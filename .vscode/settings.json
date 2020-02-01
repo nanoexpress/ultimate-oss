@@ -1,9 +1,10 @@
 {
   "eslint.validate": ["javascript"],
   "typescript.validate.enable": true,
-  "prettier.requireConfig": false,
+  "prettier.requireConfig": true,
   "files.associations": {
     "*.js": "javascript",
     "*.d.ts": "typescript"
-  }
+  },
+  "eslint.enable": true
 }

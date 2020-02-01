@@ -47,7 +47,9 @@
     "busboy": "^0.3.1",
     "cookie": "^0.x",
     "fast-json-stringify": "^1.16.0",
-    "uWebSockets.js": "github:uNetworking/uWebSockets.js#binaries"
+    "install": "^0.13.0",
+    "npm": "^6.13.7",
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.0.0"
   },
   "devDependencies": {
     "coveralls": "^3.0.9",

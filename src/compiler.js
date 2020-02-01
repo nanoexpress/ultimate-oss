@@ -1,6 +1,6 @@
 import http from 'http';
 
-import responseMethods from '../response-proto/http/HttpResponse.js';
+import responseMethods from './response-proto/http/HttpResponse.js';
 
 const nonSimpleProps = ['query', 'cookies', 'body'].map(
   (prop) => `req.${prop}`
@@ -57,7 +57,11 @@ export default function compileRoute(fn, params) {
 
   // Don't parse dummy functions
   if (content === '() => {}') {
-    return (req, res) => res.end('');
+    return (res) => res.end('');
+  }
+
+  if (content.indexOf('(res, req)') !== -1 || content.indexOf('(res)') !== -1) {
+    return fn;
   }
 
   const lines = content.split('\n');
@@ -100,12 +104,24 @@ export default function compileRoute(fn, params) {
     if (argumentsLine.includes('(req)') || argumentsLine.includes('(res)')) {
       argumentsLine = argumentsLine.replace(
         ARGUMENTS_MATCH_REG_EX,
-        '(req, res)'
+        '(res, req)'
       );
     } else {
-      argumentsLine =
-        '(req, res) ' + argumentsLine.substr(argumentsLine.indexOf('()') + 2);
+      const _line = argumentsLine.substr(argumentsLine.indexOf('()') + 2);
+      argumentsLine = '(res, req) ' + _line;
     }
+  }
+
+  if (argumentsLine.includes('(req, res)')) {
+    const _line = argumentsLine.substr(argumentsLine.indexOf('()') + 2);
+    argumentsLine = '(res, req) ' + _line;
+  }
+
+  if (argumentsLine.includes('({') && !argumentsLine.includes('res.')) {
+    argumentsLine = argumentsLine.replace(
+      /\({(.*)}\)/g,
+      'res.end(JSON.stringify({$1}))'
+    );
   }
 
   if (returnLine === '}' && lines.length > 0) {
@@ -143,7 +159,7 @@ export default function compileRoute(fn, params) {
       }
 
       if (line.includes('req.headers')) {
-        const headerKeyIndex = line.indexOf('req.headers');
+        const headerKeyIndex = line.lastIndexOf('req.headers');
         if (headerKeyIndex !== -1) {
           const headerKey = line
             .substr(headerKeyIndex + 12)
@@ -178,7 +194,7 @@ export default function compileRoute(fn, params) {
           }
         }
       } else if (line.includes('req.params')) {
-        const paramKeyIndex = line.indexOf('req.params');
+        const paramKeyIndex = line.lastIndexOf('req.params');
 
         if (paramKeyIndex !== -1) {
           const paramKey = line
@@ -232,6 +248,24 @@ export default function compileRoute(fn, params) {
         } else {
           contentLines += line;
         }
+      } else if (line.includes('return {')) {
+        const startIndex = line.indexOf('{');
+        const endIndex = line.lastIndexOf('}');
+        const distance = endIndex - startIndex;
+
+        contentLines += `res.end(JSON.stringify(${line.substr(
+          startIndex,
+          distance
+        )}))`;
+      } else if (line.includes('return ({')) {
+        const startIndex = line.indexOf('({');
+        const endIndex = line.lastIndexOf('})');
+        const distance = endIndex - startIndex;
+
+        contentLines += `res.end(JSON.stringify(${line.substr(
+          startIndex,
+          distance
+        )}))`;
       } else {
         contentLines += line;
       }
@@ -239,6 +273,7 @@ export default function compileRoute(fn, params) {
       contentLines += '\n';
     }
   }
+
   if (returnLine) {
     contentLines += returnLine;
   }

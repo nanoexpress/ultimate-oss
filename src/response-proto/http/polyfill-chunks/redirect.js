@@ -9,9 +9,6 @@ export const normalizeLocation = (path, config, host) => {
     let httpHost;
     if (host) {
       httpHost = host;
-    } else if (config && config.host) {
-      httpHost = config.host;
-      httpHost += config.port ? `:${config.port}` : '';
     }
     if (httpHost) {
       path =

@@ -1,42 +1,57 @@
 import nanoexpress from '../src/nanoexpress.js';
+import fastJson from 'fast-json-stringify';
 
 const app = nanoexpress();
 
-app.get(
-  '/',
-  {
-    schema: {
-      headers: {
-        type: 'object',
-        properties: {
-          authorization: { type: 'string' }
-        }
-      },
-      query: false,
-      params: false,
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            hello: { type: 'string' }
-          }
-        },
-        403: {
-          type: 'object',
-          properties: {
-            status: { type: 'string' }
-          }
+const serialization = (responseSchema) => {
+  let prepare;
+
+  if (responseSchema.type) {
+    prepare = fastJson(responseSchema);
+  } else {
+    const codes = {};
+    for (const code in responseSchema) {
+      codes[code] = fastJson(responseSchema[code]);
+    }
+
+    prepare = function(result) {
+      if (this.rawStatusCode) {
+        return codes[this.rawStatusCode](result);
+      }
+      return result;
+    };
+  }
+  return async (req, res) => {
+    res.serialize = prepare;
+  };
+};
+const headers = (keys) => {
+  return async (req) => {
+    if (keys) {
+      if (keys.length > 0) {
+        req.headers = {};
+        for (let i = 0, len = keys.length; i < len; i++) {
+          req.headers[keys[i]] = req.getHeader(keys[i]);
         }
       }
+    } else {
+      req.forEach((key, value) => {
+        if (!req.headers) {
+          req.headers = {};
+        }
+        req.headers[key] = value;
+      });
     }
-  },
-  (req, res) => {
-    if (req.headers.authorization) {
-      return res.json({ hello: 'world' });
-    }
-    res.status(403);
-    return res.json({ status: 'error', message: 'Unauthorized' });
-  }
-);
+  };
+};
 
-app.listen(4000);
+app.get('/', headers(['authorization']), async (req, res) => {
+  if (req.headers && req.headers.authorization) {
+    return 'hello world';
+  }
+
+  res.status(403);
+  return 'Unauthorized';
+});
+
+app.listen(4000, '0.0.0.0');

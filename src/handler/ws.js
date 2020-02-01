@@ -1,4 +1,4 @@
-import { headers, cookies, queries, params } from '../request-proto/index.js';
+import { cookies, queries, params } from '../request-proto/index.js';
 import { prepareParams } from '../helpers/index.js';
 
 import Events from '@dalisoft/events';
@@ -49,7 +49,7 @@ export default (path, options = {}, fn, ajv) => {
 
       if (!isRaw && schema !== false) {
         if (!schema || schema.headers !== false) {
-          req.headers = headers(req, schema && schema.headers);
+          // req.headers = headers(req, schema && schema.headers);
         }
         if (!schema || schema.cookies !== false) {
           req.cookies = cookies(req, schema && schema.cookies);

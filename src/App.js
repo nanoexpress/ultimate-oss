@@ -29,6 +29,9 @@ export default class App {
 
     return address;
   }
+  get raw() {
+    return this._app;
+  }
   constructor(config, app, route) {
     this._config = config;
     this._app = app;
@@ -131,11 +134,12 @@ export default class App {
     if (!this._anyRouteCalled) {
       const notFoundHandler =
         config._notFoundHandler ||
-        ((req, res) => {
-          res.statusCode = 404;
-          res.send({ code: 404, message: 'The route does not exist' });
+        ((res) => {
+          res.writeStatus('404 Not Found');
+          res.end(
+            JSON.stringify({ code: 404, message: 'The route does not exist' })
+          );
         });
-      notFoundHandler.handler = 2;
       this.get('/*', notFoundHandler);
     }
 
