@@ -4,26 +4,19 @@ export default function modifyEnd() {
 
     this.end = function(chunk, encoding) {
       // eslint-disable-next-line prefer-const
-      let { _headers, statusCode, rawStatusCode } = this;
+      let { _headers, statusCode, rawStatusCode = 200 } = this;
 
       // Polyfill for express-session and on-headers module
       if (!this.writeHead.notModified) {
-        this.writeHead(statusCode || rawStatusCode, _headers);
+        this.writeHead(rawStatusCode, _headers);
         this.writeHead.notModified = true;
         _headers = this._headers;
       }
 
-      if (typeof statusCode === 'number' && statusCode !== rawStatusCode) {
-        this.status(statusCode);
-        statusCode = this.statusCode;
-      }
       if (_headers) {
-        if (statusCode && statusCode !== rawStatusCode) {
-          this.writeStatus(statusCode);
-        }
-
         this.applyHeadersAndStatus();
-      } else if (statusCode && statusCode !== rawStatusCode) {
+      }
+      if (statusCode && rawStatusCode !== 200) {
         this.writeStatus(statusCode);
       }
 

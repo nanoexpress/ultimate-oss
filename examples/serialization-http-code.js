@@ -1,7 +1,9 @@
 import nanoexpress from '../src/nanoexpress.js';
 import fastJson from 'fast-json-stringify';
 
-const app = nanoexpress();
+const app = nanoexpress({
+  json_spaces: 4
+});
 
 const serialization = (responseSchema) => {
   let prepare;
@@ -45,13 +47,8 @@ const headers = (keys) => {
   };
 };
 
-app.get('/', headers(['authorization']), async (req, res) => {
-  if (req.headers && req.headers.authorization) {
-    return 'hello world';
-  }
-
-  res.status(403);
-  return 'Unauthorized';
+app.get('/', headers(['authorization']), async () => {
+  return 'Hello World';
 });
 
-app.listen(4000, '0.0.0.0');
+app.listen(4000);

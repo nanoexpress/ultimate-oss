@@ -1,15 +1,17 @@
 import http from 'http';
 
-export default function status(code, notModify) {
-  if (!notModify && this.modifyEnd && !this._modifiedEnd) {
-    this.modifyEnd();
-  }
-
-  if (typeof code === 'string') {
+export default function status(code) {
+  // Quick return as it's default HTTPResponse Status
+  if (code === 200 || code === '200 OK') {
+    // Do nothing... ;)
+  } else if (typeof code === 'string') {
+    this.writeStatus(code);
     this.statusCode = code;
     this.rawStatusCode = parseInt(code);
   } else if (http.STATUS_CODES[code] !== undefined) {
-    this.statusCode = code + ' ' + http.STATUS_CODES[code];
+    const statusCode = code + ' ' + http.STATUS_CODES[code];
+    this.writeStatus(statusCode);
+    this.statusCode = statusCode;
     this.rawStatusCode = code;
   } else {
     throw new Error('Invalid Code: ' + JSON.stringify(code));

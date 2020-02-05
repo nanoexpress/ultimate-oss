@@ -1,8 +1,12 @@
 /* global describe, expect, it */
-import { default as status } from './status';
+import status from './status';
 
 describe('normalize status', () => {
-  const _this = {};
+  const _this = {
+    writeStatus(statusCode) {
+      this.statusCode = statusCode;
+    }
+  };
 
   it('empty values should throw', () => {
     expect.assertions(1);

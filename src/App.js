@@ -29,6 +29,12 @@ export default class App {
 
     return address;
   }
+  get https() {
+    return this._config.https !== undefined && this._config.isSSL !== false;
+  }
+  get _console() {
+    return this._config.console || console;
+  }
   get raw() {
     return this._app;
   }
@@ -41,22 +47,20 @@ export default class App {
 
     this._instance = null;
 
-    if (config && config.swagger) {
-      this.activateDocs();
-    }
-
     this._routeCalled = false;
     this._optionsCalled = false;
 
-    this._console = config.console || console;
+    if (config && !config._errorHandler) {
+      config._errorHandler = (err) => ({
+        status: 'error',
+        status_code: 500,
+        stack_trace: err.stack,
+        message: err.message,
+        code: err.code
+      });
+    }
 
     return this;
-  }
-  activateDocs() {
-    this._app.get('/docs/swagger.json', (res) => {
-      res.writeHeader('Content-Type', 'application/json; charset=utf-8');
-      res.end(JSON.stringify(this._config.swagger, null, 4));
-    });
   }
   setErrorHandler(fn) {
     this._config._errorHandler = fn;
@@ -65,11 +69,6 @@ export default class App {
   }
   setNotFoundHandler(fn) {
     this._config._notFoundHandler = fn;
-
-    return this;
-  }
-  setValidationErrorHandler(fn) {
-    this._config._validationErrorHandler = fn;
 
     return this;
   }
@@ -93,9 +92,6 @@ export default class App {
 
     return this;
   }
-  // TODO:
-  // Beta `app.publish` method
-  // when i will i have time, i will improve this wrapping
   publish(topic, string, isBinary, compress) {
     this._app.publish(topic, string, isBinary, compress);
   }
@@ -128,13 +124,13 @@ export default class App {
     // Polyfill for plugins like CORS
     // Detaching it from every method for performance reason
     if (_routeCalled && !_optionsCalled) {
-      this.options('/*', () => {});
+      this.options('/*', async (req, res) => res.end(''));
     }
 
     if (!this._anyRouteCalled) {
       const notFoundHandler =
         config._notFoundHandler ||
-        ((res) => {
+        (async (req, res) => {
           res.writeStatus('404 Not Found');
           res.end(
             JSON.stringify({ code: 404, message: 'The route does not exist' })

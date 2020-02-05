@@ -1,10 +1,5 @@
 export default function applyHeadersAndStatus() {
-  const { _headers, statusCode } = this;
-
-  if (typeof statusCode === 'string') {
-    this.writeStatus(statusCode);
-    this.statusCode = 200;
-  }
+  const { _headers } = this;
 
   for (const header in _headers) {
     const value = _headers[header];

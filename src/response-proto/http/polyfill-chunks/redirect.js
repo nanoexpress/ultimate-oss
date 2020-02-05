@@ -32,7 +32,8 @@ export default function redirect(code, path) {
     Location = normalizeLocation(path, config, host);
   }
 
-  this.writeHead(code, { Location });
+  this.status(code);
+  this.writeHeader('Location', Location);
   this.end();
 
   return this;

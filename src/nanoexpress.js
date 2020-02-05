@@ -2,7 +2,6 @@ import uWS from 'uWebSockets.js';
 
 import Route from './Route.js';
 import App from './App.js';
-import Config from './Config.js';
 
 const nanoexpress = (options = {}) => {
   let app;
@@ -12,16 +11,15 @@ const nanoexpress = (options = {}) => {
   } else {
     app = uWS.App();
   }
-  // App configuration
-  const config = new Config(options);
 
   // Initialize Route instance
-  const routeInstance = new Route(config);
+  const routeInstance = new Route();
   routeInstance._app = app;
+  routeInstance._config = options;
   routeInstance._rootLevel = true;
 
   // Initialize App instance
-  return new App(config, app, routeInstance);
+  return new App(options, app, routeInstance);
 };
 
 export { nanoexpress as default };

@@ -1,6 +1,6 @@
 import { HttpResponse } from './response-proto/http/index.js';
+import * as Constants from './constants.js';
 import { httpMethods } from './helpers/index.js';
-import BasicExperimentalCompiler from './compiler.js';
 
 export default class Route {
   constructor() {
@@ -13,6 +13,22 @@ export default class Route {
   }
   get raw() {
     return this._app;
+  }
+  _prepareMiddlewares(path, middlewares) {
+    for (const middleware of middlewares) {
+      if (middleware._module) {
+        middleware._app = this._app;
+        middleware._config = this._config;
+
+        if (typeof path === 'string') {
+          middleware._baseUrl = path;
+        }
+      } else if (middleware.constructor.name !== 'AsyncFunction') {
+        throw new Error(
+          '[nanoexpress] Only Async Functions are allowed to expose route'
+        );
+      }
+    }
   }
   use(path, ...middlewares) {
     let { _middlewares } = this;
@@ -27,15 +43,7 @@ export default class Route {
       path = undefined;
     }
 
-    middlewares.forEach((middleware) => {
-      if (middleware._module) {
-        middleware._app = this._app;
-
-        if (typeof path === 'string') {
-          middleware._baseUrl = path;
-        }
-      }
-    });
+    this._prepareMiddlewares(path, middlewares);
 
     _middlewares.push(...middlewares);
 
@@ -43,40 +51,27 @@ export default class Route {
   }
   _prepareMethod(method, { originalUrl, path }, ...middlewares) {
     // eslint-disable-next-line no-unused-vars
-    const { _baseUrl, _middlewares, _module } = this;
+    const { _baseUrl, _middlewares, _module, _config } = this;
+
+    const handleError = _config._errorHandler;
+    const jsonSpaces = _config.json_spaces;
 
     const fetchMethod = method.toUpperCase() === 'ANY';
     const fetchUrl = path.indexOf('*') !== -1 || path.indexOf(':') !== -1;
 
-    const findConfig = middlewares.find(
-      (middleware) =>
-        typeof middleware === 'object' && middleware.isRaw !== undefined
-    );
-    const isRaw = findConfig ? findConfig.isRaw : false;
-    const isBasicExperimentalCompiler = findConfig
-      ? findConfig.experimentalCompiler !== false
-      : true;
-
-    middlewares = _middlewares ? _middlewares.concat(middlewares) : middlewares;
-
-    // console.log({ length: middlewares.length }, middlewares[0].toString());
-
-    if (middlewares.length === 1 && isBasicExperimentalCompiler) {
-      const compiledFunction = BasicExperimentalCompiler(middlewares[0]);
-
-      if (compiledFunction) {
-        return compiledFunction;
-      }
+    if (middlewares) {
+      this._prepareMiddlewares(path, middlewares);
     }
 
-    const handleError = (err) => ({
-      status: 'error',
-      stack_trace: err.stack,
-      message: err.message,
-      code: err.code
-    });
+    middlewares = Array.isArray(_middlewares)
+      ? _middlewares.concat(middlewares)
+      : middlewares;
 
     return async (res, req) => {
+      res.onAborted(() => {
+        // on aborted
+      });
+
       req.method = fetchMethod ? req.getMethod().toUpperCase() : method;
       req.path = fetchUrl ? req.getUrl().substr(_baseUrl.length) : path;
       req.baseUrl = _baseUrl || '';
@@ -87,21 +82,19 @@ export default class Route {
 
       let response;
       let skipCheck = false;
+      let newMethod;
 
       // Aliases for future usage and easy-access
-      if (!isRaw) {
-        req.__response = res;
-        res.__request = req;
+      req[Constants.__request] = res;
+      res[Constants.__response] = req;
 
-        // Extending proto
-        const { __proto__ } = res;
-        for (const newMethod in HttpResponse) {
-          __proto__[newMethod] = HttpResponse[newMethod];
-        }
-        res.writeHead.notModified = true;
+      // Extending HttpResponse
+      for (let i = 0, len = Constants.HttpResponseKeys.length; i < len; i++) {
+        newMethod = Constants.HttpResponseKeys[i];
+        res.__proto__[newMethod] = HttpResponse[newMethod];
       }
 
-      if (!isRaw && middlewares && middlewares.length > 0) {
+      if (middlewares && middlewares.length > 0) {
         for (const middleware of middlewares) {
           if (skipCheck) {
             break;
@@ -112,7 +105,16 @@ export default class Route {
 
           response = await middleware(req, res).catch(handleError);
 
-          if (response === res || (response && response.stack_trace)) {
+          if (
+            response === res ||
+            (response &&
+              (response.message ||
+                response.stack_trace ||
+                response.status_code))
+          ) {
+            if (response.status_code) {
+              res.status(response.status_code);
+            }
             skipCheck = true;
           }
         }
@@ -125,20 +127,11 @@ export default class Route {
         skipCheck = true;
       }
 
-      if (!fetchUrl || req.path === path) {
-        if (
-          !skipCheck &&
-          !isRaw &&
-          !res._modifiedEnd &&
-          (!res.writeHead.notModified || res._headers)
-        ) {
-          res.modifyEnd();
-        }
-
+      if (req.path === path) {
         if (res.serialize) {
           res.end(res.serialize(response));
         } else if (typeof response === 'object') {
-          res.end(JSON.stringify(response, null, 4));
+          res.end(JSON.stringify(response, null, jsonSpaces));
         } else {
           res.end(response);
         }

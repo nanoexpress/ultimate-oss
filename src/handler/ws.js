@@ -1,39 +1,16 @@
-import { cookies, queries, params } from '../request-proto/index.js';
-import { prepareParams } from '../helpers/index.js';
-
 import Events from '@dalisoft/events';
 
 const __wsProto__ = Events.prototype;
 
-export default (path, options = {}, fn, ajv) => {
-  if (typeof options === 'function' && !fn) {
-    fn = options;
-    options = {};
-  }
-
-  let validator = null;
-  const { schema, isRaw } = options;
-
-  Object.assign(
-    options,
-    {
-      compression: 0,
-      maxPayloadLength: 16 * 1024 * 1024,
-      idleTimeout: 120
-    },
-    options
-  );
-  if (schema) {
-    if (ajv) {
-      validator = ajv.compile(schema);
-    }
-  }
+export default (path, fn, options) => {
+  options = {
+    compression: 0,
+    maxPayloadLength: 16 * 1024 * 1024,
+    idleTimeout: 120,
+    ...options
+  };
 
   const fetchUrl = path.indexOf('*') !== -1 || path.indexOf(':') !== -1;
-  const preparedParams =
-    path.indexOf(':') !== -1 &&
-    (!schema || schema.params !== false) &&
-    prepareParams(path);
 
   return {
     ...options,
@@ -42,28 +19,6 @@ export default (path, options = {}, fn, ajv) => {
       req.url = path;
       req.baseUrl = '';
       req.originalUrl = fetchUrl ? req.getUrl() : path;
-
-      if (req.path.charAt(req.path.length - 1) === '/') {
-        req.path = req.path.substr(0, req.path.length - 1);
-      }
-
-      if (!isRaw && schema !== false) {
-        if (!schema || schema.headers !== false) {
-          // req.headers = headers(req, schema && schema.headers);
-        }
-        if (!schema || schema.cookies !== false) {
-          req.cookies = cookies(req, schema && schema.cookies);
-        }
-        if (!schema || schema.params !== false) {
-          if (req.path !== path) {
-            path = req.path;
-          }
-          req.params = params(req, preparedParams);
-        }
-        if (!schema || schema.query !== false) {
-          req.query = queries(req, schema && schema.query);
-        }
-      }
 
       if (!ws.___events) {
         ws.on = __wsProto__.on;
@@ -84,19 +39,6 @@ export default (path, options = {}, fn, ajv) => {
           if (message.indexOf('[') === 0 || message.indexOf('{') === 0) {
             if (message.indexOf('[object') === -1) {
               message = JSON.parse(message);
-
-              const valid = validator(message);
-              if (!valid) {
-                ws.emit(
-                  'message',
-                  {
-                    type: 'websocket.message',
-                    errors: validator.errors.map((err) => err.message)
-                  },
-                  isBinary
-                );
-                return;
-              }
             }
           }
         }
