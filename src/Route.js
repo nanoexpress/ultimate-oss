@@ -68,10 +68,6 @@ export default class Route {
       : middlewares;
 
     return async (res, req) => {
-      res.onAborted(() => {
-        // on aborted
-      });
-
       req.method = fetchMethod ? req.getMethod().toUpperCase() : method;
       req.path = fetchUrl ? req.getUrl().substr(_baseUrl.length) : path;
       req.baseUrl = _baseUrl || '';
