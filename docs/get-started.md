@@ -15,13 +15,13 @@ Thanks for choosing `nanoexpress` as backend server
 ### npm
 
 ```bash
-npm install dalisoft/nanoexpress#pro-esm
+npm install nanoexpress/pro-slim
 ```
 
 ### yarn
 
 ```bash
-yarn add dalisoft/nanoexpress#pro-esm
+yarn add nanoexpress/pro-slim
 ```
 
 ## Let's create server

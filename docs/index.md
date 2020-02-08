@@ -2,11 +2,11 @@
 
 ## Examples
 
-All examples are lives [here](https://github.com/dalisoft/nanoexpress/tree/pro-esm/examples)
+All examples are lives [here](https://github.com/nanoexpress/pro-slim/tree/master/examples)
 
 ## Autodocument your API
 
-For example please see [this](https://github.com/dalisoft/nanoexpress/tree/pro-esm/examples/swagger.js)
+For example please see [this](https://github.com/nanoexpress/pro-slim/tree/master/examples/swagger.js)
 
 ## Warning
 
@@ -21,7 +21,7 @@ For example please see [this](https://github.com/dalisoft/nanoexpress/tree/pro-e
 
 ## Differences
 
-About approximate price look [here](https://github.com/dalisoft/nanoexpress/issues/29)
+About approximate price look [here](https://github.com/nanoexpress/pro-slim/issues/29)
 
 ### PRO and non-PRO versions are almost same except
 
