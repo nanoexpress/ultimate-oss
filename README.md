@@ -17,13 +17,14 @@ Nano-framework for Node.js powered by uWebSockets.js
 
 ## Benchmarks
 
-| Library         | RPS   | Memory |
-| --------------- | ----- | ------ |
-| uWebSockets.js  | 2M    | 80Mb   |
-| nanoexpress Pro | 1.79M | 180Mb  |
-| nanoexpress     | 1.65M | 120Mb  |
-| Raw HTTP        | 1.03M | 290Mb  |
-| express         | 654K  | 430Mb  |
+| Library          | RPS   | Memory |
+| ---------------- | ----- | ------ |
+| uWebSockets.js   | 2M    | 80Mb   |
+| nanoexpress Slim | 1.95M | 100Mb  |
+| nanoexpress Pro  | 1.79M | 180Mb  |
+| nanoexpress      | 1.65M | 120Mb  |
+| Raw HTTP         | 1.03M | 290Mb  |
+| express          | 654K  | 430Mb  |
 
 Benchmarked on my macBook Pro 2012 13" (Core i5, 8Gb RAM) performance.
 
@@ -38,20 +39,9 @@ _You can install `wrk` via `Homebrew` in `macOS` or `Linux`_
 ## Features
 
 - Async/Await out-of-the-box
-- No async mode supported
-- Easy to use (for Express users especially)
 - Blazing fast performance
 - Ultra lightweight size
 - Resource (CPU / Memory) effecient
-- Familiar API
-- Normalised API
-- Can define routes Declaratively
-- Express-compatible middleware
-- In-built middlewares
-- In-built Stream (Video stream, yay!) support
-- In-built WebSocket support (Express-like API and Events)
-- In-built Schema validator via `Ajv`
-- Out-of-the-box `fast-json-stringify` support via `{schema}` middleware
 - Small working examples
 - TypeScript declaration
 - Tests and CI checked code
@@ -63,9 +53,6 @@ All examples are lives [here](https://github.com/nanoexpress/pro-slim/tree/maste
 ## Credits
 
 - [uWebSockets.js](https://github.com/uNetworking/uWebSockets.js)
-- [fast-json-stringify](https://github.com/fastify/fast-json-stringify)
-- [ajv](https://ajv.js.org)
-- [cookie](https://github.com/jshttp/cookie#readme)
 
 And to other libraries which used to create this library and without these libraries wouldn't be possible to create this library
 
