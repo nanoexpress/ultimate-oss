@@ -1,30 +1,23 @@
 {
   "name": "nanoexpress-pro",
-  "version": "1.10.2",
+  "version": "2.0",
   "description": "Nano-framework for Node.js powered by uWebSockets.js",
   "type": "module",
   "main": "src/nanoexpress.js",
   "typings": "nanoexpress.d.ts",
   "scripts": {
     "lint": "eslint ./src",
-    "test": "jest --config jest.config.js",
+    "test": "jest --config jest.config.json",
     "coverage": "npm run test --coverage",
     "coveralls": "npm run coverage && cat ./tests/coverage/lcov.info | coveralls",
     "prepublishOnly": "npm run lint"
   },
-  "exports": {
-    ".": "./src/nanoexpress.js",
-    "./Route": "./src/Route.js",
-    "./static": "./src/static.js",
-    "./defines": "./src/packed/defines/index.js",
-    "./middlewares": "./src/packed/middlewares/index.js"
-  },
   "engines": {
-    "node": ">=12"
+    "node": ">=12.4"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nanoexpress/pro-slim.git#pro-esm"
+    "url": "git+https://github.com/nanoexpress/pro-slim.git"
   },
   "keywords": [
     "nano",
@@ -42,26 +35,13 @@
   },
   "homepage": "https://github.com/nanoexpress/pro-slim#readme",
   "dependencies": {
-    "@dalisoft/events": "^0.2.0",
-    "ajv": "^6.10.2",
-    "busboy": "^0.3.1",
-    "cookie": "^0.x",
-    "fast-json-stringify": "^1.16.0",
-    "install": "^0.13.0",
-    "npm": "^6.13.7",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.0.0"
   },
   "devDependencies": {
     "coveralls": "^3.0.9",
     "eslint": "^6.8.0",
     "husky": "^4.0.6",
-    "jest": "^24.9.0",
     "lint-staged": "^9.5.0",
     "prettier": "^1.19.1"
-  },
-  "peerDependencies": {
-    "passport": "^0.4.0",
-    "swagger-ui-dist": "^3.23.6",
-    "ws": "^7.2.0"
   }
 }

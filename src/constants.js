@@ -1,4 +1,4 @@
-import { HttpResponse } from './response-proto/http/index.js';
+import { HttpResponse } from './polyfills/http-response/index.js';
 
 export const HttpResponseKeys = Object.keys(HttpResponse);
 
@@ -9,3 +9,15 @@ export const __response = Symbol('HttpResponseInstance');
 // HttpResponse symbols
 export const resCookies = Symbol('HttpResponseCookies');
 export const resHeaders = Symbol('HttpResponseHeaders');
+
+export const httpMethods = [
+  'get',
+  'post',
+  'put',
+  'patch',
+  'del',
+  'any',
+  'head',
+  'options',
+  'trace'
+];

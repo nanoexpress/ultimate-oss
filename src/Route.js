@@ -1,6 +1,5 @@
-import { HttpResponse } from './response-proto/http/index.js';
+import { HttpResponse } from './polyfills/index.js';
 import * as Constants from './constants.js';
-import { httpMethods } from './helpers/index.js';
 
 export default class Route {
   constructor() {
@@ -136,7 +135,7 @@ export default class Route {
   }
 }
 
-httpMethods.forEach((method) => {
+Constants.httpMethods.forEach((method) => {
   Route.prototype[method] = function(path, ...middlewares) {
     const { _baseUrl, _module, _app } = this;
 

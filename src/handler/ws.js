@@ -1,6 +1,4 @@
-import Events from '@dalisoft/events';
-
-const __wsProto__ = Events.prototype;
+import { EventEmitter } from 'events';
 
 export default (path, fn, options) => {
   options = {
@@ -10,38 +8,21 @@ export default (path, fn, options) => {
     ...options
   };
 
-  const fetchUrl = path.indexOf('*') !== -1 || path.indexOf(':') !== -1;
-
   return {
     ...options,
-    open: (ws, req) => {
-      req.path = path;
-      req.url = path;
-      req.baseUrl = '';
-      req.originalUrl = fetchUrl ? req.getUrl() : path;
+    open: async (ws, req) => {
+      const ev = new EventEmitter();
 
-      if (!ws.___events) {
-        ws.on = __wsProto__.on;
-        ws.once = __wsProto__.once;
-        ws.off = __wsProto__.off;
-        ws.emit = __wsProto__.emit;
+      ws.on = ev.on.bind(ev);
+      ws.once = ev.once.bind(ev);
+      ws.off = ev.off.bind(ev);
+      ws.emit = ev.emit.bind(ev);
 
-        ws.___events = [];
-      }
-      fn(req, ws);
+      await fn(req, ws);
     },
     message: (ws, message, isBinary) => {
       if (!isBinary) {
         message = Buffer.from(message).toString('utf-8');
-      }
-      if (options.schema) {
-        if (typeof message === 'string') {
-          if (message.indexOf('[') === 0 || message.indexOf('{') === 0) {
-            if (message.indexOf('[object') === -1) {
-              message = JSON.parse(message);
-            }
-          }
-        }
       }
       ws.emit('message', message, isBinary);
     },
