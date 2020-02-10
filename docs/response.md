@@ -20,15 +20,10 @@ Stability tip: _If you don't want crash of your application, please try always c
 
 - `pipe`
 - `send`
-- `json` (same as `send`, but for compatibility we keep this method)
 - `sendFile`
 - `redirect`
 - `status`
 - `writeHead`
-- `cookie`
-- `setCookie`
-- `hasCookie`
-- `removeCookie`
 - `setHeader`
 - `getHeader`
 - `hasHeader`
@@ -42,34 +37,22 @@ Stability tip: _If you don't want crash of your application, please try always c
 ## Cookie + JSON example
 
 ```js
-app.get('/is_logged', (req, res) => {
+app.get('/is_logged', async (req, res) => {
   const status = res.hasCookie('userId') ? 'success' : 'error';
 
-  res.json({ status });
+  res.send({ status });
 });
 ```
 
 ## Redirect + Params example
 
 ```js
-app.get('/user/:id/login', (req, res) => {
+app.get('/user/:id/login', async (req, res) => {
   const { id } = req.params;
 
   const result = await db.getUser(id);
 
-  res.redirect(`/user/${id}/`);
-});
-```
-
-## Cookie set + Body example
-
-```js
-app.post('/auth', async (req, res) => {
-  const { userId } = req.body;
-
-  res.setCookie('userId', userId);
-
-  // do something...
+  return res.redirect(`/user/${id}/`);
 });
 ```
 
@@ -80,8 +63,8 @@ Note: _File should on same directory of this request._
 _Or you can try `Absolute URLs` for stream_
 
 ```js
-app.get('/video.mp4', (req, res) => {
-  res.sendFile('video.mp4');
+app.get('/video.mp4', async (req, res) => {
+  return res.sendFile('video.mp4');
 });
 ```
 

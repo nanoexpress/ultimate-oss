@@ -39,7 +39,6 @@ Both versions are maintaining, supporting and documentated
 - [Middlewares](./middlewares.md)
 - [Defines](./defines.md)
 - [WebSocket](./websocket.md)
-- [WebRTC](./webrtc.md)
 - [Routes](./routes.md)
 - [Request](./request.md)
 - [Response](./response.md)

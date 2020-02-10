@@ -1,6 +1,8 @@
 # Testing
 
-We use [Jest](https://jestjs.io) for testing.
+> Currently unavailable
+
+We use plan to refactor tests too!
 
 When new commits are pushed or new PR arrived, [Travis CI](https://travis-ci.org) runs the tests.
 

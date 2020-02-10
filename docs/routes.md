@@ -1,17 +1,15 @@
 # Routes
 
-Routes are intellectual, not only good, because if your routes are simple, library uses direct calling to `uWebSockets.js` which improves response time by 30-40% and responses performance will be almost equal to `uWebSockets.js.
+Stability tip: _Don't forget return `HttpResponse` from route_
 
 Performance tip: _Using many middlewares may slow response performance_
 
 ## Route-middleware route
 
-Yes, finally, we have working model of Express-middleware like routes
-
 ```js
 import Route from 'nanoexpress/src/Route';
 
-const route = new Router();
+const route = new Route();
 
 // To working properly, first apply `app.use(route)`
 // and then set `route.get(...)`, else this not works
@@ -39,15 +37,11 @@ app.get('/', async (req, res) => {
 });
 ```
 
-## Express/Connect like route
-
-This library target is out-of-the-box async support and works good, but we recommend using `sync` aka Express/Connect like method for performance reason.
-
 ### Basic example
 
 ```js
-app.get('/', (req, res) => {
-  res.end('hello world');
+app.get('/', async (req, res) => {
+  return res.end('hello world');
 });
 ```
 
@@ -57,61 +51,11 @@ app.get('/', (req, res) => {
 app.post('/', (req, res) => {
   const { body } = req;
 
-  res.json({ status: 'ok' });
+  res.send({ status: 'ok' });
 });
-```
-
-## Raw example
-
-Note: _Body-parsing, schema validating are unavailable here, but RPS are higher by 5-10%_
-
-Note #2: The more strict and performant way, try `{ isStrictRaw: true }`
-
-```js
-app.get('/', { isRaw: true }, (req, res) => {
-  // do something...
-});
-```
-
-## Route-raw example
-
-Note: _Body-parsing, schema validating and polyfilled methods such as `path, url, method` are unavailable here, but RPS are higher by up to 25%_
-
-```js
-app.get('/', { forceRaw: true }, (req, res) => {
-  // do something...
-});
-```
-
-## noMiddleware example
-
-Note: _All middlewares including globals will be disabled for this route_
-
-```js
-app.get('/', { noMiddleware: true }, (req, res) => {
-  // do something...
-});
-```
-
-## onAborted example
-
-```js
-app.get(
-  '/',
-  {
-    onAborted: () => {
-      /* cancel your async task somehow */
-    }
-  },
-  (req, res) => {
-    // do something...
-  }
-);
 ```
 
 ## Error handling example
-
-Note: Don't forget convert your route to `Async` for to be handled!
 
 ```js
 app.setErrorHandler((err, req, res) => {
@@ -124,12 +68,7 @@ app.setErrorHandler((err, req, res) => {
 Also available these methods
 
 - `app.setErrorHandler(error: Error, req: HttpRequest, res: HttpResponse): HttpResponse`
-- `app.setValidationErrorHandler(errors: ValidationErrors[], req: HttpRequest, res: HttpResponse): HttpResponse`
 - `app.setNotFoundHandler(req: HttpRequest, res: HttpResponse): HttpResponse`
-
-## Known Issues
-
-- Sync functions errors doesn't handled, you make that function `Async` to be handled by `nanoexpress Pro`
 
 [&laquo; Websocket](./websocket.md)
 

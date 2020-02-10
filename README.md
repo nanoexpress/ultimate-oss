@@ -8,53 +8,21 @@
 
 Nano-framework for Node.js powered by uWebSockets.js
 
-## Documentation available [here](https://github.com/nanoexpress/pro-slim/blob/master/docs/index.md)
+---
 
-## Requires
+See docs at [here](https://github.com/nanoexpress/pro-slim/blob/master/docs/index.md)
 
-- Node.js v12 or greater
-- developer, already worked with nanoexpress before
-
-## Benchmarks
-
-| Library          | RPS   | Memory |
-| ---------------- | ----- | ------ |
-| uWebSockets.js   | 2M    | 80Mb   |
-| nanoexpress Slim | 1.95M | 100Mb  |
-| nanoexpress Pro  | 1.79M | 180Mb  |
-| nanoexpress      | 1.65M | 120Mb  |
-| Raw HTTP         | 1.03M | 290Mb  |
-| express          | 654K  | 430Mb  |
-
-Benchmarked on my macBook Pro 2012 13" (Core i5, 8Gb RAM) performance.
-
-You can see live benchmark results at [here](https://github.com/the-benchmarker/web-frameworks#results)
-
-**Note**: _Real-world app memory/rps may differs from these numbers and these numbers are in my macBook_
-
-_You can install `wrk` via `Homebrew` in `macOS` or `Linux`_
-
-**Benchmark command**: `wrk -t4 -d100 -c10`
+This _slim_ version is faster than `pro` about 20% and faster than `master` about 50% at cost of polyfilled methods.
+All of things can manually added via `middlewares` and/or `defines`.
 
 ## Features
 
-- Async/Await out-of-the-box
-- Blazing fast performance
+- Async/Await as default
+- Fastest performance as possible
 - Ultra lightweight size
 - Resource (CPU / Memory) effecient
 - Small working examples
-- TypeScript declaration
 - Tests and CI checked code
-
-## Examples
-
-All examples are lives [here](https://github.com/nanoexpress/pro-slim/tree/master/examples)
-
-## Credits
-
-- [uWebSockets.js](https://github.com/uNetworking/uWebSockets.js)
-
-And to other libraries which used to create this library and without these libraries wouldn't be possible to create this library
 
 ## License
 

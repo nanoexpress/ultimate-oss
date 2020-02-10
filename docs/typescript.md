@@ -1,6 +1,6 @@
 # TypeScript
 
-This library has built-in declaration file which defines all public methods and parameters
+The `slim` version doesn't packs TS declarations, but can be added via PR
 
 [&laquo; Schema](./schema.md)
 

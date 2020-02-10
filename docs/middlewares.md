@@ -23,37 +23,11 @@ I'm excluded in-box modules from initialization for performance reason
 ### How-to import
 
 ```js
-import { middlewares } from 'nanoexpress/packed';
+import { middlewares } from 'nanoexpress-pro/packed';
 // or import { passportInitialize } from 'nanoexpress/packed/middlewares';
 
 const app = nanoexpress();
 app.use(middlewares.passportInitialize()); // or app.use(passportInitialize());
-```
-
-#### Packed middlewares
-
-- `passport`
-- `reDoc`
-- `static`
-- `bodyParser`
-
-### Tested Express/Connect like Middlewares
-
-- `body-parser` (yes, if you don't want packed)
-- `express-fileupload`
-- `cors` (yes, `express` `cors` middleware)
-- `express-jwt`
-- `express-session`
-- `express-graphql`
-- `passport`
-
-### Basic example
-
-```js
-app.use((req, res, next) => {
-  req.appId = 'MY_APP_ID';
-  next();
-});
 ```
 
 ### Async example
@@ -70,17 +44,10 @@ app.use(async (req, res) => {
 function lazyEnd(end) {
   setTimeout(() => this.end(end), 0);
 }
-app.use((req, res, next) => {
+app.use(async (req, res) => {
   res.lazyEnd = lazyEnd;
-  next();
 });
 ```
-
-### You may look to [Passport](../examples/passport.js) example
-
-## Error handling
-
-Error which comes from Middleware automacilly will be handled by `nanoexpress`, but not always and may not work stable
 
 ## Known Bugs
 
