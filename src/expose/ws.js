@@ -1,16 +1,25 @@
 import { EventEmitter } from 'events';
 
-export default (path, fn, options) => {
+export default function({ path, originalUrl }, fn, options) {
   options = {
     compression: 0,
     maxPayloadLength: 16 * 1024 * 1024,
     idleTimeout: 120,
     ...options
   };
+  const { _baseUrl } = this;
+  const fetchUrl = path.indexOf('*') !== -1 || path.indexOf(':') !== -1;
 
   return {
     ...options,
     open: async (ws, req) => {
+      req.baseUrl = _baseUrl || '';
+      req.path = fetchUrl ? req.getUrl().substr(_baseUrl.length) : path;
+      req.url = req.path;
+
+      req.originalUrl = originalUrl;
+      req.method = 'ws';
+
       const ev = new EventEmitter();
 
       ws.on = ev.on.bind(ev);
@@ -33,4 +42,4 @@ export default (path, fn, options) => {
       ws.emit('close', code, Buffer.from(message).toString('utf-8'));
     }
   };
-};
+}

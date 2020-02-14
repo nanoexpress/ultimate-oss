@@ -1,6 +1,7 @@
 import { HttpResponse } from './polyfills/index.js';
 import * as Constants from './constants.js';
 import _gc from './helpers/gc.js';
+import exposeWs from './expose/ws.js';
 
 export default class Route {
   constructor() {
@@ -46,6 +47,8 @@ export default class Route {
     }
 
     _middlewares.push(...this._prepareMiddlewares(path, middlewares));
+
+    _gc();
 
     return this;
   }
@@ -167,3 +170,20 @@ Constants.httpMethods.forEach((method) => {
     return this;
   };
 });
+
+Route.prototype.ws = function routeWs(path, fn, options) {
+  const { _baseUrl, _module, _app } = this;
+
+  let originalUrl = path;
+  if (_baseUrl !== '' && _module && originalUrl.indexOf(_baseUrl) === -1) {
+    originalUrl = _baseUrl + path;
+  }
+
+  if (originalUrl && originalUrl[originalUrl.length - 1] === '/') {
+    originalUrl = originalUrl.substr(0, originalUrl.length - 1);
+  }
+
+  _gc();
+
+  _app.ws(originalUrl, exposeWs.call(this, { path, originalUrl }, fn, options));
+};
