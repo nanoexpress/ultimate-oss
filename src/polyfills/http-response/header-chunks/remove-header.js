@@ -1,10 +1,12 @@
+import { resHeaders } from '../../../constants.js';
+
 export default function removeHeader(key) {
-  if (!this._headers || !this._headers[key]) {
+  if (!this[resHeaders] || !this[resHeaders][key]) {
     return undefined;
   }
-  !this._modifiedEnd && this.modifyEnd();
-  this._headers[key] = null;
-  delete this._headers[key];
+  !this._modifiedEnd && this.modifyEnd && this.modifyEnd();
+  this[resHeaders][key] = null;
+  delete this[resHeaders][key];
 
   return this;
 }

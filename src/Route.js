@@ -1,5 +1,6 @@
 import { HttpResponse } from './polyfills/index.js';
 import * as Constants from './constants.js';
+import _gc from './helpers/gc.js';
 
 export default class Route {
   constructor() {
@@ -14,20 +15,22 @@ export default class Route {
     return this._app;
   }
   _prepareMiddlewares(path, middlewares) {
-    for (const middleware of middlewares) {
-      if (middleware._module) {
-        middleware._app = this._app;
-        middleware._config = this._config;
-
-        if (typeof path === 'string') {
-          middleware._baseUrl = path;
-        }
-      } else if (middleware.constructor.name !== 'AsyncFunction') {
+    return middlewares.map((middleware) => {
+      if (middleware.constructor.name !== 'AsyncFunction') {
         throw new Error(
           '[nanoexpress] Only Async Functions are allowed to expose route'
         );
       }
-    }
+      if (middleware._module) {
+        return {
+          ...middleware,
+          _app: this._app,
+          _config: this._config,
+          _baseUrl: typeof path === 'string' ? path : middleware._baseUrl || '/'
+        };
+      }
+      return middleware;
+    });
   }
   use(path, ...middlewares) {
     let { _middlewares } = this;
@@ -42,9 +45,7 @@ export default class Route {
       path = undefined;
     }
 
-    this._prepareMiddlewares(path, middlewares);
-
-    _middlewares.push(...middlewares);
+    _middlewares.push(...this._prepareMiddlewares(path, middlewares));
 
     return this;
   }
@@ -58,13 +59,14 @@ export default class Route {
     const fetchMethod = method.toUpperCase() === 'ANY';
     const fetchUrl = path.indexOf('*') !== -1 || path.indexOf(':') !== -1;
 
-    if (middlewares) {
-      this._prepareMiddlewares(path, middlewares);
+    if (middlewares && middlewares.length > 1) {
+      middlewares = this._prepareMiddlewares(path, middlewares);
+      middlewares = Array.isArray(_middlewares)
+        ? _middlewares.concat(middlewares)
+        : middlewares;
     }
 
-    middlewares = Array.isArray(_middlewares)
-      ? _middlewares.concat(middlewares)
-      : middlewares;
+    _gc();
 
     return async (res, req) => {
       req.method = fetchMethod ? req.getMethod().toUpperCase() : method;
@@ -82,6 +84,7 @@ export default class Route {
       // Aliases for future usage and easy-access
       req[Constants.__request] = res;
       res[Constants.__response] = req;
+      res[Constants.resConfig] = _config;
 
       // Extending HttpResponse
       for (let i = 0, len = Constants.HttpResponseKeys.length; i < len; i++) {
@@ -100,17 +103,16 @@ export default class Route {
 
           response = await middleware(req, res).catch(handleError);
 
-          if (
-            response === res ||
-            (response &&
-              (response.message ||
-                response.stack_trace ||
-                response.status_code))
+          if (response === res) {
+            skipCheck = true;
+          } else if (
+            response &&
+            (response.message || response.stack_trace || response.status_code)
           ) {
             if (response.status_code) {
               res.status(response.status_code);
             }
-            skipCheck = true;
+            skipCheck = false;
           }
         }
       }
@@ -122,8 +124,11 @@ export default class Route {
         skipCheck = true;
       }
 
-      if (req.path === path) {
-        if (res.serialize) {
+      if (!skipCheck && req.path === path) {
+        middlewares = null;
+        if (res.compiledResponse) {
+          return res.end(res.compiledResponse);
+        } else if (res.serialize) {
           res.end(res.serialize(response));
         } else if (typeof response === 'object') {
           res.end(JSON.stringify(response, null, jsonSpaces));

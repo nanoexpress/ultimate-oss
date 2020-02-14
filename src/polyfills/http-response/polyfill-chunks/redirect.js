@@ -1,39 +1,20 @@
-const HTTP_PREFIX = 'http://';
-const HTTPS_PREFIX = 'https://';
-
-export const normalizeLocation = (path, config, host) => {
-  if (path.indexOf('http') === -1) {
-    if (path.indexOf('/') === -1) {
-      path = '/' + path;
-    }
-    let httpHost;
-    if (host) {
-      httpHost = host;
-    }
-    if (httpHost) {
-      path =
-        (config && config.https ? HTTPS_PREFIX : HTTP_PREFIX) + httpHost + path;
-    }
-  }
-  return path;
-};
+import { __request } from '../../../constants.js';
 
 export default function redirect(code, path) {
-  const { __request, config } = this;
-  const host = __request && __request.headers && __request.headers.host;
+  const req = this[__request];
+  const host = req.headers && req.headers.host;
+  const protocol = (req.connection && req.connection.protocol) || 'http';
 
   if (!path && typeof code === 'string') {
     path = code;
     code = 301;
   }
-
-  let Location = '';
-  if (path) {
-    Location = normalizeLocation(path, config, host);
+  if (path.indexOf('/') === -1) {
+    path = '/' + path;
   }
 
   this.status(code);
-  this.writeHeader('Location', Location);
+  this.writeHeader('Location', `${protocol}://${host}${path}`);
   this.end();
 
   return this;

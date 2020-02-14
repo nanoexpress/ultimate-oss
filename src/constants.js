@@ -9,6 +9,7 @@ export const __response = Symbol('HttpResponseInstance');
 // HttpResponse symbols
 export const resCookies = Symbol('HttpResponseCookies');
 export const resHeaders = Symbol('HttpResponseHeaders');
+export const resConfig = Symbol('HttpResponseConfig');
 
 export const httpMethods = [
   'get',
@@ -21,3 +22,5 @@ export const httpMethods = [
   'options',
   'trace'
 ];
+export const httpPrefix = 'http://';
+export const httpsPrefix = 'https://';

@@ -1,5 +1,7 @@
+import { resHeaders } from '../../../constants.js';
+
 export default function applyHeadersAndStatus() {
-  const { _headers } = this;
+  const _headers = this[resHeaders];
 
   for (const header in _headers) {
     const value = _headers[header];

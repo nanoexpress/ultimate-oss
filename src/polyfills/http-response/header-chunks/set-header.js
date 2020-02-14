@@ -1,9 +1,11 @@
-export default function setHeader(key, value) {
-  !this._modifiedEnd && this.modifyEnd();
+import { resHeaders } from '../../../constants.js';
 
-  if (!this._headers) {
-    this._headers = {};
+export default function setHeader(key, value) {
+  !this._modifiedEnd && this.modifyEnd && this.modifyEnd();
+
+  if (!this[resHeaders]) {
+    this[resHeaders] = {};
   }
-  this._headers[key] = value;
+  this[resHeaders][key] = value;
   return this;
 }

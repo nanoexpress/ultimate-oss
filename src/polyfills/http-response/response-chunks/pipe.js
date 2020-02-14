@@ -1,9 +1,9 @@
 import compressStream from '../stream/compress-stream.js/index.js';
+import { __request } from '../../../constants.js';
 
 export default function(stream, size, compressed = false) {
-  const { __request: req } = this;
-  const { onAborted, headers, responseHeaders } = req;
-  let isAborted = false;
+  const req = this[__request];
+  const { headers, responseHeaders } = req;
 
   this.stream = true;
 
@@ -15,22 +15,8 @@ export default function(stream, size, compressed = false) {
     }
   }
 
-  onAborted(() => {
-    if (stream) {
-      stream.destroy();
-    }
-    if (stream) {
-      stream.destroy();
-    }
-    isAborted = true;
-  });
-
   if (compressed || !size) {
     stream.on('data', (buffer) => {
-      if (isAborted) {
-        stream.destroy();
-        return;
-      }
       this.write(
         buffer.buffer.slice(
           buffer.byteOffset,
@@ -40,10 +26,6 @@ export default function(stream, size, compressed = false) {
     });
   } else {
     stream.on('data', (buffer) => {
-      if (isAborted) {
-        stream.destroy();
-        return;
-      }
       buffer = buffer.buffer.slice(
         buffer.byteOffset,
         buffer.byteOffset + buffer.byteLength
@@ -78,17 +60,11 @@ export default function(stream, size, compressed = false) {
   stream
     .on('error', () => {
       this.stream = -1;
-      if (!isAborted) {
-        this.writeStatus('500 Internal server error');
-        this.end();
-      }
       stream.destroy();
     })
     .on('end', () => {
       this.stream = 1;
-      if (!isAborted) {
-        this.end();
-      }
+      this.end();
     });
 
   return this;
