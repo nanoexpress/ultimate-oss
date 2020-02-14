@@ -12,7 +12,7 @@ export default function({ path, originalUrl }, fn, options) {
 
   return {
     ...options,
-    open: async (ws, req) => {
+    open: (ws, req) => {
       req.baseUrl = _baseUrl || '';
       req.path = fetchUrl ? req.getUrl().substr(_baseUrl.length) : path;
       req.url = req.path;
@@ -27,7 +27,7 @@ export default function({ path, originalUrl }, fn, options) {
       ws.off = ev.off.bind(ev);
       ws.emit = ev.emit.bind(ev);
 
-      await fn(req, ws);
+      fn(req, ws);
     },
     message: (ws, message, isBinary) => {
       if (!isBinary) {
