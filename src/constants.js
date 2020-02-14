@@ -7,7 +7,6 @@ export const __request = Symbol('HttpRequestInstance');
 export const __response = Symbol('HttpResponseInstance');
 
 // HttpResponse symbols
-export const resCookies = Symbol('HttpResponseCookies');
 export const resHeaders = Symbol('HttpResponseHeaders');
 export const resConfig = Symbol('HttpResponseConfig');
 
