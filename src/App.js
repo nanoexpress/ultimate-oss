@@ -1,7 +1,6 @@
 import uWS from 'uWebSockets.js';
 
-import wsHandler from './handler/ws.js';
-import { httpMethods } from './helpers/index.js';
+import { httpMethods } from './constants.js';
 
 export default class App {
   get config() {
@@ -79,16 +78,6 @@ export default class App {
   }
   define(callback) {
     callback(this);
-
-    return this;
-  }
-  ws(path, options, wsConfig) {
-    this._app.ws(
-      path,
-      options && options.isRaw
-        ? wsConfig
-        : wsHandler(path, options, wsConfig, this._config.ajv)
-    );
 
     return this;
   }
@@ -212,6 +201,10 @@ export default class App {
 
 for (let i = 0, len = httpMethods.length; i < len; i++) {
   const method = httpMethods[i];
+  App.prototype.ws = function(path, fn, options) {
+    this._route.ws(path, fn, options);
+    return this;
+  };
   App.prototype[method] = function(path, ...fns) {
     const { _app, _route, _anyRouteCalled } = this;
 

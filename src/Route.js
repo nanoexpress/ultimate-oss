@@ -186,4 +186,6 @@ Route.prototype.ws = function routeWs(path, fn, options) {
   _gc();
 
   _app.ws(originalUrl, exposeWs.call(this, { path, originalUrl }, fn, options));
+
+  return this;
 };
