@@ -1,6 +1,5 @@
 # nanoexpress Pro Slim
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/nanoexpress/pro-slim.svg)](https://greenkeeper.io/)
 [![Travis](https://img.shields.io/travis/nanoexpress/pro-slim.svg)](http://github.com/nanoexpress/pro-slim)
 [![Code Climate](https://codeclimate.com/github/nanoexpress/pro-slim/badges/gpa.svg)](https://codeclimate.com/github/nanoexpress/pro-slim)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nanoexpress/pro-slim/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/nanoexpress/pro-slim/?branch=master)
