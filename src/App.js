@@ -142,15 +142,16 @@ export default exposeApp(
           return undefined;
         }
         port = Number(port);
+        const id = `${host}:${port}`;
 
         const onListenHandler = (token) => {
           if (token) {
             const _debugContext = _console.debug ? _console : console;
             const end = process.hrtime(this.time);
 
-            this._instance[`${host}:${port}`] = token;
+            this._instance[id] = token;
             _debugContext.debug(
-              `[${sslString}Server]: started successfully at [${host}:${port}] in [${(
+              `[${sslString}Server]: started successfully at [${id}] in [${(
                 (end[0] * 1000 + end[1]) /
                 1000000
               ).toFixed(2)}ms]`
@@ -163,7 +164,7 @@ export default exposeApp(
               this.https &&
               (!config.https.cert_file_name || !config.https.key_file_name)
                 ? `[${sslString}Server]: SSL certificate was not defined or loaded`
-                : `[${sslString}Server]: failed to host at [${host}:${port}]`
+                : `[${sslString}Server]: failed to host at [${id}]`
             );
             _errorContext.error(err.message);
             reject(err);
@@ -180,7 +181,8 @@ export default exposeApp(
     close(port, host = 'localhost') {
       const { _console } = this;
 
-      const token = this._instance[`${host}:${port}`];
+      const id = `${host}:${port}`;
+      const token = this._instance[id];
 
       this.time = null;
       this._separateServed = false;
@@ -188,7 +190,7 @@ export default exposeApp(
         const _debugContext = _console.debug ? _console : console;
 
         uWS.us_listen_socket_close(token);
-        this._instance[`${host}:${port}`] = null;
+        this._instance[id] = null;
         _debugContext.debug('[Server]: stopped successfully');
         return true;
       } else {
