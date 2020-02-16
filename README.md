@@ -5,7 +5,7 @@
 [![Code Climate](https://codeclimate.com/github/nanoexpress/pro-slim/badges/gpa.svg)](https://codeclimate.com/github/nanoexpress/pro-slim)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nanoexpress/pro-slim/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/nanoexpress/pro-slim/?branch=master)
 
-Nano-framework for Node.js powered by uWebSockets.js
+Slim version of nanoexpress Pro for really PRO simple users
 
 ---
 
