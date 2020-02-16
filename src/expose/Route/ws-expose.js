@@ -1,4 +1,4 @@
-import exposeWs from './ws.js';
+import exposeWs from '../ws.js';
 import _gc from '../../helpers/gc.js';
 
 export default (Route) => {

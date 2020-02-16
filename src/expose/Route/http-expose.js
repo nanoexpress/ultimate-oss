@@ -1,7 +1,7 @@
-import * as Constants from '../../constants.js';
+import { httpMethods } from '../../constants.js';
 
 export default (Route) => {
-  Constants.httpMethods.forEach((method) => {
+  httpMethods.forEach((method) => {
     Route.prototype[method] = function(path, ...middlewares) {
       const { _baseUrl, _module, _app } = this;
 
