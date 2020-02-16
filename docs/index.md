@@ -45,7 +45,7 @@ Both versions are maintaining, supporting and documentated
 - [Static Serve](./static-serve.md)
 - [Schema](./schema.md)
 - [TypeScript](./typescript.md)
-- [Docker](./docker.md)
+- [Docker / Linux](./docker.md)
 - [Benchmark](./benchmark.md)
 - [Testing](./testing.md)
 - [Support](./support.md)

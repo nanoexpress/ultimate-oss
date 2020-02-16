@@ -57,17 +57,29 @@ app.post('/', (req, res) => {
 
 ## Error handling example
 
-```js
-app.setErrorHandler((err, req, res) => {
-  if (checkSomething(err)) {
-    res.send(sendSomething());
+```ts
+interface ErrorHandlerResponse {
+  status!: 'success' | 'error';
+  status_code?: number; // response status code in `int` format
+  stack_trace?: string; // error stack trace
+  message!: string;
+  code?: string; // auth_failed, bad_request, ...
+}
+app.setErrorHandler(
+  (err: Error): ErrorHandlerResponse => {
+    if (checkSomething(err)) {
+      return {
+        status: 'error',
+        status_code: 500,
+        message: 'oops'
+      }
+    }
   }
-});
+);
 ```
 
 Also available these methods
 
-- `app.setErrorHandler(error: Error, req: HttpRequest, res: HttpResponse): HttpResponse`
 - `app.setNotFoundHandler(req: HttpRequest, res: HttpResponse): HttpResponse`
 
 [&laquo; Websocket](./websocket.md)

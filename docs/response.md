@@ -21,6 +21,7 @@ Stability tip: _If you don't want crash of your application, please try always c
 - `pipe`
 - `send`
 - `sendFile`
+- `compressStream`
 - `redirect`
 - `status`
 - `writeHead`

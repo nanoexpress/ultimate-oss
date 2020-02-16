@@ -2,10 +2,18 @@
 
 Thanks for choosing `nanoexpress-pro-slim` as backend server
 
+## Why PRO
+
+When you don't need a lot of features and you can develop own middleware in seconds to add what you need. Scale you middlewares list as you grow!
+
+## Difference
+
+- **Slim**: Less polyfilled methods, Less functionality, High performance, Low resource usage
+- **Pro**: More polyfilled methods, More functionality, Mid-high performance, Mid resource usage
+
 ## Warning
 
 - This library does not support HTTP2!
-- This branch (PRO) is differs from master/dev branches
 - This branch is paid for commercial products if sources are closed
 
 ## Install
@@ -46,7 +54,6 @@ Special route are
 
 There has few options which you can configure
 
-- `swagger: SwaggerObject` - Configures Swagger autodocumentation with your any schema for you
 - `https: { key_file_name: string, cert_file_name: string }` - Option to enable SSL (https) mode
 - `console: CustomConsole { log, error }` - Your custom console class object for nice-looking logs :)
 - `json_spaces` - JSON.stringify 3-rd parameter
