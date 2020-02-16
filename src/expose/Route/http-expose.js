@@ -1,4 +1,5 @@
 import { httpMethods } from '../../constants.js';
+import { originalUrlFix } from './fix.js';
 
 export default (Route) => {
   httpMethods.forEach((method) => {
@@ -15,9 +16,7 @@ export default (Route) => {
           originalUrl = _baseUrl + path;
         }
 
-        if (originalUrl && originalUrl[originalUrl.length - 1] === '/') {
-          originalUrl = originalUrl.substr(0, originalUrl.length - 1);
-        }
+        originalUrl = originalUrlFix(originalUrl);
 
         _app[method](
           originalUrl + '/',
