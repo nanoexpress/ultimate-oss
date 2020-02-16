@@ -69,6 +69,20 @@ There has few options which you can configure
 - `console: CustomConsole { log, error }` - Your custom console class object for nice-looking logs :)
 - `json_spaces` - JSON.stringify 3-rd parameter
 
+## Optimizations
+
+### Pre-collect Garbage Collection
+
+If you feel your app was freeze while you request, try `--expose-gc` argument. After this optimization enabled, `@nanoexpress/pro-slim` does optimization before route called and marks/collects unnecessary garbage. This should help improve freezes.
+
+Note: To log how GC works, try `--trace-gc` argument.
+
+### AoT Route compliation
+
+Then try out `@nanoexpress/aot` to get our maximum performance as possible.
+
+## Examples
+
 ```js
 import nanoexpress from 'nanoexpress/pro-slim';
 const app = nanoexpress();

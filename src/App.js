@@ -1,5 +1,6 @@
 import uWS from 'uWebSockets.js';
 import exposeApp from './expose/App.js';
+import _gc from './helpers/gc.js';
 
 export default exposeApp(
   class App {
@@ -156,6 +157,7 @@ export default exposeApp(
                 1000000
               ).toFixed(2)}ms]`
             );
+            _gc();
             resolve(token);
           } else {
             const _errorContext = _console.error ? _console : console;
@@ -167,6 +169,7 @@ export default exposeApp(
                 : `[${sslString}Server]: failed to host at [${id}]`
             );
             _errorContext.error(err.message);
+            _gc();
             reject(err);
           }
         };
@@ -192,11 +195,13 @@ export default exposeApp(
         uWS.us_listen_socket_close(token);
         this._instance[id] = null;
         _debugContext.debug('[Server]: stopped successfully');
+        _gc();
         return true;
       } else {
         const _errorContext = _console.error ? _console : console;
 
         _errorContext.error('[Server]: Error, failed while stopping');
+        _gc();
         return false;
       }
     }

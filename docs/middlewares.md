@@ -2,6 +2,8 @@
 
 > `nanoexpress Pro Slim` supports only `Async` middlewares.
 
+You can see full list of compatible and shipped middlewares from [@nanoexpress/middlewares](https://github.com/nanoexpress/middlewares) for `@nanoexpress/pro-slim`
+
 ## Examples
 
 ```js
