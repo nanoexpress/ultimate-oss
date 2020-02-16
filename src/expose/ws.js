@@ -1,12 +1,17 @@
 import { EventEmitter } from 'events';
 
+const defaultOptions = {
+  compression: 0,
+  maxPayloadLength: 16 * 1024 * 1024,
+  idleTimeout: 120
+};
 export default function({ path, originalUrl }, fn, options) {
-  options = {
-    compression: 0,
-    maxPayloadLength: 16 * 1024 * 1024,
-    idleTimeout: 120,
-    ...options
-  };
+  if (options) {
+    options = Object.assign({}, defaultOptions, options);
+  } else {
+    options = Object.assign({}, defaultOptions);
+  }
+
   const { _baseUrl } = this;
   const fetchUrl = path.indexOf('*') !== -1 || path.indexOf(':') !== -1;
 
