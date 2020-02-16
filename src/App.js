@@ -6,28 +6,6 @@ export default class App {
   get config() {
     return this._config;
   }
-  get host() {
-    const { _config: config } = this;
-    return config.host;
-  }
-  get port() {
-    const { _config: config } = this;
-    return config.port;
-  }
-  get address() {
-    const { _config: config } = this;
-    let address = '';
-    if (config.host) {
-      address += config.https ? 'https://' : 'http://';
-      address += config.host || 'localhost';
-
-      if (config.port) {
-        address += ':' + config.port;
-      }
-    }
-
-    return address;
-  }
   get https() {
     return this._config.https !== undefined && this._config.isSSL !== false;
   }
@@ -42,9 +20,9 @@ export default class App {
     this._app = app;
     this._route = route;
 
-    this.time = Date.now();
+    this.time = process.hrtime();
 
-    this._instance = null;
+    this._instance = {};
 
     this._routeCalled = false;
     this._optionsCalled = false;
@@ -81,10 +59,7 @@ export default class App {
 
     return this;
   }
-  publish(topic, string, isBinary, compress) {
-    this._app.publish(topic, string, isBinary, compress);
-  }
-  listen(port, host) {
+  listen(port, host = 'localhost', is_ssl) {
     const {
       _config: config,
       _app: app,
@@ -101,6 +76,37 @@ export default class App {
         port = _host || undefined;
       }
     }
+    if (Array.isArray(port)) {
+      return Promise.all(
+        port.map((currPort, index) => {
+          const currHost =
+            typeof currPort === 'object'
+              ? currPort.host
+              : Array.isArray(host)
+              ? host[index]
+              : host;
+
+          return this.listen(
+            typeof currPort === 'object' ? currPort.port : currPort,
+            currHost
+          );
+        })
+      );
+    } else if (
+      this.https &&
+      config.https.separateServer &&
+      !this._separateServed
+    ) {
+      const httpsPort =
+        typeof config.https.separateServer === 'number'
+          ? config.https.separateServer
+          : 443;
+      this._separateServed = true;
+      return Promise.all([
+        this.listen(port || 80, host, false),
+        this.listen(httpsPort, host, true)
+      ]);
+    }
 
     if (!_routeCalled) {
       const _errorContext = _console.error ? _console : console;
@@ -111,7 +117,6 @@ export default class App {
     }
 
     // Polyfill for plugins like CORS
-    // Detaching it from every method for performance reason
     if (_routeCalled && !_optionsCalled) {
       this.options('/*', async (req, res) => res.end(''));
     }
@@ -127,6 +132,7 @@ export default class App {
         });
       this.get('/*', notFoundHandler);
     }
+    const sslString = is_ssl ? 'HTTPS ' : is_ssl === false ? 'HTTP ' : '';
 
     return new Promise((resolve, reject) => {
       if (port === undefined) {
@@ -138,36 +144,29 @@ export default class App {
       port = Number(port);
 
       const onListenHandler = (token) => {
-        if (typeof host === 'string') {
-          config.host = host;
-        } else {
-          config.host = 'localhost';
-        }
-        if (typeof port === 'number') {
-          config.port = port;
-        }
-
         if (token) {
           const _debugContext = _console.debug ? _console : console;
+          const end = process.hrtime(this.time);
 
-          this._instance = token;
+          this._instance[`${host}:${port}`] = token;
           _debugContext.debug(
-            `[Server]: started successfully at [${
-              config.host
-            }:${port}] in [${Date.now() - this.time}ms]`
+            `[${sslString}Server]: started successfully at [${host}:${port}] in [${(
+              (end[0] * 1000 + end[1]) /
+              1000000
+            ).toFixed(2)}ms]`
           );
-          resolve(this);
+          resolve(token);
         } else {
           const _errorContext = _console.error ? _console : console;
 
-          _errorContext.error(
-            `[Server]: failed to host at [${config.host}:${port}]`
+          const err = new Error(
+            this.https &&
+            (!config.https.cert_file_name || !config.https.key_file_name)
+              ? `[${sslString}Server]: SSL certificate was not defined or loaded`
+              : `[${sslString}Server]: failed to host at [${host}:${port}]`
           );
-          reject(
-            new Error(`[Server]: failed to host at [${config.host}:${port}]`)
-          );
-          config.host = null;
-          config.port = null;
+          _errorContext.error(err.message);
+          reject(err);
         }
       };
 
@@ -178,16 +177,18 @@ export default class App {
       }
     });
   }
-  close() {
-    const { _config: config, _console } = this;
+  close(port, host = 'localhost') {
+    const { _console } = this;
 
-    if (this._instance) {
+    const token = this._instance[`${host}:${port}`];
+
+    this.time = null;
+    this._separateServed = false;
+    if (token) {
       const _debugContext = _console.debug ? _console : console;
 
-      config.host = null;
-      config.port = null;
-      uWS.us_listen_socket_close(this._instance);
-      this._instance = null;
+      uWS.us_listen_socket_close(token);
+      this._instance[`${host}:${port}`] = null;
       _debugContext.debug('[Server]: stopped successfully');
       return true;
     } else {
@@ -203,6 +204,10 @@ for (let i = 0, len = httpMethods.length; i < len; i++) {
   const method = httpMethods[i];
   App.prototype.ws = function(path, fn, options) {
     this._route.ws(path, fn, options);
+    return this;
+  };
+  App.prototype.publish = function(topic, string, isBinary, compress) {
+    this._route.publish(topic, string, isBinary, compress);
     return this;
   };
   App.prototype[method] = function(path, ...fns) {

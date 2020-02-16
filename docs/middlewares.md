@@ -16,7 +16,7 @@ app.use(async (req, res) => {
 > We recomment upgrading to `async` middlewares as possible, but we keep backward compatible middleware layer
 
 ```js
-import legacyConvert from 'nanoexpress-pro-slim/utils/legacy.js';
+import legacyConvert from 'nanoexpress/pro-slim/utils/legacy.js';
 import expressMiddleware from '????';
 
 const convertedExpressMiddleware = legacyConvert(expressMiddleware());

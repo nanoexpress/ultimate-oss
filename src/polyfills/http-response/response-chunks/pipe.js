@@ -1,4 +1,4 @@
-import compressStream from '../stream/compress-stream.js/index.js';
+import compressStream from '../stream/compress-stream.js';
 import { __request } from '../../../constants.js';
 
 export default function(stream, size, compressed = false) {

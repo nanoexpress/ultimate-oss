@@ -2,7 +2,7 @@
 
 Note: _Multi-threading/Clustering available in Linux-only env_
 
-Note #2: _Docker may be good place to get started with Clustering. But remember, on real Linux results always higher than server Docker container by 5-10%_
+Note #2: Docker may be good place to get started with Clustering. But remember, on real Linux results always higher than server Docker container by 5-10%
 
 **Benchmark command**: `wrk -t4 -d60 -c8`
 

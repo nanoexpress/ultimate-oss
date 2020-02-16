@@ -5,11 +5,9 @@ import * as HttpResponsePolyfill from './polyfill-chunks/index.js';
 
 import * as HttpResponseStream from './stream/index.js';
 
-const HttpResponse = {
-  ...HttpResponseHeaderResponse,
-  ...HttpResponseChunks,
-  ...HttpResponsePolyfill,
-  ...HttpResponseStream
+export {
+  HttpResponseHeaderResponse,
+  HttpResponseChunks,
+  HttpResponsePolyfill,
+  HttpResponseStream
 };
-
-export default HttpResponse;
