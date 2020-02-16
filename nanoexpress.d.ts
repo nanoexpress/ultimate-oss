@@ -89,8 +89,30 @@ declare namespace nanoexpress {
       compress?: boolean
     ): nanoexpressApp;
 
-    listen(port: number, host?: string): Promise<nanoexpressApp>;
-    close(): boolean;
+    listen(
+      port: number,
+      host?: string,
+      is_ssl_server?: boolean
+    ): Promise<nanoexpressApp>;
+    listen(
+      port: number[],
+      host?: string,
+      is_ssl_server?: boolean
+    ): Promise<nanoexpressApp>;
+    listen(
+      host?: string,
+      port: number,
+      is_ssl_server?: boolean
+    ): Promise<nanoexpressApp>;
+    listen(
+      host?: string,
+      port: number[],
+      is_ssl_server?: boolean
+    ): Promise<nanoexpressApp>;
+    listen(
+      ports: Array<{ port: number; host?: string }>
+    ): Promise<nanoexpressApp>;
+    close(host?: string, port?: number): boolean;
     setErrorHandler(
       errorHandlerCallback: (
         err: Error

@@ -58,7 +58,7 @@ There are few types of registering sever
 - `app.listen(PORT: number[], host?: string, is_ssl_server?: boolean)`
 - `app.listen(host: string, PORT: number, is_ssl_server?: boolean)`
 - `app.listen(host: string, PORT: number[], is_ssl_server?: boolean)`
-- `app.listen(Array<{ port: number, host?: string}>)`
+- `app.listen(ports: Array<{ port: number, host?: string}>)`
 
 ### Options
 
