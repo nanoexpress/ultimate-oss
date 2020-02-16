@@ -5,11 +5,13 @@
   "type": "module",
   "main": "src/nanoexpress.js",
   "typings": "nanoexpress.d.ts",
+  "funding": {
+    "type": "patreon",
+    "url": "https://www.patreon.com/dalisoft"
+  },
   "scripts": {
     "lint": "eslint ./src",
-    "test": "jest --config jest.config.json",
-    "coverage": "npm run test --coverage",
-    "coveralls": "npm run coverage && cat ./tests/coverage/lcov.info | coveralls",
+    "test": "node --experimental-modules tests/index.js",
     "prepublishOnly": "npm run lint"
   },
   "engines": {
@@ -38,7 +40,7 @@
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.0.0"
   },
   "devDependencies": {
-    "coveralls": "^3.0.9",
+    "baretest": "^1.0.0",
     "eslint": "^6.8.0",
     "husky": "^4.0.6",
     "lint-staged": "^10.0.7",

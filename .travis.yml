@@ -5,11 +5,12 @@ notifications:
 os:
   - linux
   - osx
+  - windows
 node_js:
   - '12'
+  - '13'
 install:
   - npm install
 script:
   - npm run lint
-  # - npm test
-  # - npm run coveralls
+  - npm test

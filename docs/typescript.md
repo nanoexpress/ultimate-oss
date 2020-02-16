@@ -1,6 +1,10 @@
 # TypeScript
 
-The `slim` version doesn't packs TS declarations, but can be added via PR
+The project has in-built shipped TypeScript declaration.
+
+Any TS supported Editor should get method autocomplete.
+
+IDE always gets method auto-completetion.
 
 [&laquo; Schema](./schema.md)
 
