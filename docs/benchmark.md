@@ -65,7 +65,7 @@ Example for HTTP
 
 or for WebSocket
 
-> 5\$ DigitalOcean plan can handle ~20 Downloads per month in torrent server. Source [here](https://hackernoon.com/µws-as-your-next-websocket-library-d34209686357)
+> 5\$ DigitalOcean plan can handle ~20K Downloads per month in torrent server easily. Source [here](https://hackernoon.com/µws-as-your-next-websocket-library-d34209686357)
 
 [&laquo; Docker](./docker.md)
 
