@@ -1,5 +1,9 @@
 # Documentation
 
+## Why nanoexpress at all
+
+[This](./why-nanoexpress.md) answers question from [here](https://www.reddit.com/r/node/comments/egpenm/why_would_one_use_nanoexpress_over_just/?utm_source=share&utm_medium=web2x) asked by one of user intered in nanoexpress
+
 ## Examples
 
 All examples are lives [here](https://github.com/nanoexpress/pro-slim/tree/master/examples)
@@ -34,6 +38,8 @@ About approximate price look [here](https://github.com/nanoexpress/pro-slim/issu
 Both versions are maintaining, supporting and documentated
 
 ## Table of Contents
+
+- [Why nanoexpress?](./why-nanoexpress.md)
 
 - [Getting Started](./get-started.md)
 - [Middlewares](./middlewares.md)

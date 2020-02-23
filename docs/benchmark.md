@@ -4,13 +4,13 @@ Note: _Multi-threading/Clustering available in Linux-only env_
 
 Note #2: Docker may be good place to get started with Clustering. But remember, on real Linux results always higher than server Docker container by 5-10%
 
-**Benchmark command**: `wrk -t4 -d60 -c8`
+Note #3: In this benchmark all framework/libraries was used as basic example without any middleware, when you use any middlewares or you already have complex logic, try optimize them to improve performance as this can slow down RPS. We cannot guarantee any performance improvements on complex backend applications.
+
+**Benchmark command**: `wrk -t2 -d2` or `wrk TEST_URL`
 
 You can see live benchmark results at [here](https://github.com/the-benchmarker/web-frameworks#results)
 
 ## Machines
-
-Note: _Memory usage range is +-30Mb per million request_
 
 ### MBP Mid-2012
 
@@ -20,14 +20,14 @@ Note: _Memory usage range is +-30Mb per million request_
 - Env: macOS itself
 - Clustering: unavailable
 
-| Library              | Req/min | Memory |
+| Library              | Req/sec | Memory |
 | -------------------- | ------- | ------ |
-| uWebSockets.js       | ~1.2M   | ~80Mb  |
-| nanoexpress Pro Slim | ~1.1M   | ~100Mb |
-| nanoexpress Pro      | ~1M     | ~180Mb |
-| nanoexpress          | ~950K   | ~120Mb |
-| Raw HTTP             | ~850K   | ~290Mb |
-| express              | ~260K   | ~430Mb |
+| uWebSockets.js       | ~70K    | ~4Mb   |
+| nanoexpress Pro Slim | ~70K    | ~8Mb   |
+| nanoexpress Pro      | ~60K    | ~18Mb  |
+| nanoexpress          | ~55K    | ~12Mb  |
+| Raw HTTP             | ~35K    | ~29Mb  |
+| express              | ~25K    | ~43Mb  |
 
 ### Dev Machine
 
@@ -37,14 +37,35 @@ Note: _Memory usage range is +-30Mb per million request_
 - Env: Linux
 - Clustering: available (on 16 threads)
 
-| Library              | Req/min | Memory |
+Note: more than 4-cores doesn't used at unknown reason, but should improve perf even not marginally
+
+| Library              | Req/sec | Memory |
 | -------------------- | ------- | ------ |
-| uWebSockets.js       | 16M+    | ~140Mb |
-| nanoexpress Pro Slim | ~15M    | ~160Mb |
-| nanoexpress Pro      | ~13M    | ~260Mb |
-| nanoexpress          | ~10M    | ~200Mb |
-| Raw HTTP             | ~6M     | ~450Mb |
-| express              | ~4M     | ~700Mb |
+| uWebSockets.js       | ~400K   | ~14Mb  |
+| nanoexpress Pro Slim | ~400K   | ~19Mb  |
+| nanoexpress Pro      | ~350K   | ~26Mb  |
+| nanoexpress          | ~300K   | ~22Mb  |
+| Raw HTTP             | ~250K   | ~40Mb  |
+| express              | ~200K   | ~70Mb  |
+
+## Why
+
+and when use this framework for my backend application?
+
+1. When your want reduce server cost for WebSocket and/or WebRTC real-time comminucation and file-exchange (maybe stream, video, photo, etc) servers.
+2. When your server has low RAM memory
+3. Your logic is easy and simple
+4. Startups which looks for faster startup
+5. You want try out how it works?!
+6. You don't want spend a lot for servers
+
+Example for HTTP
+
+> 5\$ DigitalOcean plan can handle 1000 HTTP Requests per hour easily and without any slowdowns
+
+or for WebSocket
+
+> 5\$ DigitalOcean plan can handle ~20 Downloads per month in torrent server. Source [here](https://hackernoon.com/µws-as-your-next-websocket-library-d34209686357)
 
 [&laquo; Docker](./docker.md)
 
