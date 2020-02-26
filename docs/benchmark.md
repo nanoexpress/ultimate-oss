@@ -61,7 +61,7 @@ and when use this framework for my backend application?
 
 Example for HTTP
 
-> 5\$ DigitalOcean plan can handle 1000 HTTP Requests per hour easily and without any slowdowns
+> 5\$ DigitalOcean plan can handle 1000 HTTP Requests per day easily and without any slowdowns
 
 or for WebSocket
 
