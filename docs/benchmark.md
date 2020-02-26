@@ -1,8 +1,8 @@
 # Benchmarks
 
-Note: _Multi-threading/Clustering available in Linux-only env_
+Note: _Multi-threading/Clustering is available in Linux-only env_
 
-Note #2: Docker may be good place to get started with Clustering. But remember, on real Linux results always higher than server Docker container by 5-10%
+Note #2: Docker may be a good place to get started with Clustering. But remember, on real Linux results always higher than server Docker container by 5-10%
 
 Note #3: In this benchmark all framework/libraries was used as basic example without any middleware, when you use any middlewares or you already have complex logic, try optimize them to improve performance as this can slow down RPS. We cannot guarantee any performance improvements on complex backend applications.
 

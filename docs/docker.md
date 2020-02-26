@@ -2,7 +2,7 @@
 
 > This patches can be applied for Linux itself
 
-If you using `alpine` or `slim` version of `node` images, some errors may happen and you can fix with this minimal guide
+If you use `alpine` or `slim` version of `node` images, some errors may happen and you can fix with this minimal guide
 
 ## Requires
 
