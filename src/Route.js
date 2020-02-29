@@ -64,8 +64,12 @@ export default exposeRoute(
       const fetchMethod = method.toUpperCase() === 'ANY';
       const fetchUrl = path.indexOf('*') !== -1 || path.indexOf(':') !== -1;
 
-      if (middlewares && middlewares.length > 1) {
+      if (
+        middlewares &&
+        (middlewares.length > 1 || (_middlewares && _middlewares.length > 0))
+      ) {
         middlewares = this._prepareMiddlewares(path, middlewares);
+
         middlewares = Array.isArray(_middlewares)
           ? _middlewares.concat(middlewares)
           : middlewares;
@@ -84,6 +88,7 @@ export default exposeRoute(
 
         let response;
         let skipCheck = false;
+        let stopNext = false;
         let newMethod;
 
         // Aliases for future usage and easy-access
@@ -94,12 +99,13 @@ export default exposeRoute(
         // Extending HttpResponse
         for (let i = 0, len = Constants.HttpResponseKeys.length; i < len; i++) {
           newMethod = Constants.HttpResponseKeys[i];
+
           res.__proto__[newMethod] = HttpResponse[newMethod];
         }
 
         if (middlewares && middlewares.length > 0) {
           for (const middleware of middlewares) {
-            if (skipCheck) {
+            if (stopNext || skipCheck) {
               break;
             }
             if (typeof middleware !== 'function') {
@@ -118,6 +124,7 @@ export default exposeRoute(
                 res.status(response.status_code);
               }
               skipCheck = false;
+              stopNext = true;
             }
           }
         }
@@ -131,7 +138,7 @@ export default exposeRoute(
 
         if (!skipCheck && (fetchUrl || (!fetchUrl && req.path === path))) {
           if (res.compiledResponse) {
-            return res.end(res.compiledResponse);
+            res.end(res.compiledResponse);
           } else if (res.serialize) {
             res.end(res.serialize(response));
           } else if (typeof response === 'object') {

@@ -1,1 +1,1 @@
-export * from './http-response/index.js';
+export { HttpResponse } from './http-response/index.js';
