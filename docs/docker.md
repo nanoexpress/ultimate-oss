@@ -12,7 +12,7 @@ If you use `alpine` or `slim` version of `node` images, some errors may happen a
 
 ```Dockerfile
 # FROM ...
-RUN apk update && apk add --no-cache git
+RUN apk add --no-cache git
 # your scripts
 ```
 
@@ -28,7 +28,15 @@ RUN ln -s /lib/libc.musl-x86_64.so.1 /lib/ld-linux-x86-64.so.2
 
 ### For CentOS 7 `glibc 2.18` not found error
 
-See solution from [here](https://serverfault.com/a/894689) and [here](https://serverfault.com/a/980302)
+First, please try
+
+```Dockerfile
+# FROM ...
+RUN apk add --no-cache gcompat
+# your scripts
+```
+
+if above solution did not work, try solution from [here](https://serverfault.com/a/894689) and [here](https://serverfault.com/a/980302)
 
 ## Multi-thread / Cluster
 
