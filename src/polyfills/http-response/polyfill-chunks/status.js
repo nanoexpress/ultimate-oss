@@ -1,10 +1,7 @@
 import http from 'http';
 
 export default function status(code) {
-  // Quick return as it's default HTTPResponse Status
-  if (code === 200 || code === '200 OK') {
-    // Do nothing... ;)
-  } else if (typeof code === 'string') {
+  if (typeof code === 'string') {
     this.writeStatus(code);
     this.statusCode = code;
     this.rawStatusCode = parseInt(code);

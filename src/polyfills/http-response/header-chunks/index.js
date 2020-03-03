@@ -1,3 +1,5 @@
+/** global: header */
+
 import setHeader from './set-header.js';
 import getHeader from './get-header.js';
 import hasHeader from './has-header.js';
