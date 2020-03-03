@@ -13,12 +13,12 @@ export default (App) => {
       _debugContext.debug('[Server]: stopped successfully');
       _gc();
       return true;
-    } else {
-      const _errorContext = _console.error ? _console : console;
-
-      _errorContext.error('[Server]: Error, failed while stopping');
-      _gc();
-      return false;
     }
+
+    const _errorContext = _console.error ? _console : console;
+
+    _errorContext.error('[Server]: Error, failed while stopping');
+    _gc();
+    return false;
   };
 };
