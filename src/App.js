@@ -1,6 +1,4 @@
-import uWS from 'uWebSockets.js';
 import exposeApp from './expose/App.js';
-import _gc from './helpers/gc.js';
 
 export default exposeApp(
   class App {
@@ -52,6 +50,7 @@ export default exposeApp(
     }
     use(...args) {
       this._route.use(...args);
+      this._routeCalled = true;
 
       return this;
     }
@@ -61,13 +60,7 @@ export default exposeApp(
       return this;
     }
     listen(port, host = 'localhost', is_ssl) {
-      const {
-        _config: config,
-        _app: app,
-        _routeCalled,
-        _optionsCalled,
-        _console
-      } = this;
+      const { _config: config } = this;
 
       if (typeof port === 'string') {
         if (port.indexOf('.') !== -1) {
@@ -109,101 +102,18 @@ export default exposeApp(
         ]);
       }
 
-      if (!_routeCalled) {
-        const _errorContext = _console.error ? _console : console;
+      this._prepareListen();
 
-        _errorContext.error(
-          'nanoexpress [Server]: None of middleware will be called until you define route'
-        );
-      }
-
-      // Polyfill for plugins like CORS
-      if (_routeCalled && !_optionsCalled) {
-        this.options('/*', async (req, res) => res.end(''));
-      }
-
-      if (!this._anyRouteCalled) {
-        const notFoundHandler =
-          config._notFoundHandler ||
-          (async (req, res) => {
-            res.writeStatus('404 Not Found');
-            res.end(
-              JSON.stringify({ code: 404, message: 'The route does not exist' })
-            );
-          });
-        this.get('/*', notFoundHandler);
-      }
-      const sslString = is_ssl ? 'HTTPS ' : is_ssl === false ? 'HTTP ' : '';
-
-      return new Promise((resolve, reject) => {
-        if (port === undefined) {
-          const _errorContext = _console.error ? _console : console;
-
-          _errorContext.error('[Server]: PORT is required');
-          return undefined;
-        }
-        port = Number(port);
-        const id = `${host}:${port}`;
-
-        const onListenHandler = (token) => {
-          if (token) {
-            const _debugContext = _console.debug ? _console : console;
-            const end = process.hrtime(this.time);
-
-            this._instance[id] = token;
-            _debugContext.debug(
-              `[${sslString}Server]: started successfully at [${id}] in [${(
-                (end[0] * 1000 + end[1]) /
-                1000000
-              ).toFixed(2)}ms]`
-            );
-            _gc();
-            resolve(token);
-          } else {
-            const _errorContext = _console.error ? _console : console;
-
-            const err = new Error(
-              this.https &&
-              (!config.https.cert_file_name || !config.https.key_file_name)
-                ? `[${sslString}Server]: SSL certificate was not defined or loaded`
-                : `[${sslString}Server]: failed to host at [${id}]`
-            );
-            _errorContext.error(err.message);
-            _gc();
-            reject(err);
-          }
-        };
-
-        if (host) {
-          app.listen(host, port, onListenHandler);
-        } else {
-          app.listen(port, onListenHandler);
-        }
-      });
+      return this._applyListen(host, port, is_ssl);
     }
     close(port, host = 'localhost') {
-      const { _console } = this;
-
       const id = `${host}:${port}`;
       const token = this._instance[id];
 
       this.time = null;
       this._separateServed = false;
-      if (token) {
-        const _debugContext = _console.debug ? _console : console;
 
-        uWS.us_listen_socket_close(token);
-        this._instance[id] = null;
-        _debugContext.debug('[Server]: stopped successfully');
-        _gc();
-        return true;
-      } else {
-        const _errorContext = _console.error ? _console : console;
-
-        _errorContext.error('[Server]: Error, failed while stopping');
-        _gc();
-        return false;
-      }
+      this._close(token, id);
     }
   }
 );

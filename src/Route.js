@@ -17,20 +17,18 @@ export default exposeRoute(
       return this._app;
     }
     _prepareMiddlewares(path, middlewares) {
-      return middlewares.map((middleware) => {
+      middlewares.forEach((middleware) => {
+        if (middleware._module) {
+          middleware._app = this._app;
+          middleware._config = this._config;
+          middleware._baseUrl =
+            typeof path === 'string' ? path : middleware._baseUrl || '/';
+          return middleware;
+        }
         if (middleware.constructor.name !== 'AsyncFunction') {
           throw new Error(
             '[nanoexpress] Only Async Functions are allowed to expose route'
           );
-        }
-        if (middleware._module) {
-          return {
-            ...middleware,
-            _app: this._app,
-            _config: this._config,
-            _baseUrl:
-              typeof path === 'string' ? path : middleware._baseUrl || '/'
-          };
         }
         return middleware;
       });
@@ -43,12 +41,18 @@ export default exposeRoute(
         this._middlewares = _middlewares;
       }
 
-      if (typeof path === 'function') {
+      if (typeof path === 'function' || path._module) {
         middlewares.unshift(path);
         path = undefined;
       }
 
-      _middlewares.push(...this._prepareMiddlewares(path, middlewares));
+      middlewares.forEach((middleware) => {
+        if (middleware.onPrepare) {
+          middleware.onPrepare();
+        }
+      });
+      this._prepareMiddlewares(path, middlewares);
+      _middlewares.push(...middlewares);
 
       _gc();
 
@@ -68,7 +72,7 @@ export default exposeRoute(
         middlewares &&
         (middlewares.length > 1 || (_middlewares && _middlewares.length > 0))
       ) {
-        middlewares = this._prepareMiddlewares(path, middlewares);
+        this._prepareMiddlewares(path, middlewares);
 
         middlewares = Array.isArray(_middlewares)
           ? _middlewares.concat(middlewares)
