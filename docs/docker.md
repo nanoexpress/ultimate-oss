@@ -54,7 +54,3 @@ Note: _In Docker with Linux images this feature available out-of-the-box! Enjoy!
 [&laquo; TypeScript](./typescript.md)
 
 [Benchmark &raquo;](./benchmark.md)
-
-```
-
-```
