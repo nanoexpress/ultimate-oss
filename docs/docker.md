@@ -36,7 +36,7 @@ RUN apk add --no-cache gcompat
 # your scripts
 ```
 
-and try
+or try
 
 ```Dockerfile
 # FROM ...
