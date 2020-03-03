@@ -36,7 +36,16 @@ RUN apk add --no-cache gcompat
 # your scripts
 ```
 
-if above solution did not work, try solution from [here](https://serverfault.com/a/894689) and [here](https://serverfault.com/a/980302)
+and try
+
+```Dockerfile
+# FROM ...
+RUN apk add --no-cache libc6-compat
+RUN mv /lib64/ld-linux-x86-64.so.2 /lib
+# your scripts
+```
+
+if above solutions did not work, try solution from [here](https://serverfault.com/a/894689) and [here](https://serverfault.com/a/980302)
 
 ## Multi-thread / Cluster
 
@@ -45,3 +54,7 @@ Note: _In Docker with Linux images this feature available out-of-the-box! Enjoy!
 [&laquo; TypeScript](./typescript.md)
 
 [Benchmark &raquo;](./benchmark.md)
+
+```
+
+```
