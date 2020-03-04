@@ -21,8 +21,14 @@ export default exposeRoute(
         if (middleware._module) {
           middleware._app = this._app;
           middleware._config = this._config;
+          middleware._define = this._define;
           middleware._baseUrl =
             typeof path === 'string' ? path : middleware._baseUrl || '/';
+
+          if (!middleware.defined && this._define) {
+            this._define(middleware);
+            middleware.defined = true;
+          }
           return middleware;
         }
         if (middleware.constructor.name !== 'AsyncFunction') {
@@ -147,7 +153,7 @@ export default exposeRoute(
             res.end(res.serialize(response));
           } else if (typeof response === 'object') {
             res.end(JSON.stringify(response, null, jsonSpaces));
-          } else {
+          } else if (response) {
             res.end(response);
           }
         }

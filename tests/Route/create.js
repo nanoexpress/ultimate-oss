@@ -5,7 +5,7 @@ import Route from '../../src/Route.js';
 
 const test = baretest('Route.create');
 
-test('created successfully', function() {
+test('created successfully', () => {
   assert.ok(new Route());
 });
 

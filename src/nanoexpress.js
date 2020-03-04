@@ -19,7 +19,10 @@ const nanoexpress = (options = {}) => {
   routeInstance._rootLevel = true;
 
   // Initialize App instance
-  return new App(options, app, routeInstance);
+  const appInstance = new App(options, app, routeInstance);
+  appInstance.wraps = Route.wraps;
+
+  return appInstance;
 };
 
 export { nanoexpress as default };

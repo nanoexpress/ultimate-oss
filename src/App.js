@@ -56,6 +56,10 @@ export default exposeApp(
     }
     define(callback) {
       callback(this);
+      callback(this._route);
+
+      // For future routes
+      this._route._define = callback;
 
       return this;
     }
