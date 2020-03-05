@@ -21,7 +21,7 @@ For example please see [this](https://github.com/nanoexpress/pro-slim/tree/maste
 
 ## Differences
 
-About approximate price look [here](https://github.com/nanoexpress/pro-slim/issues/29)
+About approximate price look [here](https://github.com/nanoexpress/pro-slim/issues/5)
 
 ### PRO and non-PRO versions are almost same except
 
