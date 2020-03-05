@@ -25,6 +25,8 @@ class HeaderSupportedRoute extends Route {
           buffer = Buffer.concat([buffer, Buffer.from(chunk)]);
 
           if (isLast) {
+            req.buffer = buffer;
+
             if (contentType && contentType.indexOf('/json') !== -1) {
               res.writeHeader('Content-Type', contentType);
               req.body = JSON.parse(buffer.toString('utf8'));
@@ -68,12 +70,46 @@ class HeaderSupportedRoute extends Route {
   }
 }
 
+app.wraps(null, (method, [url], self) => {
+  if (url.indexOf(':') !== -1) {
+    const matches = url.match(/:(.*)/g);
+
+    if (matches && matches.length) {
+      const names = matches.map((match) => {
+        const slashIndex = match.indexOf('/');
+
+        if (slashIndex !== -1) {
+          return match.substr(1, slashIndex - 1);
+        }
+
+        return match.substr(1);
+      });
+
+      const handleParams = async function(req) {
+        req.params = {};
+
+        for (let i = 0, len = names.length; i < len; i++) {
+          req.params[names[i]] = req.getParameter(i);
+        }
+      };
+      if (self._middlewares) {
+        self._middlewares.unshift(handleParams);
+      } else {
+        self._middlewares = [handleParams];
+      }
+    }
+  }
+});
+
 const route = new HeaderSupportedRoute();
 
 app.use(route);
 
 route.get('/', async (req, res) => {
   return res.send({ headers: req.headers });
+});
+route.get('/user/:id/', async (req, res) => {
+  return res.send({ headers: req.headers, params: req.params });
 });
 route.post('/', async (req, res) => {
   return res.send({ body: req.body });
