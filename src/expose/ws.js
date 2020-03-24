@@ -5,7 +5,7 @@ const defaultOptions = {
   maxPayloadLength: 16 * 1024 * 1024,
   idleTimeout: 120
 };
-export default function({ path, originalUrl }, fn, options) {
+export default function ({ path, originalUrl }, fn, options) {
   if (options) {
     options = Object.assign({}, defaultOptions, options);
   } else {

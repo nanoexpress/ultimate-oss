@@ -2,7 +2,7 @@ import uWS from 'uWebSockets.js';
 import _gc from '../../helpers/gc.js';
 
 export default (App) => {
-  App.prototype._close = function(token, id) {
+  App.prototype._close = function (token, id) {
     const { _console } = this;
 
     if (token) {

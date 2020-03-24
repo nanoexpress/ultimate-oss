@@ -2,7 +2,7 @@ import { getMime } from '../../../helpers/mime.js';
 import { __request } from '../../../constants.js';
 import { statSync, createReadStream } from 'fs';
 
-export default function(path, lastModified = true, compressed = false) {
+export default function (path, lastModified = true, compressed = false) {
   const res = this;
   const req = res[__request];
   const { headers } = req;

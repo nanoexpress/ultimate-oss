@@ -1,7 +1,7 @@
 import compressStream from '../stream/compress-stream.js';
 import { __request } from '../../../constants.js';
 
-export default function(stream, size, compressed = false) {
+export default function (stream, size, compressed = false) {
   const req = this[__request];
   const { headers, responseHeaders } = req;
 

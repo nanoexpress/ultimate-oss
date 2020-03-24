@@ -1,7 +1,7 @@
 import _gc from '../../helpers/gc.js';
 
 export default (App) => {
-  App.prototype._applyListen = function(host, port, is_ssl) {
+  App.prototype._applyListen = function (host, port, is_ssl) {
     const { _console, _config: config, _app: app } = this;
 
     const sslString = is_ssl ? 'HTTPS ' : is_ssl === false ? 'HTTP ' : '';

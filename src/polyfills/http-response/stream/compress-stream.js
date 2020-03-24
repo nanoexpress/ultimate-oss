@@ -3,7 +3,7 @@ import { __request } from '../../../constants.js';
 
 const priority = ['gzip', 'br', 'deflate'];
 
-export default function(stream) {
+export default function (stream) {
   const req = this[__request];
   const { headers } = req;
 

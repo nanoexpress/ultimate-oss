@@ -85,7 +85,7 @@ app.wraps(null, (method, [url], self) => {
         return match.substr(1);
       });
 
-      const handleParams = async function(req) {
+      const handleParams = async function (req) {
         req.params = {};
 
         for (let i = 0, len = names.length; i < len; i++) {

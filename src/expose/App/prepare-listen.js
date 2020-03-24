@@ -1,5 +1,5 @@
 export default (App) => {
-  App.prototype._prepareListen = function() {
+  App.prototype._prepareListen = function () {
     const { _routeCalled, _optionsCalled, _console, _config: config } = this;
 
     if (!_routeCalled) {
