@@ -1,4 +1,3 @@
-import compressStream from '../stream/compress-stream.js';
 import { __request } from '../../../constants.js';
 
 export default function (stream, size, compressed = false) {
@@ -8,7 +7,10 @@ export default function (stream, size, compressed = false) {
   this.stream = true;
 
   if (compressed) {
-    const compressedStream = compressStream(stream, responseHeaders || headers);
+    const compressedStream = this.compressStream(
+      stream,
+      responseHeaders || headers
+    );
 
     if (compressedStream) {
       stream = compressedStream;

@@ -1,11 +1,12 @@
 import { createBrotliCompress, createGzip, createDeflate } from 'zlib';
-import { __request } from '../../../constants.js';
+import { __request, reqHeaderResponse } from '../../../constants.js';
 
 const priority = ['gzip', 'br', 'deflate'];
 
 export default function (stream) {
   const req = this[__request];
   const { headers } = req;
+  const responseHeaders = req[reqHeaderResponse];
 
   if (!headers) {
     throw new Error(
@@ -29,7 +30,7 @@ export default function (stream) {
   if (compression) {
     stream.pipe(compression);
 
-    headers['Content-Encoding'] = encoding;
+    responseHeaders['Content-Encoding'] = encoding;
   }
 
   return compression;

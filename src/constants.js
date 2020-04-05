@@ -6,6 +6,9 @@ export const HttpResponseKeys = Object.keys(HttpResponse);
 export const __request = Symbol('HttpRequestInstance');
 export const __response = Symbol('HttpResponseInstance');
 
+// HttpRequest symbols
+export const reqHeaderResponse = Symbol('HttpRequestResponseHeaders');
+
 // HttpResponse symbols
 export const resHeaders = Symbol('HttpResponseHeaders');
 export const resConfig = Symbol('HttpResponseConfig');
