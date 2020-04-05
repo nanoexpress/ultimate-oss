@@ -83,11 +83,16 @@ export default exposeRoute(
         middlewares = Array.isArray(_middlewares)
           ? _middlewares.concat(middlewares)
           : middlewares;
+      } else if (middlewares.length === 1) {
+        middlewares[0].async =
+          middlewares[0].constructor.name == 'AsyncFunction';
       }
 
       _gc();
 
       return async (res, req) => {
+        res.aborted = false;
+
         req.method = fetchMethod ? req.getMethod().toUpperCase() : method;
         req.path = fetchUrl ? req.getUrl().substr(_baseUrl.length) : path;
         req.baseUrl = _baseUrl || '';
@@ -115,14 +120,18 @@ export default exposeRoute(
 
         if (middlewares && middlewares.length > 0) {
           for (const middleware of middlewares) {
-            if (stopNext || skipCheck) {
+            if (res.aborted || stopNext || skipCheck) {
               break;
             }
             if (typeof middleware !== 'function') {
               continue;
             }
 
-            response = await middleware(req, res).catch(handleError);
+            if (middleware.async) {
+              response = await middleware(req, res).catch(handleError);
+            } else {
+              response = middleware(req, res);
+            }
 
             if (response === res) {
               skipCheck = true;
@@ -139,11 +148,18 @@ export default exposeRoute(
           }
         }
 
-        if (!skipCheck && (method === 'OPTIONS' || res.stream !== undefined)) {
+        if (
+          res.aborted ||
+          (!skipCheck && (method === 'OPTIONS' || res.stream !== undefined))
+        ) {
           skipCheck = true;
         }
 
-        if (!skipCheck && (fetchUrl || (!fetchUrl && req.path === path))) {
+        if (
+          !res.aborted &&
+          !skipCheck &&
+          (fetchUrl || (!fetchUrl && req.path === path))
+        ) {
           if (res.compiledResponse) {
             res.end(res.compiledResponse);
           } else if (res.serialize) {

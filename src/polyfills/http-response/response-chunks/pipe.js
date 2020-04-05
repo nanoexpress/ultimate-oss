@@ -8,6 +8,10 @@ export default function (stream, size, compressed = false) {
   }
 
   this.stream = stream;
+  this.onAborted(() => {
+    this.aborted = true;
+    stream.destroy();
+  });
 
   if (compressed || !size) {
     stream.on('data', (buffer) => {
