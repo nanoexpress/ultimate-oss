@@ -102,8 +102,8 @@ export default exposeRoute(
         let newMethod;
 
         // Aliases for future usage and easy-access
-        req[Constants.__request] = res;
-        res[Constants.__response] = req;
+        req[Constants.__response] = res;
+        res[Constants.__request] = req;
         res[Constants.resConfig] = _config;
 
         // Extending HttpResponse
