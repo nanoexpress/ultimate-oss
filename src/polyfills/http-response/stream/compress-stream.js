@@ -3,7 +3,7 @@ import { __request, reqHeaderResponse } from '../../../constants.js';
 
 const priority = ['gzip', 'br', 'deflate'];
 
-export default function (stream) {
+export default function (stream, options) {
   const req = this[__request];
   const { headers } = req;
   const responseHeaders = req[reqHeaderResponse];
@@ -20,17 +20,17 @@ export default function (stream) {
 
   const compression =
     encoding === 'br'
-      ? createBrotliCompress()
+      ? createBrotliCompress(options)
       : encoding === 'gzip'
-      ? createGzip()
+      ? createGzip(options)
       : encoding === 'deflate'
-      ? createDeflate()
+      ? createDeflate(options)
       : null;
 
   if (compression) {
     stream.pipe(compression);
 
-    responseHeaders['Content-Encoding'] = encoding;
+    responseHeaders['content-encoding'] = encoding;
   }
 
   return compression;

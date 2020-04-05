@@ -1,16 +1,8 @@
-import { __request } from '../../../constants.js';
-
 export default function (stream, size, compressed = false) {
-  const req = this[__request];
-  const { headers, responseHeaders } = req;
-
   this.stream = true;
 
   if (compressed) {
-    const compressedStream = this.compressStream(
-      stream,
-      responseHeaders || headers
-    );
+    const compressedStream = this.compressStream(stream);
 
     if (compressedStream) {
       stream = compressedStream;
@@ -63,6 +55,7 @@ export default function (stream, size, compressed = false) {
     .on('error', () => {
       this.stream = -1;
       stream.destroy();
+      this.end();
     })
     .on('end', () => {
       this.stream = 1;
