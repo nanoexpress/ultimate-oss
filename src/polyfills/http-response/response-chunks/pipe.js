@@ -1,6 +1,4 @@
 export default function (stream, size, compressed = false) {
-  this.stream = true;
-
   if (compressed) {
     const compressedStream = this.compressStream(stream);
 
@@ -8,6 +6,8 @@ export default function (stream, size, compressed = false) {
       stream = compressedStream;
     }
   }
+
+  this.stream = stream;
 
   if (compressed || !size) {
     stream.on('data', (buffer) => {

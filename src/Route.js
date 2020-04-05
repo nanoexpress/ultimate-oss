@@ -139,10 +139,7 @@ export default exposeRoute(
           }
         }
 
-        if (
-          !skipCheck &&
-          (method === 'OPTIONS' || res.stream === true || res.stream === 1)
-        ) {
+        if (!skipCheck && (method === 'OPTIONS' || res.stream !== undefined)) {
           skipCheck = true;
         }
 
