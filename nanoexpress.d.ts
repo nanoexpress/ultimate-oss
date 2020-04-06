@@ -6,7 +6,13 @@ import {
   WebSocket as WebSocketBasic
 } from 'uWebSockets.js';
 import { Readable, Writable } from 'stream';
-import { BrotliCompress, Gzip, Deflate } from 'zlib';
+import {
+  BrotliCompress,
+  Gzip,
+  Deflate,
+  BrotliOptions,
+  ZlibOptions
+} from 'zlib';
 
 declare namespace nanoexpress {
   export interface AppOptions extends AppOptionsBasic {
@@ -46,7 +52,8 @@ declare namespace nanoexpress {
       compressed?: boolean
     ): HttpResponse;
     compressStream(
-      stream: ReadableStream
+      stream: ReadableStream,
+      options: BrotliOptions | ZlibOptions
     ): BrotliCompress | Gzip | Deflate | null;
     sendFile(
       filename: string,
