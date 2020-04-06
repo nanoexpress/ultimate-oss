@@ -1,3 +1,5 @@
+import { resAbortHandler } from '../../../constants.js';
+
 export default function (stream, size, compressed = false) {
   if (compressed) {
     const compressedStream = this.compressStream(stream);
@@ -6,15 +8,21 @@ export default function (stream, size, compressed = false) {
       stream = compressedStream;
     }
   }
+  if (!this[resAbortHandler]) {
+    this.onAborted(() => {
+      this.aborted = true;
+    });
+    this[resAbortHandler] = true;
+  }
 
   this.stream = stream;
-  this.onAborted(() => {
-    this.aborted = true;
-    stream.destroy();
-  });
 
   if (compressed || !size) {
     stream.on('data', (buffer) => {
+      if (this.aborted) {
+        stream.destroy();
+        return;
+      }
       this.write(
         buffer.buffer.slice(
           buffer.byteOffset,
@@ -24,6 +32,10 @@ export default function (stream, size, compressed = false) {
     });
   } else {
     stream.on('data', (buffer) => {
+      if (this.aborted) {
+        stream.destroy();
+        return;
+      }
       buffer = buffer.buffer.slice(
         buffer.byteOffset,
         buffer.byteOffset + buffer.byteLength
