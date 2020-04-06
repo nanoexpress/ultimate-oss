@@ -127,10 +127,10 @@ export default exposeRoute(
               continue;
             }
 
-            if (middleware.async) {
-              response = await middleware(req, res).catch(handleError);
-            } else {
+            if (middleware.async === false) {
               response = middleware(req, res);
+            } else {
+              response = await middleware(req, res).catch(handleError);
             }
 
             if (response === res) {
