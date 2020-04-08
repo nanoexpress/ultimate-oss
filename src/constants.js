@@ -12,7 +12,7 @@ export const reqHeaderResponse = Symbol('HttpRequestResponseHeaders');
 // HttpResponse symbols
 export const resHeaders = Symbol('HttpResponseHeaders');
 export const resConfig = Symbol('HttpResponseConfig');
-export const resAbortHandler = Symbol('HttpResponseAbortHandler');
+export const resAbortHandler = '___$HttpResponseAbortHandler';
 
 export const httpMethods = [
   'get',
