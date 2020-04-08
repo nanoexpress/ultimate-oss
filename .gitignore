@@ -70,3 +70,5 @@ coverage
 # lock files
 package-lock.json
 yarn.lock
+
+!cjs/package.json
