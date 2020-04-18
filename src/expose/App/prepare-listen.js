@@ -24,7 +24,7 @@ export default (App) => {
             JSON.stringify({ code: 404, message: 'The route does not exist' })
           );
         });
-      this.all('/*', notFoundHandler);
+      this.any('/*', notFoundHandler);
     }
   };
 };
