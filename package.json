@@ -1,6 +1,6 @@
 {
   "name": "@nanoexpress/pro-slim",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "Slim version of nanoexpress Pro for really PRO simple users",
   "type": "module",
   "main": "src/nanoexpress.js",
@@ -37,10 +37,10 @@
   },
   "homepage": "https://github.com/nanoexpress/pro-slim#readme",
   "dependencies": {
-    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.3.0"
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.4.0"
   },
   "devDependencies": {
-    "baretest": "^1.0.0",
+    "baretest": "^2.x",
     "eslint": "^6.8.0",
     "husky": "^4.2.5",
     "lint-staged": "^10.1.7",
