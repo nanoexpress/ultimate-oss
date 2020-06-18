@@ -10,8 +10,13 @@
     "url": "https://www.patreon.com/dalisoft"
   },
   "scripts": {
-    "lint": "eslint ./src",
+    "lint:eslint": "eslint ./src",
+    "lint:prettier": "prettier -c .",
+    "lint": "npm run lint:eslint && npm run lint:prettier",
     "test": "node --experimental-modules tests/index.js",
+    "cleanup-cjs": "rm -rf cjs/*.js",
+    "build": "npm run cleanup-cjs && rollup -c",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run lint"
   },
   "engines": {
@@ -37,13 +42,14 @@
   },
   "homepage": "https://github.com/nanoexpress/pro-slim#readme",
   "dependencies": {
-    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.6.0"
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v18.1.0"
   },
   "devDependencies": {
     "baretest": "^2.x",
-    "eslint": "^6.8.0",
+    "eslint": "^7.2.0",
     "husky": "^4.2.5",
-    "lint-staged": "^10.2.10",
-    "prettier": "^2.0.5"
+    "lint-staged": "^10.2.0",
+    "prettier": "^2.0.5",
+    "rollup": "^2.17.0"
   }
 }

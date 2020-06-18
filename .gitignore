@@ -66,6 +66,7 @@ tmp
 dist
 tests/coverage
 coverage
+cjs
 
 # lock files
 package-lock.json
