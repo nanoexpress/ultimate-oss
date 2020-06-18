@@ -1,5 +1,10 @@
 import { HttpResponse } from './polyfills/index.js';
-import * as Constants from './constants.js';
+import {
+  __request,
+  __response,
+  resConfig,
+  HttpResponseKeys
+} from './constants.js';
 import _gc from './helpers/gc.js';
 import exposeRoute from './expose/Route.js';
 
@@ -107,13 +112,13 @@ export default exposeRoute(
         let newMethod;
 
         // Aliases for future usage and easy-access
-        req[Constants.__response] = res;
-        res[Constants.__request] = req;
-        res[Constants.resConfig] = _config;
+        req[__response] = res;
+        res[__request] = req;
+        res[resConfig] = _config;
 
         // Extending HttpResponse
-        for (let i = 0, len = Constants.HttpResponseKeys.length; i < len; i++) {
-          newMethod = Constants.HttpResponseKeys[i];
+        for (let i = 0, len = HttpResponseKeys.length; i < len; i++) {
+          newMethod = HttpResponseKeys[i];
 
           res.__proto__[newMethod] = HttpResponse[newMethod];
         }
