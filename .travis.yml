@@ -4,10 +4,8 @@ notifications:
 os:
   - linux
   - osx
-  - windows
 node_js:
   - '12'
-  - '13'
   - '14'
 install:
   - npm install
