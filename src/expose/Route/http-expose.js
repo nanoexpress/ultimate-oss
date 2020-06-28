@@ -1,5 +1,4 @@
 import { httpMethods } from '../../constants.js';
-import { originalUrlFix } from './fix.js';
 
 export default (Route) => {
   httpMethods.forEach((method) => {
@@ -16,10 +15,8 @@ export default (Route) => {
           originalUrl = _baseUrl + path;
         }
 
-        originalUrl = originalUrlFix(originalUrl);
-
         _app[method](
-          originalUrl + '/',
+          originalUrl,
           this._prepareMethod(
             method.toUpperCase(),
             { path, originalUrl },

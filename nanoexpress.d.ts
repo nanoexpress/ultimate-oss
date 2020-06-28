@@ -26,11 +26,22 @@ declare namespace nanoexpress {
     console?: Console | any;
     json_spaces?: number;
   }
+  export interface HttpRequestHeaders {
+    [key: string]: string | number;
+  }
   export interface WebSocket extends WebSocketBasic {
-    on(name: string, listener: Function);
-    once(name: string, listener: Function);
-    off(name: string, listener?: Function);
     emit(name: string, ...args: any[]);
+
+    on(
+      event: 'message',
+      listener: (message: string, isBinary?: boolean) => void
+    ): void;
+    on(event: 'drain', listener: (drain_amount: number) => void): void;
+    on(event: 'close', listener: (code: number, message: string) => void): void;
+
+    on(event: string, listener: (...args: any[]) => void): void;
+    once(event: string, listener: (...args: any[]) => void): void;
+    off(event: string, listener?: (...args: any[]) => void): void;
   }
   export interface HttpResponse extends HttpResponseBasic {
     type(type: string): HttpResponse;
@@ -63,13 +74,14 @@ declare namespace nanoexpress {
   }
 
   type MiddlewareRoute = Promise<
-    (req: HttpRequest, res: HttpResponse) => nanoexpressApp
+    (req: HttpRequestBasic, res: HttpResponse) => nanoexpressApp
   >;
-  type WsRoute = (req: HttpRequest, ws: WebSocket) => any;
+  type WsRoute = (req: HttpRequestBasic, ws: WebSocket) => any;
   export interface WebSocketOptions {
     compression?: number;
     maxPayloadLength?: number;
     idleTimeout?: number;
+    upgrade?: PromiseLike<(req: HttpRequestBasic, res: HttpResponse) => void>;
   }
 
   interface nanoexpressAppInterface {
@@ -107,12 +119,12 @@ declare namespace nanoexpress {
       is_ssl_server?: boolean
     ): Promise<nanoexpressApp>;
     listen(
-      host?: string,
+      host: string,
       port: number,
       is_ssl_server?: boolean
     ): Promise<nanoexpressApp>;
     listen(
-      host?: string,
+      host: string,
       port: number[],
       is_ssl_server?: boolean
     ): Promise<nanoexpressApp>;
@@ -133,7 +145,7 @@ declare namespace nanoexpress {
     ): nanoexpressApp;
     setNotFoundHandler(
       notFoundHandlerCallback: Promise<
-        (req: HttpRequest, res: HttpResponse) => HttpResponse
+        (req: HttpRequestBasic, res: HttpResponse) => HttpResponse
       >
     ): nanoexpressApp;
     config: AppOptions;

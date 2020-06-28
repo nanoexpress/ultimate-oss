@@ -10,7 +10,7 @@ export default function applyHeadersAndStatus() {
       if (value.splice) {
         this.writeHeaderValues(header, value);
       } else {
-        this.writeHeader(header, value);
+        this.writeHeader(header, value + '');
       }
       this.removeHeader(header);
     }

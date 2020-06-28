@@ -5,7 +5,7 @@ const defaultOptions = {
   maxPayloadLength: 16 * 1024 * 1024,
   idleTimeout: 120
 };
-export default function ({ path, originalUrl }, fn, options) {
+export default function ({ path, originalUrl }, options, fn) {
   if (options) {
     options = Object.assign({}, defaultOptions, options);
   } else {
@@ -17,7 +17,9 @@ export default function ({ path, originalUrl }, fn, options) {
 
   return {
     ...options,
-    open: (ws, req) => {
+    open(ws) {
+      const { req } = ws;
+
       req.baseUrl = _baseUrl || '';
       req.path = fetchUrl ? req.getUrl().substr(_baseUrl.length) : path;
       req.url = req.path;
@@ -34,22 +36,43 @@ export default function ({ path, originalUrl }, fn, options) {
 
       fn(req, ws);
     },
-    upgrade: (ws, req, context) => {
+    async upgrade(res, req, context) {
+      const headers = {};
+      req.forEach((key, value) => {
+        headers[key] = value;
+      });
+      req.headers = headers;
+
       if (options.upgrade) {
-        options.upgrade(req, ws, context);
+        res.onAborted(() => {
+          res.isAborted = true;
+        });
+        await options.upgrade(req, res);
       }
-      ws.emit('upgrade', req, context);
+
+      if (res.isAborted) {
+        return;
+      }
+
+      res.upgrade(
+        { req },
+        /* Spell these correctly */
+        req.headers['sec-websocket-key'],
+        req.headers['sec-websocket-protocol'],
+        req.headers['sec-websocket-extensions'],
+        context
+      );
     },
-    message: (ws, message, isBinary) => {
+    message(ws, message, isBinary) {
       if (!isBinary) {
         message = Buffer.from(message).toString('utf-8');
       }
       ws.emit('message', message, isBinary);
     },
-    drain: (ws) => {
+    drain(ws) {
       ws.emit('drain', ws.getBufferedAmount());
     },
-    close: (ws, code, message) => {
+    close(ws, code, message) {
       ws.emit('close', code, Buffer.from(message).toString('utf-8'));
     }
   };

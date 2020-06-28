@@ -1,5 +1,4 @@
 import exposeWs from '../ws.js';
-import { originalUrlFix } from './fix.js';
 import _gc from '../../helpers/gc.js';
 
 export default (Route) => {
@@ -10,8 +9,6 @@ export default (Route) => {
     if (_baseUrl !== '' && _module && originalUrl.indexOf(_baseUrl) === -1) {
       originalUrl = _baseUrl + path;
     }
-
-    originalUrl = originalUrlFix(originalUrl);
 
     _gc();
 
