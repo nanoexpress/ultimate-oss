@@ -32,7 +32,7 @@
 
 ## Support
 
-Thanks for all supporters
+Thank you, all sponsors, backers and supporters
 
 ### Sponsors
 
