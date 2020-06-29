@@ -9,11 +9,11 @@ assignees: ''
 
 ## Feature Request
 
-**Is you sponsoring this project**
-
-<!-- Type Yes or No depending on your sponsorship -->
+**Is you/your team sponsoring this project**
 
 **No**
+
+_If your team sponsoring this project, please attach here your team lead or who purchased license GitHub login_
 
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I have an issue when [...]

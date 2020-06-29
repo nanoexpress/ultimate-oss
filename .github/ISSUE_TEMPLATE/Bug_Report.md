@@ -9,11 +9,11 @@ assignees: ''
 
 ## Bug Report
 
-**Is you sponsoring this project**
-
-<!-- Type Yes or No depending on your sponsorship -->
+**Is you/your team sponsoring this project**
 
 **No**
+
+_If your team sponsoring this project, please attach here your team lead or who purchased license GitHub login_
 
 **I am read new [rules](https://nanoexpress.js.org/pro-is-now-free) and agree**
 
@@ -46,4 +46,4 @@ Add any other context about the problem here. If applicable, add screenshots to 
 
 **Note**
 - **Project is provided as-is without any support nor warranty**
-- **If this issue not related to this project and exists on [core](https://github.com/uNetworking/uWebSockets.js) of this project, please close issue or not open
+- **If this issue not related to this project and exists on [core](https://github.com/uNetworking/uWebSockets.js) of this project, please close issue or not open**
