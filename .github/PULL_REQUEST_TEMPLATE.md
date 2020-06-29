@@ -1,12 +1,3 @@
----
-name: "Pull Request"
-about: "Fix of something"
-title: ''
-labels: bug
-assignees: ''
-
----
-
 ## Pull Request
 
 **Is you/your team sponsoring this project**
