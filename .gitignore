@@ -144,6 +144,9 @@ functions-build
 **/build/Release
 **/functions-build
 
+## Except cjs/package.json
+!cjs/package.json
+
 ## Bundle files
 ## Build files for
 ## Gatsby, CRA, etc
