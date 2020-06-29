@@ -9,8 +9,6 @@ assignees: ''
 
 ## Bug Report
 
-> If this issue not related to this project and exists on core of this project - [uWebSockets.js](https://github.com/uNetworking/uWebSockets.js), you should create issue on their repository
-
 **Is you sponsoring this project**
 
 <!-- Type Yes or No depending on your sponsorship -->
@@ -47,4 +45,5 @@ A clear and concise description of what you expected to happen (or code).
 Add any other context about the problem here. If applicable, add screenshots to help explain.
 
 **Note**
-Project will be provided as-is without any support nor warranty
+- **Project is provided as-is without any support nor warranty**
+- **If this issue not related to this project and exists on [core](https://github.com/uNetworking/uWebSockets.js) of this project, please close issue or not open
