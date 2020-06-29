@@ -23,7 +23,7 @@ _If you did not read and not agree with these rules, you may not use this framew
 
 **Minimal reproducible repo** link
 
-<!-- Type here link -->
+_Link should be here_
 
 **Current Behavior**
 A clear and concise description of the behavior.

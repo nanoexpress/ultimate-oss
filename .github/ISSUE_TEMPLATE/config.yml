@@ -3,6 +3,12 @@ contact_links:
   - name: 📦 Core issue submit
     url: https://github.com/uNetworking/uWebSockets.js/issues
     about: Link to issues of framework which nanoexpress built on top 💪
+  - name: 📝 Documentation
+    url: https://github.com/nanoexpress/docs/issues
+    about: Issue for documentations should be created here
+  - name: 🔗 Middlewares
+    url: https://github.com/nanoexpress/middlewares/issues
+    about: Issue for middlewares should be created here
   - name: 🙌 Help
     url: https://stackoverflow.com/questions/tagged/nanoexpress
     about: Any help or issues like cannot run example should be posted here 🤗
