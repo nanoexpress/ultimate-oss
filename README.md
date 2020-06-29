@@ -16,4 +16,4 @@ See more info at [docs](https://nanoexpress.js.org)
 
 ## License
 
-This project is licensed under GPL-3.0 license and if you want use this on commercial projects with closed sources, you should contact to me via dalisoft@mail.ru for getting license
+This project is licensed under GPL-3.0 license and if you want use this on commercial projects with closed sources, you should contact to me via [here](https://t.me/dalisoft) for getting license
