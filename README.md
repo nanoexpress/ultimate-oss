@@ -27,7 +27,7 @@
 
 - nanoexpress v1.x and express-ws compatible API interface
 - Much more stable, error percent was decreased by 90%
-- Much cleaner API, but **pluggable** with **defines** and [middlewares](https://github.com/nanoexpress/middlewares)
+- Much cleaner API and codebase, but **pluggable** with **defines** and [middlewares](https://github.com/nanoexpress/middlewares)
 - A bit faster than PRO version
 
 ## Support
