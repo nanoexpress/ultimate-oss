@@ -188,6 +188,9 @@ export default exposeRoute(
           } else if (res.serialize) {
             res.end(res.serialize(response));
           } else if (typeof response === 'object') {
+            res.writeHeader('Content-Type', 'application/json; charset=utf-8');
+            res.writeStatus(res.statusCode);
+
             res.end(JSON.stringify(response, null, jsonSpaces));
           } else if (response) {
             res.end(response);
