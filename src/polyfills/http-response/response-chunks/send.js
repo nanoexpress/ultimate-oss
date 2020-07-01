@@ -8,6 +8,7 @@ export default function send(response) {
   } else if (this.serialize) {
     return this.end(this.serialize(response));
   } else if (typeof response === 'object') {
+    this.writeHeader('Content-Type', 'application/json; charset=utf-8');
     return this.end(JSON.stringify(response, null, config.json_spaces));
   } else {
     return this.end(response);
