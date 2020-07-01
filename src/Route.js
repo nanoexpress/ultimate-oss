@@ -40,6 +40,12 @@ export default exposeRoute(
           throw new Error(
             '[nanoexpress] Only Async Functions are allowed to expose route'
           );
+        } else if (!middleware._module) {
+          if (this._baseUrl.length > 1) {
+            middleware._path = this._baseUrl + path.substr(1);
+          } else {
+            middleware._path = path;
+          }
         }
         return middleware;
       });
@@ -128,7 +134,10 @@ export default exposeRoute(
             if (res.aborted || stopNext || skipCheck) {
               break;
             }
-            if (typeof middleware !== 'function') {
+            if (
+              typeof middleware !== 'function' ||
+              (middleware._path && middleware._path !== req.path)
+            ) {
               continue;
             }
 
