@@ -1,6 +1,6 @@
 {
   "name": "@nanoexpress/pro-slim",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Slim version of nanoexpress Pro for really PRO simple users",
   "type": "module",
   "main": "src/nanoexpress.js",

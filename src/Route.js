@@ -22,7 +22,7 @@ export default exposeRoute(
       return this._app;
     }
     _prepareMiddlewares(path, middlewares) {
-      middlewares.forEach((middleware) => {
+      return middlewares.map((middleware) => {
         if (middleware._module) {
           middleware._app = this._app;
           middleware._config = this._config;
@@ -40,11 +40,25 @@ export default exposeRoute(
           throw new Error(
             '[nanoexpress] Only Async Functions are allowed to expose route'
           );
-        } else if (!middleware._module) {
-          if (this._baseUrl.length > 1) {
-            middleware._path = this._baseUrl + path.substr(1);
-          } else {
-            middleware._path = path;
+        } else if (!middleware._module && !middleware.wrapped) {
+          if (path && path !== '/*') {
+            const isParams = path.indexOf(':') !== -1;
+            let reqPath = path;
+            if (this._baseUrl.length > 1) {
+              reqPath = this._baseUrl + path.substr(1);
+            }
+
+            const wrapped = async (req, res) => {
+              if (
+                isParams ||
+                req.originalUrl === reqPath ||
+                req.path === reqPath
+              ) {
+                return middleware(req, res);
+              }
+            };
+            wrapped.wrapped = true;
+            return wrapped;
           }
         }
         return middleware;
@@ -68,8 +82,7 @@ export default exposeRoute(
           middleware.onPrepare();
         }
       });
-      this._prepareMiddlewares(path, middlewares);
-      _middlewares.push(...middlewares);
+      _middlewares.push(...this._prepareMiddlewares(path, middlewares));
 
       _gc();
 
@@ -89,7 +102,7 @@ export default exposeRoute(
         middlewares &&
         (middlewares.length > 1 || (_middlewares && _middlewares.length > 0))
       ) {
-        this._prepareMiddlewares(path, middlewares);
+        middlewares = this._prepareMiddlewares(path, middlewares);
 
         middlewares = Array.isArray(_middlewares)
           ? _middlewares.concat(middlewares)
@@ -134,10 +147,7 @@ export default exposeRoute(
             if (res.aborted || stopNext || skipCheck) {
               break;
             }
-            if (
-              typeof middleware !== 'function' ||
-              (middleware._path && middleware._path !== req.path)
-            ) {
+            if (typeof middleware !== 'function') {
               continue;
             }
 
