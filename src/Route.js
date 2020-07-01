@@ -50,8 +50,7 @@ export default exposeRoute(
 
             const wrapped = async (req, res) => {
               if (
-                isParams ||
-                req.originalUrl === reqPath ||
+                (isParams && req.originalUrl === reqPath) ||
                 req.path === reqPath
               ) {
                 return middleware(req, res);
