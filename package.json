@@ -42,7 +42,7 @@
   },
   "homepage": "https://github.com/nanoexpress/pro-slim#readme",
   "dependencies": {
-    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v18.3.0"
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v18.4.0"
   },
   "devDependencies": {
     "baretest": "^2.x",
