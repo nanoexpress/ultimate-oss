@@ -46,10 +46,10 @@
   },
   "devDependencies": {
     "baretest": "^2.x",
-    "eslint": "^7.5.0",
+    "eslint": "^7.6.0",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.0",
     "prettier": "^2.0.5",
-    "rollup": "^2.23.0"
+    "rollup": "^2.23.1"
   }
 }
