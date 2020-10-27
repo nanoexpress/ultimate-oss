@@ -5,10 +5,17 @@
   "type": "module",
   "main": "src/nanoexpress.js",
   "typings": "nanoexpress.d.ts",
-  "funding": {
-    "type": "patreon",
-    "url": "https://www.patreon.com/dalisoft"
-  },
+  "funding": [
+    {
+      "type": "opencollective",
+      "url": "https://opencollective.com/nanoexpress"
+    },
+    "http://buymeacoffee.com/dalisoft",
+    {
+      "type": "patreon",
+      "url": "https://www.patreon.com/dalisoft"
+    }
+  ],
   "scripts": {
     "lint:eslint": "eslint ./src",
     "lint:prettier": "prettier -c .",
