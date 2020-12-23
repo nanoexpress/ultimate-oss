@@ -1,5 +1,5 @@
-import nanoexpress from '../src/nanoexpress.js';
 import path from 'path';
+import nanoexpress from '../src/nanoexpress.js';
 
 const app = nanoexpress();
 

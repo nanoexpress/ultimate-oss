@@ -1,6 +1,6 @@
 import { resAbortHandler } from '../../../constants.js';
 
-export default function (stream, size, compressed = false) {
+export default function resPipe(stream, size, compressed = false) {
   if (compressed) {
     const compressedStream = this.compressStream(stream);
 
@@ -53,16 +53,16 @@ export default function (stream, size, compressed = false) {
 
         // Register async handlers for drainage
         this.onWritable((offset) => {
-          const [ok, done] = this.tryEnd(
+          const [writeOk, writeDone] = this.tryEnd(
             buffer.slice(offset - lastOffset),
             size
           );
-          if (done) {
+          if (writeDone) {
             stream.end();
-          } else if (ok) {
+          } else if (writeOk) {
             stream.resume();
           }
-          return ok;
+          return writeOk;
         });
       }
     });

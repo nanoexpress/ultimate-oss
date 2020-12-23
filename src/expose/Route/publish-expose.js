@@ -1,7 +1,7 @@
 import _gc from '../../helpers/gc.js';
 
 export default (Route) => {
-  Route.prototype.publish = function publish(
+  Route.prototype.publish = function _routeWsPublish(
     topic,
     string,
     isBinary,

@@ -2,7 +2,7 @@ import { httpMethods } from '../../constants.js';
 
 export default (App) => {
   httpMethods.forEach((method) => {
-    App.prototype[method] = function (path, ...fns) {
+    App.prototype[method] = function _appExposeHTTP(path, ...fns) {
       const { _app, _route, _anyRouteCalled } = this;
 
       if (fns.length > 0) {

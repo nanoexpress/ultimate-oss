@@ -5,15 +5,19 @@ export default exposeApp(
     get config() {
       return this._config;
     }
+
     get https() {
       return this._config.https !== undefined && this._config.isSSL !== false;
     }
+
     get _console() {
       return this._config.console || console;
     }
+
     get raw() {
       return this._app;
     }
+
     constructor(config, app, route) {
       this._config = config;
       this._app = app;
@@ -38,22 +42,26 @@ export default exposeApp(
 
       return this;
     }
+
     setErrorHandler(fn) {
       this._config._errorHandler = fn;
 
       return this;
     }
+
     setNotFoundHandler(fn) {
       this._config._notFoundHandler = fn;
 
       return this;
     }
+
     use(...args) {
       this._route.use(...args);
       this._routeCalled = true;
 
       return this;
     }
+
     define(callback) {
       callback(this);
       callback(this._route);
@@ -63,6 +71,7 @@ export default exposeApp(
 
       return this;
     }
+
     listen(port, host = 'localhost', is_ssl) {
       const { _config: config } = this;
 
@@ -78,6 +87,7 @@ export default exposeApp(
         return Promise.all(
           port.map((currPort, index) => {
             const currHost =
+              // eslint-disable-next-line no-nested-ternary
               typeof currPort === 'object'
                 ? currPort.host
                 : Array.isArray(host)
@@ -90,11 +100,8 @@ export default exposeApp(
             );
           })
         );
-      } else if (
-        this.https &&
-        config.https.separateServer &&
-        !this._separateServed
-      ) {
+      }
+      if (this.https && config.https.separateServer && !this._separateServed) {
         const httpsPort =
           typeof config.https.separateServer === 'number'
             ? config.https.separateServer
@@ -110,6 +117,7 @@ export default exposeApp(
 
       return this._applyListen(host, port, is_ssl);
     }
+
     close(port, host = 'localhost') {
       const id = `${host}:${port}`;
       const token = this._instance[id];

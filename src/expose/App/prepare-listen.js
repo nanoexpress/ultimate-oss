@@ -1,5 +1,5 @@
 export default (App) => {
-  App.prototype._prepareListen = function () {
+  App.prototype._prepareListen = function _appPrepareListen() {
     const { _routeCalled, _optionsCalled, _config: config } = this;
 
     // Polyfill for plugins like CORS

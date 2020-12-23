@@ -1,7 +1,3 @@
-import { HttpResponse } from './polyfills/http-response/index.js';
-
-export const HttpResponseKeys = Object.keys(HttpResponse);
-
 // Http(Request/Response)
 export const __request = Symbol('HttpRequestInstance');
 export const __response = Symbol('HttpResponseInstance');

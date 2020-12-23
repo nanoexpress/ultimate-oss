@@ -5,11 +5,11 @@ const defaultOptions = {
   maxPayloadLength: 16 * 1024 * 1024,
   idleTimeout: 120
 };
-export default function ({ path, originalUrl }, options, fn) {
+export default function webSocket({ path, originalUrl }, options, fn) {
   if (options) {
-    options = Object.assign({}, defaultOptions, options);
+    options = { ...defaultOptions, ...options };
   } else {
-    options = Object.assign({}, defaultOptions);
+    options = { ...defaultOptions };
   }
 
   const { _baseUrl } = this;

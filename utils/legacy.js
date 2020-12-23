@@ -1,5 +1,5 @@
-export default (middleware) => async (req, res) =>
-  await new Promise((resolve, reject) => {
+export default (middleware) => (req, res) =>
+  new Promise((resolve, reject) => {
     middleware(req, res, (err, done) => {
       if (err) {
         reject(err);

@@ -1,12 +1,7 @@
-import { HttpResponse } from './polyfills/index.js';
-import {
-  __request,
-  __response,
-  resConfig,
-  HttpResponseKeys
-} from './constants.js';
-import _gc from './helpers/gc.js';
+import { resConfig, __request, __response } from './constants.js';
 import exposeRoute from './expose/Route.js';
+import _gc from './helpers/gc.js';
+import { HttpResponse, HttpResponseKeys } from './polyfills/index.js';
 
 export default exposeRoute(
   class Route {
@@ -18,9 +13,11 @@ export default exposeRoute(
       this._module = true;
       this._rootLevel = false;
     }
+
     get raw() {
       return this._app;
     }
+
     _prepareMiddlewares(path, middlewares) {
       return middlewares.map((middleware) => {
         if (middleware._module) {
@@ -63,6 +60,7 @@ export default exposeRoute(
         return middleware;
       });
     }
+
     use(path, ...middlewares) {
       let { _middlewares } = this;
 
@@ -87,9 +85,9 @@ export default exposeRoute(
 
       return this;
     }
+
     _prepareMethod(method, { originalUrl, path }, ...middlewares) {
-      // eslint-disable-next-line no-unused-vars
-      const { _baseUrl, _middlewares, _module, _config } = this;
+      const { _baseUrl, _middlewares, _config } = this;
 
       const handleError = _config._errorHandler;
       const jsonSpaces = _config.json_spaces;
@@ -108,7 +106,7 @@ export default exposeRoute(
           : middlewares;
       } else if (middlewares.length === 1) {
         middlewares[0].async =
-          middlewares[0].constructor.name == 'AsyncFunction';
+          middlewares[0].constructor.name === 'AsyncFunction';
       }
 
       _gc();
@@ -135,14 +133,15 @@ export default exposeRoute(
         res[resConfig] = _config;
 
         // Extending HttpResponse
-        for (let i = 0, len = HttpResponseKeys.length; i < len; i++) {
+        for (let i = 0, len = HttpResponseKeys.length; i < len; i += 1) {
           newMethod = HttpResponseKeys[i];
 
+          // eslint-disable-next-line no-proto
           res.__proto__[newMethod] = HttpResponse[newMethod];
         }
 
         if (middlewares && middlewares.length > 0) {
-          for (const middleware of middlewares) {
+          for await (const middleware of middlewares) {
             if (res.aborted || stopNext || skipCheck) {
               break;
             }

@@ -1,3 +1,5 @@
 import * as HttpResponse from './HttpResponse.js';
 
-export { HttpResponse };
+const HttpResponseKeys = Object.keys(HttpResponse);
+
+export { HttpResponse, HttpResponseKeys };

@@ -1,9 +1,9 @@
-import { createBrotliCompress, createGzip, createDeflate } from 'zlib';
-import { __request, reqHeaderResponse } from '../../../constants.js';
+import { createBrotliCompress, createDeflate, createGzip } from 'zlib';
+import { reqHeaderResponse, __request } from '../../../constants.js';
 
 const priority = ['gzip', 'br', 'deflate'];
 
-export default function (stream, options) {
+export default function compressStream(stream, options) {
   const req = this[__request];
   const { headers } = req;
   const responseHeaders = req[reqHeaderResponse];
@@ -15,17 +15,19 @@ export default function (stream, options) {
   }
   const contentEncoding = headers['accept-encoding'];
   const encoding = priority.find(
-    (encoding) => contentEncoding && contentEncoding.indexOf(encoding) !== -1
+    (currentEncoding) =>
+      contentEncoding && contentEncoding.indexOf(currentEncoding) !== -1
   );
 
-  const compression =
-    encoding === 'br'
-      ? createBrotliCompress(options)
-      : encoding === 'gzip'
-      ? createGzip(options)
-      : encoding === 'deflate'
-      ? createDeflate(options)
-      : null;
+  let compression = null;
+
+  if (encoding === 'br') {
+    compression = createBrotliCompress(options);
+  } else if (encoding === 'gzip') {
+    compression = createGzip(options);
+  } else if (encoding === 'deflare') {
+    compression = createDeflate(options);
+  }
 
   if (compression) {
     stream.pipe(compression);

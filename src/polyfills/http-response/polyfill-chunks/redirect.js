@@ -9,12 +9,12 @@ export default function redirect(code, path) {
     path = code;
     code = 301;
   }
-  if (path.indexOf('/') === -1) {
-    path = '/' + path;
+  if (path && path.indexOf('/') === -1) {
+    path = `/${path}`;
   }
 
   this.status(code);
-  this.writeHeader('Location', `${protocol}://${host}${path}`);
+  this.writeHeader('Location', host ? `${protocol}://${host}${path}` : path);
   this.end();
 
   return this;

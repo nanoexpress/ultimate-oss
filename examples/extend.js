@@ -1,28 +1,31 @@
+import qs from 'querystring';
 import nanoexpress from '../src/nanoexpress.js';
 import Route from '../src/Route.js';
-import qs from 'querystring';
 
 const app = nanoexpress({
   json_spaces: 2
 });
 
 class HeaderSupportedRoute extends Route {
-  async middleware_header(req) {
+  middleware_header = async (req) => {
     req.headers = {};
 
     req.forEach((key, value) => {
       req.headers[key] = value;
     });
-  }
-  async middleware_body(req, res) {
+  };
+
+  middleware_body = async (req, res) => {
     if (req.method === 'POST' || req.method === 'PUT') {
       const contentType = req.headers['content-type'];
 
-      let buffer = Buffer.allocUnsafe(0);
+      let buffer;
       await new Promise((resolve, reject) => {
         res.onAborted(reject);
         res.onData((chunk, isLast) => {
-          buffer = Buffer.concat([buffer, Buffer.from(chunk)]);
+          buffer = buffer
+            ? Buffer.concat([buffer, Buffer.from(chunk)])
+            : Buffer.from(chunk);
 
           if (isLast) {
             req.buffer = buffer;
@@ -45,14 +48,16 @@ class HeaderSupportedRoute extends Route {
         });
       });
     }
-  }
-  async middleware_query(req) {
+  };
+
+  middleware_query = async (req) => {
     const query = req.getQuery();
 
     if (query) {
       req.query = qs.parse(query);
     }
-  }
+  };
+
   onPrepare() {
     const { _middlewares } = this;
 
@@ -85,10 +90,10 @@ app.wraps(null, (method, [url], self) => {
         return match.substr(1);
       });
 
-      const handleParams = async function (req) {
+      const handleParams = async (req) => {
         req.params = {};
 
-        for (let i = 0, len = names.length; i < len; i++) {
+        for (let i = 0, len = names.length; i < len; i += 1) {
           req.params[names[i]] = req.getParameter(i);
         }
       };
@@ -105,14 +110,10 @@ const route = new HeaderSupportedRoute();
 
 app.use(route);
 
-route.get('/', async (req, res) => {
-  return res.send({ headers: req.headers });
-});
-route.get('/user/:id/', async (req, res) => {
-  return res.send({ headers: req.headers, params: req.params });
-});
-route.post('/', async (req, res) => {
-  return res.send({ body: req.body });
-});
+route.get('/', async (req, res) => res.send({ headers: req.headers }));
+route.get('/user/:id/', async (req, res) =>
+  res.send({ headers: req.headers, params: req.params })
+);
+route.post('/', async (req, res) => res.send({ body: req.body }));
 
 app.listen(8000);

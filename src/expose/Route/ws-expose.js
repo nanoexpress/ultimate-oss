@@ -1,8 +1,8 @@
-import exposeWs from '../ws.js';
 import _gc from '../../helpers/gc.js';
+import exposeWs from '../ws.js';
 
 export default (Route) => {
-  Route.prototype.ws = function routeWs(path, fn, options) {
+  Route.prototype.ws = function _routeWs(path, fn, options) {
     const { _baseUrl, _module, _app } = this;
 
     let originalUrl = path;

@@ -1,5 +1,5 @@
-export default function type(type) {
-  this.writeHeader('Content-Type', type);
+export default function type(contentType) {
+  this.writeHeader('Content-Type', contentType);
 
   return this;
 }

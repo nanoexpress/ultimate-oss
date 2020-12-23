@@ -1,16 +1,16 @@
+import { Readable } from 'stream';
 import {
   AppOptions as AppOptionsBasic,
-  TemplatedApp as AppTemplatedApp,
   HttpRequest as HttpRequestBasic,
   HttpResponse as HttpResponseBasic,
+  TemplatedApp as AppTemplatedApp,
   WebSocket as WebSocketBasic
 } from 'uWebSockets.js';
-import { Readable, Writable } from 'stream';
 import {
   BrotliCompress,
-  Gzip,
-  Deflate,
   BrotliOptions,
+  Deflate,
+  Gzip,
   ZlibOptions
 } from 'zlib';
 
@@ -23,6 +23,7 @@ declare namespace nanoexpress {
       separateServer?: boolean | number;
     };
     isSSL?: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     console?: Console | any;
     json_spaces?: number;
   }
@@ -30,7 +31,7 @@ declare namespace nanoexpress {
     [key: string]: string | number;
   }
   export interface WebSocket extends WebSocketBasic {
-    emit(name: string, ...args: any[]);
+    emit(name: string, ...args: string[] | number[] | void[]): void;
 
     on(
       event: 'message',
@@ -39,9 +40,18 @@ declare namespace nanoexpress {
     on(event: 'drain', listener: (drain_amount: number) => void): void;
     on(event: 'close', listener: (code: number, message: string) => void): void;
 
-    on(event: string, listener: (...args: any[]) => void): void;
-    once(event: string, listener: (...args: any[]) => void): void;
-    off(event: string, listener?: (...args: any[]) => void): void;
+    on(
+      event: string,
+      listener: (...args: string[] | number[] | void[]) => void
+    ): void;
+    once(
+      event: string,
+      listener: (...args: string[] | number[] | void[]) => void
+    ): void;
+    off(
+      event: string,
+      listener?: (...args: string[] | number[] | void[]) => void
+    ): void;
   }
   export interface HttpResponse extends HttpResponseBasic {
     type(type: string): HttpResponse;
@@ -51,12 +61,15 @@ declare namespace nanoexpress {
     hasHeader(key: string): HttpResponse;
     removeHeader(key: string): HttpResponse;
     applyHeadersAndStatus(): HttpResponse;
-    setHeaders(headers: HttpRequestHeaders): HttpResponse;
+    setHeaders(headers: HttpRequestHeaders, overwrite?: boolean): HttpResponse;
     writeHeaderValues(name: string, value: string[]): HttpResponse;
     writeHeaders(headers: HttpRequestHeaders): HttpResponse;
     writeHead(code: number, headers: HttpRequestHeaders): HttpResponse;
     redirect(code: number | string, path?: string): HttpResponse;
-    send(result: string | object | any[]): HttpResponse;
+    send(
+      result: string | { [key: string]: string | number },
+      autoHeaders?: boolean
+    ): HttpResponse;
     pipe(
       callback: (pipe: Readable) => void,
       size?: number,
@@ -76,7 +89,7 @@ declare namespace nanoexpress {
   type MiddlewareRoute = Promise<
     (req: HttpRequestBasic, res: HttpResponse) => nanoexpressApp
   >;
-  type WsRoute = (req: HttpRequestBasic, ws: WebSocket) => any;
+  type WsRoute = (req: HttpRequestBasic, ws: WebSocket) => void;
   export interface WebSocketOptions {
     compression?: number;
     maxPayloadLength?: number;

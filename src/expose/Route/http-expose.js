@@ -2,7 +2,7 @@ import { httpMethods } from '../../constants.js';
 
 export default (Route) => {
   httpMethods.forEach((method) => {
-    Route.prototype[method] = function (path, ...middlewares) {
+    Route.prototype[method] = function _routeExposeHTTP(path, ...middlewares) {
       const { _baseUrl, _module, _app } = this;
 
       let originalUrl = path;

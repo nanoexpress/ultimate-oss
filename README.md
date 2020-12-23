@@ -5,7 +5,8 @@
 
 <h1 align="center">nanoexpress Pro Slim</h1>
 
-<h3 align="center">Slim version of nanoexpress Pro for really PRO simple users</h3>
+<h3 align="center">nanoexpress for enterprise users & teams</h3>
+<h4 align="center">Enterprise level security, stability and quality</h4>
 
 [![Travis](https://img.shields.io/travis/nanoexpress/pro-slim.svg)](http://github.com/nanoexpress/pro-slim)
 [![Code Climate](https://codeclimate.com/github/nanoexpress/pro-slim/badges/gpa.svg)](https://codeclimate.com/github/nanoexpress/pro-slim)
