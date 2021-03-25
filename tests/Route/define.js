@@ -1,7 +1,6 @@
-import baretest from 'baretest';
 import assert from 'assert';
-
-import App from '../../src/App.js';
+import baretest from 'baretest';
+import App from '../../src/app.js';
 import Route from '../../src/Route.js';
 
 const test = baretest('Route.define via App');

@@ -7,7 +7,7 @@ export default (Route) => {
 
     let originalUrl = path;
     if (_baseUrl !== '' && _module && originalUrl.indexOf(_baseUrl) === -1) {
-      originalUrl = _baseUrl + path;
+      originalUrl = String(_baseUrl) + String(path);
     }
 
     _gc();

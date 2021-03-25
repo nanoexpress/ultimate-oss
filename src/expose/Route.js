@@ -1,7 +1,7 @@
-import httpExpose from './Route/http-expose.js';
-import wsExpose from './Route/ws-expose.js';
-import publishExpose from './Route/publish-expose.js';
-import wraps from './Route/wraps.js';
+import httpExpose from './route/http-expose.js';
+import publishExpose from './route/publish-expose.js';
+import wraps from './route/wraps.js';
+import wsExpose from './route/ws-expose.js';
 
 export default (Route) => {
   httpExpose(Route);

@@ -5,6 +5,7 @@ const defaultOptions = {
   maxPayloadLength: 16 * 1024 * 1024,
   idleTimeout: 120
 };
+// eslint-disable-next-line max-lines-per-function
 export default function webSocket({ path, originalUrl }, options, fn) {
   if (options) {
     options = { ...defaultOptions, ...options };

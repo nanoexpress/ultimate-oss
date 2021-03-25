@@ -1,0 +1,17 @@
+ls:
+  src:
+    .dir: kebab-case
+    .ts: kebab-case
+    .tsx: kebab-case
+    .js: kebab-case
+    .es.js: kebab-case | pointcase
+    .cjs.js: kebab-case | pointcase
+    .d.ts: kebab-case
+    .html: kebab-case
+    .scss: kebab-case
+    .spec.ts: kebab-case | pointcase
+
+ignore:
+  - .git
+  - .bin
+  - src/Route.js

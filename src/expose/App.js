@@ -1,9 +1,9 @@
-import httpExpose from './App/http-expose.js';
-import wsExpose from './App/ws-expose.js';
-import publishExpose from './App/publish-expose.js';
-import prepareListen from './App/prepare-listen.js';
-import applyListen from './App/apply-listen.js';
-import closeListen from './App/close-listen.js';
+import applyListen from './app/apply-listen.js';
+import closeListen from './app/close-listen.js';
+import httpExpose from './app/http-expose.js';
+import prepareListen from './app/prepare-listen.js';
+import publishExpose from './app/publish-expose.js';
+import wsExpose from './app/ws-expose.js';
 
 export default (App) => {
   httpExpose(App);

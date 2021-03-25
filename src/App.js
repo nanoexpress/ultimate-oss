@@ -1,4 +1,4 @@
-import exposeApp from './expose/App.js';
+import exposeApp from './expose/app.js';
 
 export default exposeApp(
   class App {
@@ -72,9 +72,27 @@ export default exposeApp(
       return this;
     }
 
-    listen(port, host = 'localhost', is_ssl) {
+    listenSocket(port, host = 'localhost', is_ssl) {
       const { _config: config } = this;
 
+      if (this.https && config.https.separateServer && !this._separateServed) {
+        const httpsPort =
+          typeof config.https.separateServer === 'number'
+            ? config.https.separateServer
+            : 443;
+        this._separateServed = true;
+        return Promise.all([
+          this.listen(port || 80, host, false),
+          this.listen(httpsPort, host, true)
+        ]);
+      }
+
+      this._prepareListen();
+
+      return this._applyListen(host, port, is_ssl);
+    }
+
+    listen(port, host = 'localhost', is_ssl) {
       if (typeof port === 'string') {
         if (port.indexOf('.') !== -1) {
           const _host = host;
@@ -101,21 +119,7 @@ export default exposeApp(
           })
         );
       }
-      if (this.https && config.https.separateServer && !this._separateServed) {
-        const httpsPort =
-          typeof config.https.separateServer === 'number'
-            ? config.https.separateServer
-            : 443;
-        this._separateServed = true;
-        return Promise.all([
-          this.listen(port || 80, host, false),
-          this.listen(httpsPort, host, true)
-        ]);
-      }
-
-      this._prepareListen();
-
-      return this._applyListen(host, port, is_ssl);
+      return this.listenSocket(port, host, is_ssl);
     }
 
     close(port, host = 'localhost') {

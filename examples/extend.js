@@ -22,6 +22,7 @@ class HeaderSupportedRoute extends Route {
       let buffer;
       await new Promise((resolve, reject) => {
         res.onAborted(reject);
+        // eslint-disable-next-line complexity
         res.onData((chunk, isLast) => {
           buffer = buffer
             ? Buffer.concat([buffer, Buffer.from(chunk)])

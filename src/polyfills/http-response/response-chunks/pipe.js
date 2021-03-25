@@ -1,5 +1,6 @@
 import { resAbortHandler } from '../../../constants.js';
 
+// eslint-disable-next-line max-lines-per-function
 export default function resPipe(stream, size, compressed = false) {
   if (compressed) {
     const compressedStream = this.compressStream(stream);
@@ -26,7 +27,7 @@ export default function resPipe(stream, size, compressed = false) {
       this.write(
         buffer.buffer.slice(
           buffer.byteOffset,
-          buffer.byteOffset + buffer.byteLength
+          Number(buffer.byteOffset) + Number(buffer.byteLength)
         )
       );
     });
@@ -38,7 +39,7 @@ export default function resPipe(stream, size, compressed = false) {
       }
       buffer = buffer.buffer.slice(
         buffer.byteOffset,
-        buffer.byteOffset + buffer.byteLength
+        Number(buffer.byteOffset) + Number(buffer.byteLength)
       );
       const lastOffset = this.getWriteOffset();
 

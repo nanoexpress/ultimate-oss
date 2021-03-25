@@ -1,7 +1,7 @@
 import assert from 'assert';
 import baretest from 'baretest';
 import writeHead from '../../../src/polyfills/http-response/polyfill-chunks/write-head.js';
-import HttpResponse from '../../mock/HttpResponse.js';
+import HttpResponse from '../../mock/http-response.js';
 
 const test = baretest('HttpResponse.writeHead');
 test('empty status should do nothing', () => {

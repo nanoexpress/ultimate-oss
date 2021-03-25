@@ -1,5 +1,6 @@
 import { __request } from '../../../constants.js';
 
+// eslint-disable-next-line complexity
 export default function redirect(code, path) {
   const req = this[__request];
   const host = req.headers && req.headers.host;

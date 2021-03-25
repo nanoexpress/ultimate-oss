@@ -6,6 +6,7 @@ import {
 } from '../../../constants.js';
 import { getMime } from '../../../helpers/mime.js';
 
+// eslint-disable-next-line max-lines-per-function, complexity
 export default function sendFile(
   path,
   lastModified = true,

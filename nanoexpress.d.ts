@@ -27,9 +27,7 @@ declare namespace nanoexpress {
     console?: Console | any;
     json_spaces?: number;
   }
-  export interface HttpRequestHeaders {
-    [key: string]: string | number;
-  }
+  export type HttpRequestHeaders = Record<string, string | number>;
   export interface WebSocket extends WebSocketBasic {
     emit(name: string, ...args: string[] | number[] | void[]): void;
 
@@ -67,7 +65,7 @@ declare namespace nanoexpress {
     writeHead(code: number, headers: HttpRequestHeaders): HttpResponse;
     redirect(code: number | string, path?: string): HttpResponse;
     send(
-      result: string | { [key: string]: string | number },
+      result: string | Record<string, string | number>,
       autoHeaders?: boolean
     ): HttpResponse;
     pipe(
@@ -171,6 +169,7 @@ declare namespace nanoexpress {
 
 declare function nanoexpress(
   options?: nanoexpress.AppOptions
+  // eslint-disable-next-line max-lines
 ): nanoexpress.nanoexpressApp;
 
 export = nanoexpress;

@@ -1,5 +1,5 @@
 import { __request } from '../../src/constants.js';
-import * as HttpResponseExtends from '../../src/polyfills/http-response/HttpResponse.js';
+import * as HttpResponseExtends from '../../src/polyfills/http-response/http-response.js';
 
 class HttpResponse {
   constructor() {

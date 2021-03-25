@@ -7,11 +7,14 @@
   "rules": {
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/naming-convention": "off",
+    "@typescript-eslint/indent": "off",
     "eslint-comments/disable-enable-pair": "off",
+    "indent": "off",
     "guard-for-in": "off",
     "no-restricted-syntax": "off",
     "no-continue": "off",
     "no-param-reassign": "off",
-    "consistent-return": "off"
+    "consistent-return": "off",
+    "complexity": ["warn", 8]
   }
 }

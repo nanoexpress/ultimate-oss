@@ -1,5 +1,6 @@
+/* eslint-disable filename-rules/match, max-lines */
 import { resConfig, __request, __response } from './constants.js';
-import exposeRoute from './expose/Route.js';
+import exposeRoute from './expose/route.js';
 import _gc from './helpers/gc.js';
 import { HttpResponse, HttpResponseKeys } from './polyfills/index.js';
 
@@ -19,6 +20,7 @@ export default exposeRoute(
     }
 
     _prepareMiddlewares(path, middlewares) {
+      // eslint-disable-next-line complexity
       return middlewares.map((middleware) => {
         if (middleware._module) {
           middleware._app = this._app;
@@ -42,7 +44,7 @@ export default exposeRoute(
             const isParams = path.indexOf(':') !== -1;
             let reqPath = path;
             if (this._baseUrl.length > 1) {
-              reqPath = this._baseUrl + path.substr(1);
+              reqPath = this._baseUrl + String(path.substr(1));
             }
 
             const wrapped = async (req, res) => {
@@ -86,6 +88,7 @@ export default exposeRoute(
       return this;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     _prepareMethod(method, { originalUrl, path }, ...middlewares) {
       const { _baseUrl, _middlewares, _config } = this;
 
@@ -111,6 +114,7 @@ export default exposeRoute(
 
       _gc();
 
+      // eslint-disable-next-line max-lines-per-function, complexity
       return async (res, req) => {
         res.aborted = false;
 
@@ -161,6 +165,7 @@ export default exposeRoute(
               response &&
               (response.message || response.stack_trace || response.status_code)
             ) {
+              // eslint-disable-next-line max-depth
               if (response.status_code) {
                 res.status(response.status_code);
               }

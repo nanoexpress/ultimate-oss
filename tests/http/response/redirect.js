@@ -2,7 +2,7 @@ import assert from 'assert';
 import baretest from 'baretest';
 import { __request } from '../../../src/constants.js';
 import redirect from '../../../src/polyfills/http-response/polyfill-chunks/redirect.js';
-import HttpResponse from '../../mock/HttpResponse.js';
+import HttpResponse from '../../mock/http-response.js';
 
 const test = baretest('HttpResponse.redirect');
 

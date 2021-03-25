@@ -1,6 +1,8 @@
 import _gc from '../../helpers/gc.js';
 
+// eslint-disable-next-line max-lines-per-function
 export default (App) => {
+  // eslint-disable-next-line max-lines-per-function
   App.prototype._applyListen = function _appApplyListen(host, port, is_ssl) {
     const { _console, _config: config, _app: app } = this;
 

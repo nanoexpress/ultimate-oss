@@ -1,4 +1,4 @@
-import * as HttpResponse from './HttpResponse.js';
+import * as HttpResponse from './http-response.js';
 
 const HttpResponseKeys = Object.keys(HttpResponse);
 
