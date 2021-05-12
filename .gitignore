@@ -137,7 +137,6 @@ askpass.sh
 ## Build files ##
 #################
 
-cjs
 dist
 build/Release
 functions-build
@@ -147,12 +146,11 @@ functions-build
 **/build/Release
 **/functions-build
 
-## Except cjs/package.json
-!cjs/package.json
-
 ## Bundle files
 ## Build files for
 ## Gatsby, CRA, etc
+cjs/*
+!cjs/package.json
 public/bundle*
 public/dist*
 public/assets*
