@@ -144,9 +144,7 @@ declare namespace nanoexpress {
     ): Promise<nanoexpressApp>;
     close(host?: string, port?: number): boolean;
     setErrorHandler(
-      errorHandlerCallback: (
-        err: Error
-      ) => {
+      errorHandlerCallback: (err: Error) => {
         status: 'error' | string;
         status_code: number;
         stack_trace: string;
