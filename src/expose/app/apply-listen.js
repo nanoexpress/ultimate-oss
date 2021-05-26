@@ -27,7 +27,7 @@ export default (App) => {
           this._instance[id] = token;
           _debugContext.debug(
             `[${sslString}Server]: started successfully at [${id}] in [${(
-              (end[0] * 1000 + end[1]) /
+              (Number(end[0]) * 1000 + Number(end[1])) /
               1000000
             ).toFixed(2)}ms]`
           );

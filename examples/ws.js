@@ -8,7 +8,7 @@ app.ws(
   '/ws',
   {
     async upgrade() {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(() => resolve(), 1000));
     }
   },
   async (req, ws) => {
