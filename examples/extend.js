@@ -1,6 +1,6 @@
 import qs from 'querystring';
 import nanoexpress from '../src/nanoexpress.js';
-import Route from '../src/Route.js';
+import Route from '../src/route.js';
 
 const app = nanoexpress({
   json_spaces: 2

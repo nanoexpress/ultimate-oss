@@ -1,7 +1,7 @@
 import assert from 'assert';
 import baretest from 'baretest';
 import App from '../../src/app.js';
-import Route from '../../src/Route.js';
+import Route from '../../src/route.js';
 
 const test = baretest('Route.define via App');
 
