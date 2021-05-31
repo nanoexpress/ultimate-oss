@@ -1,10 +1,12 @@
 {
   "extends": "airlight-node",
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": "./tsconfig.json",
-    "extraFileExtensions": [".cjs"]
+    "sourceType": "module"
   },
   "rules": {
+    "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/naming-convention": "off",
     "@typescript-eslint/indent": "off",
@@ -15,6 +17,6 @@
     "no-continue": "off",
     "no-param-reassign": "off",
     "consistent-return": "off",
-    "complexity": ["warn", 8]
+    "complexity": ["warn", 15]
   }
 }

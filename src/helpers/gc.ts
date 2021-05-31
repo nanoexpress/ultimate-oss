@@ -1,4 +1,4 @@
-export default function _gc() {
+export default function _gc(): boolean {
   try {
     global.gc();
     return true;

@@ -1,20 +1,18 @@
 import { createReadStream, statSync } from 'fs';
-import {
-  reqHeaderResponse,
-  resHeaders,
-  __request
-} from '../../../constants.js';
-import { getMime } from '../../../helpers/mime.js';
+import { getMime } from '../../../helpers/mime';
+import HttpResponse from '../http-response';
 
 // eslint-disable-next-line max-lines-per-function, complexity
 export default function sendFile(
-  path,
+  path: string,
   lastModified = true,
   compressed = false
-) {
-  const req = this[__request];
+): HttpResponse | undefined {
+  // @ts-ignore
+  const self = this as unknown as HttpResponse;
+  // @ts-ignore
+  const { req } = self;
   const { headers } = req;
-  const responseHeaders = this[resHeaders] || {};
 
   const stat = statSync(path);
   let { size } = stat;
@@ -29,13 +27,13 @@ export default function sendFile(
     // Return 304 if last-modified
     if (headers && headers['if-modified-since']) {
       if (new Date(headers['if-modified-since']) >= mtime) {
-        this.writeStatus('304 Not Modified');
-        return this.end();
+        self.statusCode = 304;
+        return self.end();
       }
     }
-    responseHeaders['last-modified'] = mtimeutc;
+    self.setHeader('last-modified', mtimeutc);
   }
-  responseHeaders['content-type'] = getMime(path);
+  self.setHeader('content-type', getMime(path) as string);
 
   // write data
   let start = 0;
@@ -45,7 +43,7 @@ export default function sendFile(
     [start, end] = headers.range
       .substr(6)
       .split('-')
-      .map((byte) => (byte ? parseInt(byte, 10) : undefined));
+      .map((byte: string) => (byte ? parseInt(byte, 10) : undefined));
 
     // Chrome patch for work
     if (end === undefined) {
@@ -53,9 +51,9 @@ export default function sendFile(
     }
 
     if (start !== undefined) {
-      this.writeStatus('206 Partial Content');
-      responseHeaders['accept-ranges'] = 'bytes';
-      responseHeaders['content-range'] = `bytes ${start}-${end}/${size}`;
+      self.statusCode = 206;
+      self.setHeader('accept-ranges', 'bytes');
+      self.setHeader('content-range', `bytes ${start}-${end}/${size}`);
       size = end - start + 1;
     }
   }
@@ -65,14 +63,11 @@ export default function sendFile(
     end = 0;
   }
 
-  req[reqHeaderResponse] = responseHeaders;
-
   const createStreamInstance = end
     ? createReadStream(path, { start, end })
     : createReadStream(path);
 
-  const pipe = this.pipe(createStreamInstance, size, compressed);
-  this.writeHeaders(responseHeaders);
+  const pipe = self.pipe(createStreamInstance, size, compressed);
 
   return pipe;
 }

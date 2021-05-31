@@ -167,10 +167,3 @@ assets/css/bundle*
 *.min.js
 ## Minified JS source maps
 *.min.js.map
-
-#################
-## TypeScript ###
-#################
-
-# TypeScript v1 declaration files
-typings/

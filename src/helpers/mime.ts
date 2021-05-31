@@ -169,9 +169,11 @@ const mimes = {
   default: 'text/html'
 };
 
-const getMime = (path) => {
+type valueof<T> = T[keyof T];
+
+const getMime = (path: string): valueof<typeof mimes> | undefined => {
   const i = Number(path.lastIndexOf('.'));
-  return mimes[path.substr(i + 1).toLowerCase()];
+  return mimes[path.substr(i + 1).toLowerCase() as keyof typeof mimes];
 };
 
 export { getMime, mimes };

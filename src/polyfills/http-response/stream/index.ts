@@ -1,4 +1,4 @@
-import compressStream from './compress-stream.js';
-import sendFile from './send-file.js';
+import compressStream from './compress-stream';
+import sendFile from './send-file';
 
 export { compressStream, sendFile };
