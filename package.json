@@ -3,8 +3,9 @@
   "version": "3.0.0",
   "description": "nanoexpress for enterprise users & teams",
   "type": "module",
-  "main": "src/nanoexpress.js",
-  "typings": "nanoexpress.d.ts",
+  "main": "src/nanoexpress.ts",
+  "module": "esm/nanoexpress.js",
+  "typings": "typings/nanoexpress.d.ts",
   "scripts": {
     "lint": "smartlint",
     "test": "node --experimental-modules tests/index.js",
@@ -41,8 +42,8 @@
   },
   "devDependencies": {
     "@commitlint/cli": "^12.1.4",
+    "@rollup/plugin-commonjs": "^19.0.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
-    "@rollup/plugin-sucrase": "^3.1.0",
     "@types/node": "^15.6.1",
     "baretest": "^2.x",
     "commitlint-config-airlight": "^1.0.3",
@@ -55,6 +56,7 @@
     "prettier": "^2.3.0",
     "prettier-config-airlight": "^1.0.0",
     "rollup": "^2.50.5",
+    "rollup-plugin-typescript2": "^0.30.0",
     "smartlint": "^1.1.11",
     "typedoc": "^0.20.36",
     "typescript": "^4.2.x"

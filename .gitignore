@@ -151,6 +151,8 @@ functions-build
 ## Gatsby, CRA, etc
 cjs/*
 !cjs/package.json
+esm/*
+!esm/package.json
 public/bundle*
 public/dist*
 public/assets*
@@ -167,3 +169,6 @@ assets/css/bundle*
 *.min.js
 ## Minified JS source maps
 *.min.js.map
+
+## TypeScript
+/typings

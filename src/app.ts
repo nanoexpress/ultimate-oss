@@ -1,13 +1,13 @@
 /* eslint-disable max-lines */
-import { httpMethods } from 'helpers';
 import uWS, {
   RecognizedString,
   TemplatedApp,
   us_listen_socket
 } from 'uWebSockets.js';
-import { HttpHandler, HttpMethod } from '../typings/find-route';
-import { INanoexpressOptions, IWebsocketRoute } from '../typings/nanoexpress';
+import { HttpHandler, HttpMethod } from './typings/find-route';
+import { INanoexpressOptions, IWebsocketRoute } from './typings/nanoexpress';
 import FindRoute from './find-route';
+import { httpMethods } from './helpers';
 import _gc from './helpers/gc';
 import Route from './route';
 
@@ -265,14 +265,18 @@ class App {
 const exposeAppMethodHOC = (method: HttpMethod) =>
   function exposeAppMethod(path: string, ...fns: HttpHandler[]): typeof Route {
     fns.forEach((handler) => {
+      // @ts-ignore
       this._router.on(method.toUpperCase(), path, handler);
     });
+    _gc();
+    // @ts-ignore
     return this;
   };
 
 for (let i = 0, len = httpMethods.length; i < len; i += 1) {
   const method = httpMethods[i].toLocaleLowerCase();
-  App.prototype[method] = exposeAppMethodHOC(method);
+  // @ts-ignore
+  App.prototype[method] = exposeAppMethodHOC(method as HttpMethod);
 }
 
 export default App;

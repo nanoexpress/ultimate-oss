@@ -1,6 +1,6 @@
 import { RecognizedString, WebSocket, WebSocketBehavior } from 'uWebSockets.js';
-import { HttpHandler, UnpreparedRoute } from '../typings/find-route';
-import { IWebsocketRoute } from '../typings/nanoexpress';
+import { HttpHandler, UnpreparedRoute } from './typings/find-route';
+import { IWebsocketRoute } from './typings/nanoexpress';
 import FindRoute from './find-route';
 import { invalid, _gc } from './helpers';
 

@@ -1,6 +1,6 @@
 import { Key } from 'path-to-regexp';
 import { HttpRequest } from 'uWebSockets.js';
-import { HttpResponse } from '../src/polyfills';
+import { HttpResponse } from '../polyfills';
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'OPTIONS' | 'DEL' | 'ANY';
 export type HttpHandler = (

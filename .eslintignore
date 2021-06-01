@@ -13,3 +13,4 @@ tests/coverage
 cjs/
 
 CODE_OF_CONDUCT.md
+rollup.config.js

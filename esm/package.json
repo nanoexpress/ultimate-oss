@@ -1,6 +1,5 @@
 {
-  "type": "commonjs",
+  "type": "module",
   "main": "nanoexpress.js",
-  "module": "../esm/nanoexpress.js",
   "types": "../typings/nanoexpress.d.ts"
 }

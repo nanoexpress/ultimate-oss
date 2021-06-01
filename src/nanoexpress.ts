@@ -1,5 +1,5 @@
 import uWS from 'uWebSockets.js';
-import { INanoexpressOptions } from '../typings/nanoexpress';
+import { INanoexpressOptions } from './typings/nanoexpress';
 import App from './app';
 
 const nanoexpress = (options: INanoexpressOptions = {}): App => {
