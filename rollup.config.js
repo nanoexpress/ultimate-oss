@@ -9,7 +9,7 @@ const external = Object.keys(dependencies).concat([
   'fs'
 ]);
 
-export default ['nanoexpress', 'route', 'app'].map((name) => ({
+export default ['nanoexpress', 'exposes/index', 'route', 'app'].map((name) => ({
   input: `./src/${name}.ts`,
   output: [
     {
@@ -17,14 +17,14 @@ export default ['nanoexpress', 'route', 'app'].map((name) => ({
       file: `./esm/${name}.js`,
       strict: true,
       sourcemap: true,
-      exports: 'default'
+      exports: 'auto'
     },
     {
       format: 'cjs',
       file: `./cjs/${name}.js`,
       strict: true,
       sourcemap: true,
-      exports: 'default'
+      exports: 'auto'
     }
   ],
   plugins: [

@@ -1,5 +1,5 @@
 {
-  "include": ["src", "utils", "examples"],
+  "include": ["exposes", "src", "utils", "examples", "*.cjs"],
   "exclude": ["node_modules"],
   "compilerOptions": {
     "target": "es2018",

@@ -1,4 +1,4 @@
-const nanoexpress = require('../cjs').default;
+const nanoexpress = require('../cjs');
 
 const app = nanoexpress();
 

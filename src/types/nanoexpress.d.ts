@@ -13,9 +13,11 @@ export interface INanoexpressOptions {
   console?: Console;
 }
 
+export type WebSocketHandler = (ws: WebSocket) => void | WebSocketBehavior;
+
 export interface IWebsocketRoute {
   path: RecognizedString;
-  handler?: (ws: WebSocket) => void | WebSocketBehavior;
+  handler?: WebSocketHandler;
   options: WebSocketBehavior;
 }
 
