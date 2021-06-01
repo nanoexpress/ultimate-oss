@@ -10,6 +10,7 @@ import { HttpMethod } from './find-route';
 export interface INanoexpressOptions {
   isSSL?: boolean;
   https?: AppOptions & { separateServer?: number | boolean };
+  poolSize?: number;
   console?: Console;
 }
 
@@ -17,7 +18,6 @@ export type WebSocketHandler = (ws: WebSocket) => void | WebSocketBehavior;
 
 export interface IWebsocketRoute {
   path: RecognizedString;
-  handler?: WebSocketHandler;
   options: WebSocketBehavior;
 }
 

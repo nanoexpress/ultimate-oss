@@ -1,8 +1,7 @@
-import { RecognizedString, WebSocket, WebSocketBehavior } from 'uWebSockets.js';
-import { HttpHandler, UnpreparedRoute } from './types/find-route';
-import { IWebsocketRoute } from './types/nanoexpress';
-import FindRoute from './find-route';
+import { RecognizedString, WebSocketBehavior } from 'uWebSockets.js';
 import { invalid, _gc } from './helpers';
+import { HttpHandler, HttpMethod, UnpreparedRoute } from './types/find-route';
+import { IWebsocketRoute } from './types/nanoexpress';
 
 export default class Route {
   _routers: UnpreparedRoute[];
@@ -23,25 +22,30 @@ export default class Route {
     return this;
   }
 
+  on(method: HttpMethod, path: string, handler: HttpHandler): this {
+    const normalisedPath =
+      // eslint-disable-next-line no-nested-ternary
+      this._basePath === '*'
+        ? '*'
+        : path === '/'
+        ? this._basePath
+        : `${this._basePath}${path}`;
+    if (this._app) {
+      this._app.on(method, normalisedPath, handler);
+    } else {
+      this._routers.push({ method, path: normalisedPath, handler });
+    }
+
+    return this;
+  }
+
   use(path: string | HttpHandler, ...middlewares: HttpHandler[]): this {
     if (typeof path === 'function') {
       middlewares.unshift(path);
       path = '*';
     }
     middlewares.forEach((handler) => {
-      if (this._app) {
-        const routePath =
-          // eslint-disable-next-line no-nested-ternary
-          this._basePath === '*'
-            ? '*'
-            : path === '/'
-            ? this._basePath
-            : `${this._basePath}${path}`;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (this._app._router as FindRoute).on('ANY', routePath, handler);
-      } else {
-        this._routers.push({ method: 'ANY', path, handler } as UnpreparedRoute);
-      }
+      this.on('ANY', path as string, handler);
     });
 
     _gc();
@@ -64,19 +68,15 @@ export default class Route {
     return false;
   }
 
-  ws(
-    path: RecognizedString,
-    handler: (ws: WebSocket) => void | WebSocketBehavior,
-    options?: WebSocketBehavior
-  ): this {
-    if (typeof handler === 'object' && (handler as WebSocketBehavior).open) {
-      this._ws.push({ path, handler: options } as IWebsocketRoute);
-      return this;
-    }
-
-    this._ws.push({ path, handler, options } as IWebsocketRoute);
-
-    _gc();
+  ws(path: RecognizedString, options?: WebSocketBehavior): this {
+    const normalisedPath =
+      // eslint-disable-next-line no-nested-ternary
+      this._basePath === '*'
+        ? '*'
+        : path === '/'
+        ? this._basePath
+        : `${this._basePath}${path}`;
+    this._ws.push({ path: normalisedPath, options } as IWebsocketRoute);
 
     return this;
   }

@@ -1,15 +1,18 @@
 /* eslint-disable max-lines */
 import uWS, {
+  HttpRequest,
   RecognizedString,
   TemplatedApp,
-  us_listen_socket
+  us_listen_socket,
+  WebSocketBehavior
 } from 'uWebSockets.js';
-import { HttpHandler, HttpMethod } from './types/find-route';
-import { INanoexpressOptions, IWebsocketRoute } from './types/nanoexpress';
 import FindRoute from './find-route';
 import { httpMethods } from './helpers';
 import _gc from './helpers/gc';
+import { HttpResponse } from './polyfills';
 import Route from './route';
+import { HttpHandler, HttpMethod } from './types/find-route';
+import { INanoexpressOptions, IWebsocketRoute } from './types/nanoexpress';
 
 class App {
   get config(): INanoexpressOptions {
@@ -36,9 +39,13 @@ class App {
 
   protected _ws: IWebsocketRoute[];
 
+  protected _pools: HttpResponse[];
+
   protected time: [number, number];
 
   protected _separateServed: boolean;
+
+  protected _ran: boolean;
 
   protected _instance: Record<string, us_listen_socket | null>;
 
@@ -48,9 +55,11 @@ class App {
     this._router = new FindRoute(config);
 
     this._ws = [];
+    this._pools = new Array(config?.poolSize || 10);
 
     this.time = process.hrtime();
     this._separateServed = false;
+    this._ran = false;
 
     this._instance = {};
 
@@ -75,25 +84,9 @@ class App {
       if (handler instanceof Route) {
         const { _routers, _ws } = handler;
         _routers.forEach(({ method, path, handler: routeHandler }) => {
-          const routePath =
-            // eslint-disable-next-line no-nested-ternary
-            basePath === '*'
-              ? '*'
-              : path === '/'
-              ? basePath
-              : `${basePath}${path}`;
-          this._router.on(method, routePath as string, routeHandler);
+          this._router.on(method, path as string, routeHandler);
         });
-        _ws.forEach((websocket) => {
-          websocket.path =
-            // eslint-disable-next-line no-nested-ternary
-            (basePath as string) === '*'
-              ? '*'
-              : websocket.path === '/'
-              ? (basePath as string)
-              : `${basePath}${websocket.path}`;
-          this._ws.push(websocket);
-        });
+        this._ws.push(..._ws);
         handler._app = this;
         handler._basePath = basePath as string;
         _routers.length = 0;
@@ -106,6 +99,12 @@ class App {
     return this;
   }
 
+  ws(path: RecognizedString, options: WebSocketBehavior): this {
+    this._app.ws(path, options);
+
+    return this;
+  }
+
   publish(
     topic: RecognizedString,
     message: RecognizedString,
@@ -113,6 +112,61 @@ class App {
     compress?: boolean
   ): boolean {
     return this._app.publish(topic, message, isBinary, compress);
+  }
+
+  // eslint-disable-next-line max-lines-per-function, complexity
+  run(): this {
+    const { _app: app, _ws, _pools, _router: router, _ran } = this;
+
+    if (!_ran) {
+      // eslint-disable-next-line max-lines-per-function, complexity
+      app.any('/*', async (rawRes, rawReq) => {
+        let res: HttpResponse | undefined;
+        const req = rawReq as HttpRequest & {
+          url: string;
+          path: string;
+          method: HttpMethod;
+          stream: boolean;
+        };
+
+        if (_pools.length > 0) {
+          res = _pools.shift() as HttpResponse;
+          res.setResponse(rawRes);
+        } else {
+          res = new HttpResponse();
+          res.setResponse(rawRes);
+        }
+
+        req.url = req.getUrl();
+
+        req.path = req.url;
+        req.method = req.getMethod().toUpperCase() as HttpMethod;
+
+        if (res.aborted || res.done || req.method === 'OPTIONS') {
+          return;
+        }
+
+        if (router.async && router.await) {
+          if (!req.stream) {
+            res.exposeAborted();
+          }
+          return router.lookup(req, res);
+        }
+
+        router.lookup(req, res);
+      });
+
+      _ws.forEach(({ path, options }) => {
+        this._app.ws(path, options);
+      });
+      // Cleanup GC
+      _ws.length = 0;
+      _gc();
+
+      this._ran = true;
+    }
+
+    return this;
   }
 
   listenSocket(
@@ -167,6 +221,7 @@ class App {
         )
       );
     }
+    this.run();
     return this.listenSocket(port, host as string, is_ssl);
   }
 

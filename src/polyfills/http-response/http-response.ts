@@ -13,9 +13,13 @@ class HttpResponse {
 
   protected res: uWS.HttpResponse | null;
 
-  protected done: boolean;
+  public done: boolean;
 
   public aborted: boolean;
+
+  protected _onAborted: (() => void)[];
+
+  protected exposedOnAbort: boolean;
 
   // Expose functionality properties
   protected headers: Record<string, string | number | boolean | null> | null;
@@ -27,6 +31,8 @@ class HttpResponse {
     this.res = null;
     this.done = false;
     this.aborted = false;
+    this._onAborted = [];
+    this.exposedOnAbort = false;
 
     this.headers = {};
     this.statusCode = 200;
@@ -45,6 +51,7 @@ class HttpResponse {
     this.res = res;
     this.done = false;
     this.aborted = res.aborted || false;
+    this._onAborted.length = 0;
 
     this.headers = null;
     this.statusCode = 200;
@@ -87,6 +94,17 @@ class HttpResponse {
    *
    * Exposed methods
    */
+  exposeAborted(): this {
+    if (!this.exposedOnAbort && this.res) {
+      this.res.onAborted(() => {
+        this.aborted = true;
+        this._onAborted.forEach((callback) => callback());
+      });
+      this.exposedOnAbort = true;
+    }
+
+    return this;
+  }
 
   /**
    * Get response header value by key
