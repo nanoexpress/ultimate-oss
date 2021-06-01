@@ -171,4 +171,4 @@ assets/css/bundle*
 *.min.js.map
 
 ## TypeScript
-/typings
+typings

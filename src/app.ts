@@ -4,8 +4,8 @@ import uWS, {
   TemplatedApp,
   us_listen_socket
 } from 'uWebSockets.js';
-import { HttpHandler, HttpMethod } from './typings/find-route';
-import { INanoexpressOptions, IWebsocketRoute } from './typings/nanoexpress';
+import { HttpHandler, HttpMethod } from './types/find-route';
+import { INanoexpressOptions, IWebsocketRoute } from './types/nanoexpress';
 import FindRoute from './find-route';
 import { httpMethods } from './helpers';
 import _gc from './helpers/gc';

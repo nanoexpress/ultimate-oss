@@ -6,8 +6,8 @@ import {
   HttpMethod,
   PreparedRoute,
   UnpreparedRoute
-} from './typings/find-route';
-import { HttpRequestExtended } from './typings/nanoexpress';
+} from './types/find-route';
+import { HttpRequestExtended } from './types/nanoexpress';
 import { _gc } from './helpers';
 import invalid from './helpers/invalid';
 import { HttpResponse } from './polyfills';

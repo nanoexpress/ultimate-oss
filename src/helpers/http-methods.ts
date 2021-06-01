@@ -1,4 +1,4 @@
-import { HttpMethod } from '../typings/find-route';
+import { HttpMethod } from '../types/find-route';
 
 export default [
   'get',
