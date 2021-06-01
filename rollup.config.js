@@ -1,6 +1,7 @@
 const external = [
   'uWebSockets.js',
   './route.js',
+  './find-route.ts',
   './app.js',
   'events',
   'http',
@@ -9,7 +10,7 @@ const external = [
 ];
 
 export default ['nanoexpress', 'route', 'app'].map((name) => ({
-  input: `./src/${name}.js`,
+  input: `./src/${name}.ts`,
   output: {
     format: 'cjs',
     file: `./cjs/${name}.js`,

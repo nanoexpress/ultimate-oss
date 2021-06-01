@@ -41,6 +41,8 @@
   },
   "devDependencies": {
     "@commitlint/cli": "^12.1.4",
+    "@rollup/plugin-node-resolve": "^13.0.0",
+    "@rollup/plugin-sucrase": "^3.1.0",
     "@types/node": "^15.6.1",
     "baretest": "^2.x",
     "commitlint-config-airlight": "^1.0.3",

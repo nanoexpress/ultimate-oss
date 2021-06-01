@@ -1,21 +1,20 @@
 {
-  "include": ["src", "typings", "tests", "examples", "utils"],
+  "include": ["src", "typings", "utils", "examples"],
   "exclude": ["node_modules"],
   "compilerOptions": {
-    "target": "es5",
-    "module": "es6",
-    "lib": ["ESNext"],
-    "allowJs": true,
-    "incremental": true,
-    "checkJs": true,
+    "target": "es2018",
+    "module": "commonjs",
+    // "lib": ["es2018"],
+    "allowJs": false,
+    "incremental": false,
+    "checkJs": false,
     // "jsx": "preserve",
-    // "declaration": true,
-    // "declarationMap": true,
-    // "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
     // "outFile": "./",
-    // "outDir": "./",
-    // "rootDir": "./",
-    // "composite": true,
+    "outDir": "cjs",
+    "rootDir": "src",
+    "composite": true,
     "removeComments": true,
     "noEmit": true,
     // "importHelpers": true,
@@ -38,7 +37,7 @@
 
     "moduleResolution": "node",
     "baseUrl": "src",
-    "paths": {},
+    // "paths": {},
     // "rootDirs": [],
     "typeRoots": ["./node_modules/@types", "./typings"],
     // "types": [],
@@ -46,10 +45,10 @@
     "esModuleInterop": true,
     // "preserveSymlinks": true,
 
-    // "sourceRoot": "./src" ,
+    // "sourceRoot": "./src",
     // "mapRoot": "maps" ,
-    // "sourceMap": true,
-    "inlineSourceMap": true
+    "sourceMap": true,
+    "inlineSourceMap": false
     // "inlineSources": false
 
     // "experimentalDecorators": true,

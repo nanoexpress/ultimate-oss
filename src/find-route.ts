@@ -1,14 +1,14 @@
 /* eslint-disable max-lines */
 import fastDecodeURI from 'fast-decode-uri-component';
-import { _gc } from 'helpers';
 import { pathToRegexp } from 'path-to-regexp';
-import { HttpRequest } from 'uWebSockets.js';
 import {
   HttpHandler,
   HttpMethod,
   PreparedRoute,
   UnpreparedRoute
 } from '../typings/find-route';
+import { HttpRequestExtended } from '../typings/nanoexpress';
+import { _gc } from './helpers';
 import invalid from './helpers/invalid';
 import { HttpResponse } from './polyfills';
 
@@ -184,7 +184,7 @@ export default class FindRoute {
 
   // eslint-disable-next-line max-lines-per-function, complexity
   async lookup(
-    req: HttpRequest,
+    req: HttpRequestExtended,
     res: HttpResponse
   ): Promise<HttpResponse | void> {
     const { routes } = this;
@@ -199,21 +199,21 @@ export default class FindRoute {
           found = true;
         } else if (route.path === req.path) {
           found = true;
-        } else if (route.regex && route.path.test(req.path)) {
+        } else if (route.regex && (route.path as RegExp).test(req.path)) {
           found = true;
         }
 
         if (found) {
           if (route.fetch_params && route.params_id) {
             const exec = (route.path as RegExp).exec(req.path);
-            req.params = {} as Record<string, unknown>;
+            req.params = {} as Record<string, string>;
 
             for (
               let p = 0, lenp = route.params_id.length;
               exec && p < lenp;
               p += 1
             ) {
-              const key = route.params_id[p];
+              const key = route.params_id[p] as unknown as string;
               const value = exec[p + 1];
 
               req.params[key] = value;

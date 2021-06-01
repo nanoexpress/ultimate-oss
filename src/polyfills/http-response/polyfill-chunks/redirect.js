@@ -1,4 +1,4 @@
-import { __request } from '../../../constants.js';
+import { __request } from '../../../constants';
 
 // eslint-disable-next-line complexity
 export default function redirect(code, path) {
