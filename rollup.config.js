@@ -9,7 +9,7 @@ const external = Object.keys(dependencies).concat([
   'fs'
 ]);
 
-export default ['nanoexpress', 'exposes/index', 'route', 'app'].map((name) => ({
+export default ['nanoexpress'].map((name) => ({
   input: `./src/${name}.ts`,
   output: [
     {

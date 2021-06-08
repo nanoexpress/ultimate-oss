@@ -7,7 +7,6 @@ import uWS, {
   WebSocketBehavior
 } from 'uWebSockets.js';
 import FindRoute from './find-route';
-import { httpMethods } from './helpers';
 import _gc from './helpers/gc';
 import { HttpResponse } from './polyfills';
 import Route from './route';
@@ -41,6 +40,8 @@ class App {
 
   protected _pools: HttpResponse[];
 
+  protected _poolsSize: number;
+
   protected time: [number, number];
 
   protected _separateServed: boolean;
@@ -55,7 +56,8 @@ class App {
     this._router = new FindRoute(config);
 
     this._ws = [];
-    this._pools = new Array(config?.poolSize || 10);
+    this._pools = [];
+    this._poolsSize = config?.poolSize || 10;
 
     this.time = process.hrtime();
     this._separateServed = false;
@@ -66,21 +68,21 @@ class App {
     return this;
   }
 
-  setNotFoundHandler(handler: HttpHandler): this {
+  setNotFoundHandler(handler: HttpHandler<HttpMethod>): this {
     this._router.setNotFoundHandler(handler);
 
     return this;
   }
 
   use(
-    basePath: string | HttpHandler,
-    ...middlewares: Array<HttpHandler | Route>
+    basePath: string | HttpHandler<HttpMethod>,
+    ...middlewares: Array<HttpHandler<HttpMethod> | Route>
   ): this {
     if (typeof basePath === 'function') {
       middlewares.unshift(basePath);
       basePath = '*';
     }
-    middlewares.forEach((handler: Route | HttpHandler) => {
+    middlewares.forEach((handler: Route | HttpHandler<HttpMethod>) => {
       if (handler instanceof Route) {
         const { _routers, _ws } = handler;
         _routers.forEach(({ method, path, handler: routeHandler }) => {
@@ -99,6 +101,38 @@ class App {
     return this;
   }
 
+  on(
+    method: HttpMethod,
+    path: string | RegExp,
+    ...handlers: HttpHandler<HttpMethod>[]
+  ): this {
+    handlers.forEach((handler) => {
+      this._router.on(method.toUpperCase() as HttpMethod, path, handler);
+    });
+    _gc();
+    return this;
+  }
+
+  get(path: string | RegExp, ...handlers: HttpHandler<'GET'>[]): this {
+    return this.on('GET', path, ...(handlers as HttpHandler<HttpMethod>[]));
+  }
+
+  post(path: string | RegExp, ...handlers: HttpHandler<'POST'>[]): this {
+    return this.on('POST', path, ...(handlers as HttpHandler<HttpMethod>[]));
+  }
+
+  put(path: string | RegExp, ...handlers: HttpHandler<'PUT'>[]): this {
+    return this.on('PUT', path, ...(handlers as HttpHandler<HttpMethod>[]));
+  }
+
+  options(path: string | RegExp, ...handlers: HttpHandler<'OPTIONS'>[]): this {
+    return this.on('OPTIONS', path, ...(handlers as HttpHandler<HttpMethod>[]));
+  }
+
+  del(path: string | RegExp, ...handlers: HttpHandler<'DEL'>[]): this {
+    return this.on('DEL', path, ...(handlers as HttpHandler<HttpMethod>[]));
+  }
+
   ws(path: RecognizedString, options: WebSocketBehavior): this {
     this._app.ws(path, options);
 
@@ -115,12 +149,80 @@ class App {
   }
 
   // eslint-disable-next-line max-lines-per-function, complexity
-  run(): this {
-    const { _app: app, _ws, _pools, _router: router, _ran } = this;
+  runModern(): this {
+    const { _app: app, _ws, _pools, _poolsSize, _router: router, _ran } = this;
 
     if (!_ran) {
       // eslint-disable-next-line max-lines-per-function, complexity
-      app.any('/*', async (rawRes, rawReq) => {
+      for (const route of router.search()) {
+        if (route.regex && !route.originalPath) {
+          continue; // TO-DO: handle later
+        }
+        switch (route.method) {
+          case 'GET': {
+            // eslint-disable-next-line @typescript-eslint/no-loop-func
+            const keys =
+              route.fetch_params && route.params_id
+                ? route.params_id.map((param) => param.name)
+                : [];
+            // eslint-disable-next-line max-lines-per-function
+            app.get(route.originalPath as string, async (rawRes, rawReq) => {
+              let res: HttpResponse | undefined;
+              const req = rawReq as HttpRequest & {
+                url: string;
+                path: string;
+                method: 'GET';
+                stream: boolean;
+                params?: Record<string, string>;
+              };
+              req.url = route.fetch_params
+                ? req.getUrl()
+                : (route.path as string);
+
+              if (route.fetch_params) {
+                req.params = {};
+              }
+
+              req.path = req.url;
+              req.method = 'GET';
+
+              if (_pools.length > 0) {
+                res = _pools.shift() as HttpResponse;
+                res.setResponse(rawRes);
+              } else {
+                res = new HttpResponse();
+                res.setResponse(rawRes);
+              }
+
+              if (route.fetch_params) {
+                const params: Record<string, string> = {};
+                for (let i = 0, len = keys.length; i < len; i += 1) {
+                  params[keys[i]] = req.getParameter(i);
+                }
+              }
+
+              if (router.async && router.await) {
+                res.exposeAborted();
+                await router.lookup(req, res);
+                if (_pools.length < _poolsSize) {
+                  _pools.push(res);
+                }
+                return;
+              }
+
+              router.lookup(req, res);
+              if (_pools.length < _poolsSize) {
+                _pools.push(res);
+              }
+            });
+            break;
+          }
+          default: {
+            break;
+          }
+        }
+      }
+      app.any('/*', async (rawRes, rawReq): Promise<void> => {
         let res: HttpResponse | undefined;
         const req = rawReq as HttpRequest & {
           url: string;
@@ -150,10 +252,84 @@ class App {
           if (!req.stream) {
             res.exposeAborted();
           }
-          return router.lookup(req, res);
+          await router.lookup(req, res);
+          if (_pools.length < _poolsSize) {
+            _pools.push(res);
+          }
+          return;
         }
 
         router.lookup(req, res);
+        if (_pools.length < _poolsSize) {
+          _pools.push(res);
+        }
+      });
+
+      _ws.forEach(({ path, options }) => {
+        this._app.ws(path, options);
+      });
+      // Cleanup GC
+      _ws.length = 0;
+      _gc();
+
+      this._ran = true;
+    }
+
+    return this;
+  }
+
+  // eslint-disable-next-line max-lines-per-function, complexity
+  run(): this {
+    const { _app: app, _ws, _pools, _poolsSize, _router: router, _ran } = this;
+
+    if (!_ran) {
+      // eslint-disable-next-line max-lines-per-function, complexity
+      app.any('/*', async (rawRes, rawReq): Promise<void> => {
+        let res: HttpResponse | undefined;
+        const req = rawReq as HttpRequest & {
+          url: string;
+          path: string;
+          method: HttpMethod;
+          params?: Record<string, string>;
+          stream: boolean;
+        };
+
+        if (_pools.length > 0) {
+          res = _pools.shift() as HttpResponse;
+          res.setResponse(rawRes);
+        } else {
+          res = new HttpResponse();
+          res.setResponse(rawRes);
+        }
+
+        req.url = req.getUrl();
+
+        req.path = req.url;
+        req.method = req.getMethod().toUpperCase() as HttpMethod;
+
+        if (router.fetchParams) {
+          req.params = {};
+        }
+
+        if (res.aborted || res.done || req.method === 'OPTIONS') {
+          return;
+        }
+
+        if (router.async && router.await) {
+          if (!req.stream) {
+            res.exposeAborted();
+          }
+          await router.lookup(req, res);
+          if (_pools.length < _poolsSize) {
+            _pools.push(res);
+          }
+          return;
+        }
+
+        router.lookup(req, res);
+        if (_pools.length < _poolsSize) {
+          _pools.push(res);
+        }
       });
 
       _ws.forEach(({ path, options }) => {
@@ -315,23 +491,6 @@ class App {
 
     return false;
   }
-}
-
-const exposeAppMethodHOC = (method: HttpMethod) =>
-  function exposeAppMethod(path: string, ...fns: HttpHandler[]): typeof Route {
-    fns.forEach((handler) => {
-      // @ts-ignore
-      this._router.on(method.toUpperCase(), path, handler);
-    });
-    _gc();
-    // @ts-ignore
-    return this;
-  };
-
-for (let i = 0, len = httpMethods.length; i < len; i += 1) {
-  const method = httpMethods[i].toLocaleLowerCase();
-  // @ts-ignore
-  App.prototype[method] = exposeAppMethodHOC(method as HttpMethod);
 }
 
 export default App;

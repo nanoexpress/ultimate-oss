@@ -1,16 +1,16 @@
 /* eslint-disable max-lines */
 import fastDecodeURI from 'fast-decode-uri-component';
 import { pathToRegexp } from 'path-to-regexp';
-import {
-  HttpHandler,
-  HttpMethod,
-  PreparedRoute,
-  UnpreparedRoute
-} from './types/find-route';
-import { HttpRequestExtended } from './types/nanoexpress';
 import { _gc } from './helpers';
 import invalid from './helpers/invalid';
 import { HttpResponse } from './polyfills';
+import {
+  HttpHandler,
+  HttpMethod,
+  HttpRequestExtended,
+  PreparedRoute,
+  UnpreparedRoute
+} from './types/find-route';
 
 export default class FindRoute {
   protected options;
@@ -23,18 +23,18 @@ export default class FindRoute {
 
   public fetchParams: boolean;
 
-  protected defaultRoute: HttpHandler | null;
+  protected defaultRoute: HttpHandler<HttpMethod> | null;
 
   constructor(options = {}) {
     this.options = options;
     this.routes = [];
     this.async = false;
     this.await = false;
-    this.fetchParams = true;
+    this.fetchParams = false;
     this.defaultRoute = null;
   }
 
-  setNotFoundHandler(handler: HttpHandler): this {
+  setNotFoundHandler(handler: HttpHandler<HttpMethod>): this {
     this.defaultRoute = handler;
 
     return this;
@@ -44,7 +44,9 @@ export default class FindRoute {
   parse(incomingRoute: UnpreparedRoute): PreparedRoute {
     const route: PreparedRoute = {
       ...incomingRoute,
-      all: true,
+      originalPath:
+        incomingRoute.path instanceof RegExp ? null : incomingRoute.path,
+      all: false,
       regex: false,
       fetch_params: false,
       async: false,
@@ -59,16 +61,19 @@ export default class FindRoute {
       } else if (route.path.indexOf(':') !== -1) {
         route.fetch_params = true;
         route.params_id = [];
+        route.originalPath = route.path;
         route.path = pathToRegexp(route.path, route.params_id);
         route.regex = true;
       } else if (route.path.indexOf('*') !== -1) {
         route.params_id = [];
+        route.originalPath = route.path;
         route.path = pathToRegexp(route.path, route.params_id);
         route.fetch_params = route.params_id.length > 0;
         route.regex = true;
       }
     } else if (route.path instanceof RegExp) {
       route.regex = true;
+      route.originalPath = null;
     }
     route.async = route.handler.constructor.name === 'AsyncFunction';
     route.await = route.handler.toString().includes('await');
@@ -80,6 +85,9 @@ export default class FindRoute {
       );
     }
 
+    if (!this.fetchParams && route.fetch_params) {
+      this.fetchParams = true;
+    }
     if (!this.async && route.async) {
       this.async = true;
     }
@@ -91,8 +99,8 @@ export default class FindRoute {
 
   on(
     method: HttpMethod,
-    path: string | string[],
-    handler: HttpHandler | HttpHandler[]
+    path: string | RegExp | Array<string | RegExp>,
+    handler: HttpHandler<HttpMethod> | HttpHandler<HttpMethod>[]
   ): this {
     if (Array.isArray(method)) {
       method.forEach((methodId) => {
@@ -120,7 +128,11 @@ export default class FindRoute {
     return this;
   }
 
-  off(method: HttpMethod, path: string, handler: HttpHandler): this {
+  off(
+    method: HttpMethod,
+    path: string,
+    handler: HttpHandler<HttpMethod>
+  ): this {
     const parsed = this.parse({ method, path, handler });
 
     if (!handler) {
@@ -145,24 +157,28 @@ export default class FindRoute {
   }
 
   search(
-    param: Record<keyof PreparedRoute, PreparedRoute[keyof PreparedRoute]>
+    param?: Record<keyof PreparedRoute, PreparedRoute[keyof PreparedRoute]>
   ): PreparedRoute[] {
     const { routes } = this;
 
-    return routes.filter((route) =>
-      Object.keys(param).every(
-        (key: string): boolean =>
-          (param as unknown as PreparedRoute)[key as keyof PreparedRoute] ===
-          (route as unknown as PreparedRoute)[key as keyof PreparedRoute]
-      )
-    );
+    return param
+      ? routes.filter((route) =>
+          Object.keys(param).every(
+            (key: string): boolean =>
+              (param as unknown as PreparedRoute)[
+                key as keyof PreparedRoute
+              ] ===
+              (route as unknown as PreparedRoute)[key as keyof PreparedRoute]
+          )
+        )
+      : routes;
   }
 
   find(
     method: HttpMethod,
     path: string,
-    handlers: HttpHandler[] = []
-  ): HttpHandler[] {
+    handlers: HttpHandler<HttpMethod>[] = []
+  ): HttpHandler<HttpMethod>[] {
     const { routes } = this;
 
     for (let i = 0, len = routes.length; i < len; i += 1) {
@@ -184,7 +200,7 @@ export default class FindRoute {
 
   // eslint-disable-next-line max-lines-per-function, complexity
   async lookup(
-    req: HttpRequestExtended,
+    req: HttpRequestExtended<HttpMethod>,
     res: HttpResponse
   ): Promise<HttpResponse | void> {
     const { routes } = this;
@@ -206,17 +222,16 @@ export default class FindRoute {
         if (found) {
           if (route.fetch_params && route.params_id) {
             const exec = (route.path as RegExp).exec(req.path);
-            req.params = {} as Record<string, string>;
 
             for (
               let p = 0, lenp = route.params_id.length;
               exec && p < lenp;
               p += 1
             ) {
-              const key = route.params_id[p] as unknown as string;
+              const key = route.params_id[p].name;
               const value = exec[p + 1];
 
-              req.params[key] = value;
+              (req.params as Record<string, string>)[key] = value;
             }
           }
           if (route.async || route.legacy) {
@@ -226,11 +241,11 @@ export default class FindRoute {
             response = route.handler(req, res);
           }
 
-          if (response !== undefined && response !== res) {
-            return res.end(JSON.stringify(response));
-          }
-          if (response === res) {
+          if (res.done || response === res) {
             return res;
+          }
+          if (!res.done && response) {
+            return res.end(JSON.stringify(response));
           }
         }
       }

@@ -9,8 +9,8 @@
   "scripts": {
     "lint": "smartlint",
     "test": "node --experimental-modules tests/index.js",
-    "cleanup-cjs": "rm -rf cjs/*.js",
-    "build": "npm run cleanup-cjs && rollup -c",
+    "cleanup": "rm -rf cjs/*.js cjs/*.js.map esm/*.js esm/*.js.map typings/",
+    "build": "npm run cleanup && rollup -c",
     "prepublishOnly": "yarn lint && yarn build"
   },
   "engines": {

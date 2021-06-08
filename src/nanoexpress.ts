@@ -1,6 +1,10 @@
 import uWS from 'uWebSockets.js';
-import { INanoexpressOptions } from './types/nanoexpress';
 import App from './app';
+import Route from './route';
+import { INanoexpressOptions } from './types/nanoexpress';
+
+export * from './exposes/index';
+export { nanoexpress, Route };
 
 const nanoexpress = (options: INanoexpressOptions = {}): App => {
   let app;
@@ -13,5 +17,3 @@ const nanoexpress = (options: INanoexpressOptions = {}): App => {
 
   return new App(options, app);
 };
-
-export default nanoexpress;
