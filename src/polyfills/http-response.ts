@@ -22,7 +22,7 @@ import {
 } from '../constants';
 import httpCodes from '../helpers/http-codes';
 import { getMime } from '../helpers/mime';
-import { INanoexpressOptions } from '../types/nanoexpress';
+import { HttpRequest, INanoexpressOptions } from '../types/nanoexpress';
 
 /**
  * HttpResponse class
@@ -33,7 +33,7 @@ import { INanoexpressOptions } from '../types/nanoexpress';
  * @example new HttpResponse().setResponse(uWS.HttpResponse)
  */
 class HttpResponse {
-  protected [resRequest]: uWS.HttpRequest | null;
+  protected [resRequest]: HttpRequest | null;
 
   protected [resResponse]: uWS.HttpResponse | null;
 
@@ -78,11 +78,11 @@ class HttpResponse {
   /**
    * Set new HttpResponse for current pool
    * @param res Native uWS.HttpResponse instance
-   * @param req Native uWS.HttpResponse instance
+   * @param req HttpResponse instance
    * @returns HttpResponse instance
    * @example res.setResponse(res, req)
    */
-  setResponse(res: uWS.HttpResponse, req: uWS.HttpRequest): this {
+  setResponse(res: uWS.HttpResponse, req: HttpRequest): this {
     this[resRequest] = req;
     this[resResponse] = res;
     this.done = false;
@@ -301,7 +301,6 @@ class HttpResponse {
     options?: BrotliOptions | ZlibOptions,
     priority = ['gzip', 'br', 'deflate']
   ): BrotliCompress | Gzip | Deflate | null {
-    // @ts-ignore
     const req = this[resRequest];
 
     if (!req) {
@@ -343,17 +342,13 @@ class HttpResponse {
    * @param path File absolute path
    * @param lastModified Sets `Last-Modified` header to prevent infinite re-loading
    * @param compressed Compresses file and saves bandwidth of user
-   * @returns HttpResponse
+   * @returns HttpResponse instance
    * @example res.sendFile('foo.mp4')
    */
   // eslint-disable-next-line max-lines-per-function
-  sendFile(
-    path: string,
-    lastModified = true,
-    compressed = false
-  ): this | undefined {
+  sendFile(path: string, lastModified = true, compressed = false): this {
     const req = this[resRequest];
-    const { headers } = req;
+    const headers = req?.headers;
 
     const stat = statSync(path);
     let { size } = stat;
@@ -377,8 +372,8 @@ class HttpResponse {
     this.setHeader('content-type', getMime(path) as string);
 
     // write data
-    let start = 0;
-    let end = 0;
+    let start: number | undefined = 0;
+    let end: number | undefined = 0;
 
     if (headers && headers.range) {
       [start, end] = headers.range

@@ -1,6 +1,7 @@
-/* eslint-disable max-lines */
+/* eslint-disable complexity, max-lines, max-lines-per-function */
 import uWS, {
-  HttpRequest,
+  HttpRequest as uWS_HttpRequest,
+  HttpResponse as uWS_HttpResponse,
   RecognizedString,
   TemplatedApp,
   us_listen_socket,
@@ -11,7 +12,11 @@ import _gc from './helpers/gc';
 import { HttpResponse } from './polyfills';
 import Route from './route';
 import { HttpHandler, HttpMethod } from './types/find-route';
-import { INanoexpressOptions, IWebsocketRoute } from './types/nanoexpress';
+import {
+  HttpRequest,
+  INanoexpressOptions,
+  IWebsocketRoute
+} from './types/nanoexpress';
 
 class App {
   get config(): INanoexpressOptions {
@@ -148,7 +153,6 @@ class App {
     return this._app.publish(topic, message, isBinary, compress);
   }
 
-  // eslint-disable-next-line max-lines-per-function, complexity
   runModern(): this {
     const {
       _app: app,
@@ -161,117 +165,79 @@ class App {
     } = this;
 
     if (!_ran) {
-      // eslint-disable-next-line max-lines-per-function, complexity
       for (const route of router.search()) {
         if (route.regex && !route.originalPath) {
           continue; // TO-DO: handle later
         }
-        switch (route.method) {
-          case 'GET': {
-            // eslint-disable-next-line @typescript-eslint/no-loop-func
-            const keys =
-              route.fetch_params && route.params_id
-                ? route.params_id.map((param) => param.name)
-                : [];
-            // eslint-disable-next-line max-lines-per-function
-            app.get(route.originalPath as string, async (rawRes, rawReq) => {
-              let res: HttpResponse | undefined;
-              const req = rawReq as HttpRequest & {
-                url: string;
-                path: string;
-                method: 'GET';
-                stream: boolean;
-                params?: Record<string, string>;
-              };
-              req.url = route.fetch_params
+
+        const keys =
+          route.fetch_params && route.params_id
+            ? route.params_id.map((param) => param.name)
+            : [];
+        const isBody = route.method === 'POST' || route.method === 'PUT';
+        const isAny = route.method === 'ANY';
+
+        app[route.method.toLowerCase() as Lowercase<HttpMethod>](
+          route.originalPath as string,
+          async (
+            rawRes: uWS_HttpResponse,
+            rawReq: uWS_HttpRequest
+          ): Promise<void> => {
+            let res: HttpResponse | undefined;
+            const req = rawReq as HttpRequest;
+            req.url =
+              isAny || route.fetch_params
                 ? req.getUrl()
                 : (route.path as string);
 
-              if (route.fetch_params) {
-                req.params = {};
+            if (route.fetch_params) {
+              req.params = {};
+            }
+
+            req.path = req.url;
+            req.method = isAny ? (req.getMethod() as HttpMethod) : route.method;
+
+            req.headers = {};
+
+            if (isBody) {
+              // get body or create transform here
+            }
+
+            if (_pools.length > 0) {
+              res = _pools.shift() as HttpResponse;
+              res.setResponse(rawRes, req);
+            } else {
+              res = new HttpResponse(config);
+              res.setResponse(rawRes, req);
+            }
+
+            if (res.aborted || res.done || req.method === 'OPTIONS') {
+              return;
+            }
+
+            if (route.fetch_params) {
+              const params: Record<string, string> = {};
+              for (let i = 0, len = keys.length; i < len; i += 1) {
+                params[keys[i]] = req.getParameter(i);
               }
+            }
 
-              req.path = req.url;
-              req.method = 'GET';
-
-              if (_pools.length > 0) {
-                res = _pools.shift() as HttpResponse;
-                res.setResponse(rawRes, req);
-              } else {
-                res = new HttpResponse(config);
-                res.setResponse(rawRes, req);
-              }
-
-              if (route.fetch_params) {
-                const params: Record<string, string> = {};
-                for (let i = 0, len = keys.length; i < len; i += 1) {
-                  params[keys[i]] = req.getParameter(i);
-                }
-              }
-
-              if (router.async && router.await) {
-                res.exposeAborted();
-                await router.lookup(req, res);
-                if (_pools.length < _poolsSize) {
-                  _pools.push(res);
-                }
-                return;
-              }
-
-              router.lookup(req, res);
+            if (router.async && router.await) {
+              res.exposeAborted();
+              await router.lookup(req, res);
               if (_pools.length < _poolsSize) {
                 _pools.push(res);
               }
-            });
-            break;
+              return;
+            }
+
+            router.lookup(req, res);
+            if (_pools.length < _poolsSize) {
+              _pools.push(res);
+            }
           }
-          default: {
-            break;
-          }
-        }
+        );
       }
-      app.any('/*', async (rawRes, rawReq): Promise<void> => {
-        let res: HttpResponse | undefined;
-        const req = rawReq as HttpRequest & {
-          url: string;
-          path: string;
-          method: HttpMethod;
-          stream: boolean;
-        };
-
-        if (_pools.length > 0) {
-          res = _pools.shift() as HttpResponse;
-          res.setResponse(rawRes, rawReq);
-        } else {
-          res = new HttpResponse(config);
-          res.setResponse(rawRes, rawReq);
-        }
-
-        req.url = req.getUrl();
-
-        req.path = req.url;
-        req.method = req.getMethod().toUpperCase() as HttpMethod;
-
-        if (res.aborted || res.done || req.method === 'OPTIONS') {
-          return;
-        }
-
-        if (router.async && router.await) {
-          if (!req.stream) {
-            res.exposeAborted();
-          }
-          await router.lookup(req, res);
-          if (_pools.length < _poolsSize) {
-            _pools.push(res);
-          }
-          return;
-        }
-
-        router.lookup(req, res);
-        if (_pools.length < _poolsSize) {
-          _pools.push(res);
-        }
-      });
 
       _ws.forEach(({ path, options }) => {
         this._app.ws(path, options);
@@ -286,7 +252,6 @@ class App {
     return this;
   }
 
-  // eslint-disable-next-line max-lines-per-function, complexity
   run(): this {
     const {
       _app: app,
@@ -299,23 +264,16 @@ class App {
     } = this;
 
     if (!_ran) {
-      // eslint-disable-next-line max-lines-per-function, complexity
       app.any('/*', async (rawRes, rawReq): Promise<void> => {
         let res: HttpResponse | undefined;
-        const req = rawReq as HttpRequest & {
-          url: string;
-          path: string;
-          method: HttpMethod;
-          params?: Record<string, string>;
-          stream: boolean;
-        };
+        const req = rawReq as HttpRequest;
 
         if (_pools.length > 0) {
           res = _pools.shift() as HttpResponse;
-          res.setResponse(rawRes, rawReq);
+          res.setResponse(rawRes, req);
         } else {
           res = new HttpResponse(config);
-          res.setResponse(rawRes, rawReq);
+          res.setResponse(rawRes, req);
         }
 
         req.url = req.getUrl();
@@ -413,7 +371,7 @@ class App {
         )
       );
     }
-    this.run();
+    this.runModern();
     return this.listenSocket(port, host as string, is_ssl);
   }
 
@@ -428,7 +386,6 @@ class App {
     return this._close(token, id);
   }
 
-  // eslint-disable-next-line max-lines-per-function
   protected _appApplyListen(
     host: string,
     port: number,
