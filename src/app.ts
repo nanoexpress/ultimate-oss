@@ -197,7 +197,7 @@ class App {
             req.path = req.url;
             req.method = isAny ? (req.getMethod() as HttpMethod) : route.method;
 
-            req.headers = {};
+            // req.headers = {};
 
             if (isBody) {
               // get body or create transform here
