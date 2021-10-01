@@ -34,6 +34,7 @@ export default class Route {
         : path === '/'
         ? this._basePath
         : `${this._basePath}${path}`;
+
     if (this._app) {
       this._app.on(method, normalisedPath, ...handlers);
     } else {

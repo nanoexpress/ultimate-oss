@@ -202,7 +202,7 @@ export default class FindRoute {
   async lookup(
     req: HttpRequestExtended<HttpMethod>,
     res: HttpResponse
-  ): Promise<HttpResponse | void> {
+  ): Promise<HttpResponse | string | void> {
     const { routes } = this;
     let response;
 
@@ -245,16 +245,20 @@ export default class FindRoute {
             return res;
           }
           if (!res.done && response) {
-            return res.end(JSON.stringify(response));
+            return res.send(response as string | Record<string, unknown>);
           }
         }
       }
     }
 
     if (response === undefined && this.defaultRoute !== null) {
-      return this.defaultRoute(req, res);
-    }
+      const notFound = this.defaultRoute(req, res);
 
-    return response;
+      if (notFound !== res) {
+        return res.send(notFound as string | Record<string, unknown>);
+      }
+
+      return notFound;
+    }
   }
 }

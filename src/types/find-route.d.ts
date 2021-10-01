@@ -12,7 +12,11 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'OPTIONS' | 'DEL' | 'ANY';
 export type HttpHandler<T> = (
   req: HttpRequestExtended<T>,
   res: HttpResponse
-) => HttpResponse | void | Promise<HttpResponse> | Promise<void>;
+) =>
+  | HttpResponse
+  | string
+  | Record<string, unknown>
+  | Promise<HttpResponse | Record<string, unknown> | string>;
 
 export interface UnpreparedRoute {
   method: HttpMethod;

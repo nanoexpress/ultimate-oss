@@ -150,7 +150,15 @@ class App {
 
   // eslint-disable-next-line max-lines-per-function, complexity
   runModern(): this {
-    const { _app: app, _ws, _pools, _poolsSize, _router: router, _ran } = this;
+    const {
+      _app: app,
+      _config: config,
+      _ws,
+      _pools,
+      _poolsSize,
+      _router: router,
+      _ran
+    } = this;
 
     if (!_ran) {
       // eslint-disable-next-line max-lines-per-function, complexity
@@ -188,10 +196,10 @@ class App {
 
               if (_pools.length > 0) {
                 res = _pools.shift() as HttpResponse;
-                res.setResponse(rawRes);
+                res.setResponse(rawRes, req);
               } else {
-                res = new HttpResponse();
-                res.setResponse(rawRes);
+                res = new HttpResponse(config);
+                res.setResponse(rawRes, req);
               }
 
               if (route.fetch_params) {
@@ -233,10 +241,10 @@ class App {
 
         if (_pools.length > 0) {
           res = _pools.shift() as HttpResponse;
-          res.setResponse(rawRes);
+          res.setResponse(rawRes, rawReq);
         } else {
-          res = new HttpResponse();
-          res.setResponse(rawRes);
+          res = new HttpResponse(config);
+          res.setResponse(rawRes, rawReq);
         }
 
         req.url = req.getUrl();
@@ -280,7 +288,15 @@ class App {
 
   // eslint-disable-next-line max-lines-per-function, complexity
   run(): this {
-    const { _app: app, _ws, _pools, _poolsSize, _router: router, _ran } = this;
+    const {
+      _app: app,
+      _config: config,
+      _ws,
+      _pools,
+      _poolsSize,
+      _router: router,
+      _ran
+    } = this;
 
     if (!_ran) {
       // eslint-disable-next-line max-lines-per-function, complexity
@@ -296,10 +312,10 @@ class App {
 
         if (_pools.length > 0) {
           res = _pools.shift() as HttpResponse;
-          res.setResponse(rawRes);
+          res.setResponse(rawRes, rawReq);
         } else {
-          res = new HttpResponse();
-          res.setResponse(rawRes);
+          res = new HttpResponse(config);
+          res.setResponse(rawRes, rawReq);
         }
 
         req.url = req.getUrl();

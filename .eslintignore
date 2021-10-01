@@ -3,9 +3,11 @@
 .gitignore
 .gitattributes
 .vscode
+.history
 
 build
 node_modules
+typings
 
 coverage
 tests/coverage

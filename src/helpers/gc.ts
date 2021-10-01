@@ -1,6 +1,8 @@
 export default function _gc(): boolean {
   try {
-    global.gc();
+    if (global.gc) {
+      global.gc();
+    }
     return true;
   } catch (e) {
     return false;

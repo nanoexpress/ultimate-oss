@@ -1,1 +1,2 @@
-export * from './http-response';
+// eslint-disable-next-line import/prefer-default-export
+export { default as HttpResponse } from './http-response';

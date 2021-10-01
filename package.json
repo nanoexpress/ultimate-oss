@@ -38,27 +38,27 @@
   "dependencies": {
     "fast-decode-uri-component": "^1.0.1",
     "path-to-regexp": "^6.2.0",
-    "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v19.2.0.tar.gz"
+    "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v19.5.0.tar.gz"
   },
   "devDependencies": {
-    "@commitlint/cli": "^12.1.4",
-    "@rollup/plugin-commonjs": "^19.0.0",
-    "@rollup/plugin-node-resolve": "^13.0.0",
-    "@types/node": "^15.6.1",
+    "@commitlint/cli": "^13.1.0",
+    "@rollup/plugin-commonjs": "^20.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.5",
+    "@types/node": "^16.9.6",
     "baretest": "^2.x",
-    "commitlint-config-airlight": "^1.0.3",
-    "coveralls": "^3.1.0",
-    "eslint": "^7.26.0",
+    "commitlint-config-airlight": "^1.0.4",
+    "coveralls": "^3.1.1",
+    "eslint": "^7.32.0",
     "eslint-config-airlight-node": "^1.1.9",
-    "husky": "^6.0.0",
-    "lint-staged": "^11.0.0",
-    "lint-staged-config-airlight": "^1.0.8",
-    "prettier": "^2.3.0",
+    "husky": "^7.0.2",
+    "lint-staged": "^11.1.2",
+    "lint-staged-config-airlight": "^2.0.1",
+    "prettier": "^2.4.1",
     "prettier-config-airlight": "^1.0.0",
-    "rollup": "^2.50.5",
+    "rollup": "^2.57.0",
     "rollup-plugin-typescript2": "^0.30.0",
-    "smartlint": "^1.1.11",
-    "typedoc": "^0.20.36",
+    "smartlint": "^2.1.3",
+    "typedoc": "^0.22.4",
     "typescript": "^4.2.x"
   }
 }

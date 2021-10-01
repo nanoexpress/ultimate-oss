@@ -52,4 +52,5 @@ app2
     )
   );
 
+// eslint-disable-next-line no-console
 app2.listen(5000, (token) => token && console.log('listen to 5000'));

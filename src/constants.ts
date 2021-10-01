@@ -1,14 +1,19 @@
 // Http(Request/Response)
-export const __request = Symbol('HttpRequestInstance');
-export const __response = Symbol('HttpResponseInstance');
+export const request: unique symbol = Symbol('HttpRequestInstance');
+export const response: unique symbol = Symbol('HttpResponseInstance');
 
 // HttpRequest symbols
 export const reqHeaderResponse = Symbol('HttpRequestResponseHeaders');
 
 // HttpResponse symbols
-export const resHeaders = Symbol('HttpResponseHeaders');
-export const resConfig = Symbol('HttpResponseConfig');
-export const resAbortHandler = '___$HttpResponseAbortHandler';
+export const resHeaders: unique symbol = Symbol('HttpResponseHeaders');
+export const resConfig: unique symbol = Symbol('HttpResponseConfig');
+export const resAbortHandler: unique symbol = Symbol(
+  'HttpResponseAbortHandler'
+);
+export const resAbortHandlerExpose: unique symbol = Symbol(
+  'HttpResponseAbortHandlerExpose'
+);
 
 export const httpMethods = [
   'get',
