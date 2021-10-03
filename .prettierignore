@@ -7,10 +7,12 @@
 
 build
 node_modules
+typings
 
 coverage
 tests/coverage
 
-cjs/
+esm
+cjs
 
 CODE_OF_CONDUCT.md
