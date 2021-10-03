@@ -1,7 +1,6 @@
 import assert from 'assert';
 import baretest from 'baretest';
-import App from '../../src/app.ts/index.js.js';
-import Route from '../../src/route.ts/index.js.js';
+import { App, Route } from '../../esm/nanoexpress.js';
 
 const test = baretest('Route.define via App');
 

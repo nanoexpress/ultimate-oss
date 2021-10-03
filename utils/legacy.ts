@@ -8,7 +8,7 @@ export default (
       next: (err?: Error, done?: boolean) => void
     ) => HttpResponse | void
   ) =>
-  (req: uWS.HttpRequest, res: HttpResponse) =>
+  (req: uWS.HttpRequest, res: HttpResponse): Promise<Error | boolean | void> =>
     new Promise((resolve, reject) => {
       middleware(req, res, (err, done) => {
         if (err) {

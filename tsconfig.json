@@ -1,6 +1,6 @@
 {
-  "include": ["exposes", "src", "utils", "examples", "*.cjs", "*.d.ts"],
-  "exclude": ["node_modules"],
+  "include": ["exposes", "src", "utils", "*.cjs", "*.d.ts"],
+  "exclude": ["node_modules", "examples", "tests"],
   "compilerOptions": {
     "target": "es2018",
     "module": "esnext",

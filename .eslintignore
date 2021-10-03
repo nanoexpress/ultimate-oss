@@ -16,3 +16,9 @@ cjs/
 
 CODE_OF_CONDUCT.md
 rollup.config.js
+
+examples
+tests
+benchmark
+esm
+cjs

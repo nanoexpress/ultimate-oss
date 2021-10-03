@@ -4,7 +4,7 @@ import Route from './route';
 import { INanoexpressOptions } from './types/nanoexpress';
 
 export * from './exposes/index';
-export { nanoexpress, Route };
+export { nanoexpress, App, Route };
 
 const nanoexpress = (options: INanoexpressOptions = {}): App => {
   let app;

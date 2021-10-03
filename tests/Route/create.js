@@ -1,7 +1,6 @@
-import baretest from 'baretest';
 import assert from 'assert';
-
-import Route from '../../src/route.ts/index.js.js';
+import baretest from 'baretest';
+import { Route } from '../../esm/nanoexpress.js';
 
 const test = baretest('Route.create');
 
