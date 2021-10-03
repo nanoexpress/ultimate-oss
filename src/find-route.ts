@@ -60,15 +60,15 @@ export default class FindRoute {
         route.all = true;
       } else if (route.path.indexOf(':') !== -1) {
         route.fetch_params = true;
-        route.params_id = [];
+        route.param_keys = [];
         route.originalPath = route.path;
-        route.path = pathToRegexp(route.path, route.params_id);
+        route.path = pathToRegexp(route.path, route.param_keys);
         route.regex = true;
       } else if (route.path.indexOf('*') !== -1) {
-        route.params_id = [];
+        route.param_keys = [];
         route.originalPath = route.path;
-        route.path = pathToRegexp(route.path, route.params_id);
-        route.fetch_params = route.params_id.length > 0;
+        route.path = pathToRegexp(route.path, route.param_keys);
+        route.fetch_params = route.param_keys.length > 0;
         route.regex = true;
       }
     } else if (route.path instanceof RegExp) {
@@ -220,15 +220,15 @@ export default class FindRoute {
         }
 
         if (found) {
-          if (route.fetch_params && route.params_id) {
+          if (route.fetch_params && route.param_keys) {
             const exec = (route.path as RegExp).exec(req.path);
 
             for (
-              let p = 0, lenp = route.params_id.length;
+              let p = 0, lenp = route.param_keys.length;
               exec && p < lenp;
               p += 1
             ) {
-              const key = route.params_id[p].name;
+              const key = route.param_keys[p].name;
               const value = exec[p + 1];
 
               (req.params as Record<string, string>)[key] = value;

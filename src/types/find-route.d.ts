@@ -29,7 +29,7 @@ export interface PreparedRoute extends Omit<UnpreparedRoute, 'path'> {
   await: boolean;
   all: boolean;
   fetch_params: boolean;
-  params_id?: Key[];
+  param_keys?: Key[];
   path: RegExp | string;
   originalPath: string | null;
   regex: boolean;

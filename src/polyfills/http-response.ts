@@ -104,14 +104,13 @@ class HttpResponse {
    * @example res.end('text');
    */
   end(body?: uWS.RecognizedString, closeConnection?: boolean): this {
-    const { statusCode } = this;
+    const { statusCode, done } = this;
     const res = this[resResponse];
-    if (!this.done && res) {
+    if (!done && res) {
       res.writeStatus(httpCodes[statusCode]);
       res.end(body, closeConnection);
       this.done = true;
       this[resResponse] = null;
-      return this;
     }
     return this;
   }
@@ -182,9 +181,10 @@ class HttpResponse {
     data: Record<string, unknown> | string | number | boolean,
     closeConnection?: boolean
   ): this {
-    if (!this.done && this[resResponse]) {
-      if (this.compiledResponse) {
-        return this.end(this.compiledResponse, closeConnection);
+    const { done, compiledResponse } = this;
+    if (!done && this[resResponse]) {
+      if (compiledResponse) {
+        return this.end(compiledResponse, closeConnection);
       }
       if (this.serialize) {
         return this.end(this.serialize(data), closeConnection);

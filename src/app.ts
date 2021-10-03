@@ -171,8 +171,8 @@ class App {
         }
 
         const keys =
-          route.fetch_params && route.params_id
-            ? route.params_id.map((param) => param.name)
+          route.fetch_params && route.param_keys
+            ? route.param_keys.map((param) => param.name)
             : [];
         const isBody = route.method === 'POST' || route.method === 'PUT';
         const isAny = route.method === 'ANY';
