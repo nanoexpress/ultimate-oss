@@ -153,7 +153,7 @@ class App {
     return this._app.publish(topic, message, isBinary, compress);
   }
 
-  runModern(): this {
+  run(): this {
     const {
       _app: app,
       _config: config,
@@ -177,6 +177,8 @@ class App {
         const isBody = route.method === 'POST' || route.method === 'PUT';
         const isAny = route.method === 'ANY';
 
+        const fetchUrl = isAny || route.fetch_params;
+
         app[route.method.toLowerCase() as Lowercase<HttpMethod>](
           route.originalPath as string,
           async (
@@ -185,14 +187,7 @@ class App {
           ): Promise<void> => {
             let res: HttpResponse | undefined;
             const req = rawReq as HttpRequest;
-            req.url =
-              isAny || route.fetch_params
-                ? req.getUrl()
-                : (route.path as string);
-
-            if (route.fetch_params) {
-              req.params = {};
-            }
+            req.url = fetchUrl ? req.getUrl() : (route.path as string);
 
             req.path = req.url;
             req.method = isAny ? (req.getMethod() as HttpMethod) : route.method;
@@ -216,9 +211,10 @@ class App {
             }
 
             if (route.fetch_params) {
-              const params: Record<string, string> = {};
+              req.params = {};
               for (let i = 0, len = keys.length; i < len; i += 1) {
-                params[keys[i]] = req.getParameter(i);
+                (req.params as Record<string, string>)[keys[i]] =
+                  req.getParameter(i);
               }
             }
 
@@ -238,73 +234,6 @@ class App {
           }
         );
       }
-
-      _ws.forEach(({ path, options }) => {
-        this._app.ws(path, options);
-      });
-      // Cleanup GC
-      _ws.length = 0;
-      _gc();
-
-      this._ran = true;
-    }
-
-    return this;
-  }
-
-  run(): this {
-    const {
-      _app: app,
-      _config: config,
-      _ws,
-      _pools,
-      _poolsSize,
-      _router: router,
-      _ran
-    } = this;
-
-    if (!_ran) {
-      app.any('/*', async (rawRes, rawReq): Promise<void> => {
-        let res: HttpResponse | undefined;
-        const req = rawReq as HttpRequest;
-
-        if (_pools.length > 0) {
-          res = _pools.shift() as HttpResponse;
-          res.setResponse(rawRes, req);
-        } else {
-          res = new HttpResponse(config);
-          res.setResponse(rawRes, req);
-        }
-
-        req.url = req.getUrl();
-
-        req.path = req.url;
-        req.method = req.getMethod().toUpperCase() as HttpMethod;
-
-        if (router.fetchParams) {
-          req.params = {};
-        }
-
-        if (res.aborted || res.done || req.method === 'OPTIONS') {
-          return;
-        }
-
-        if (router.async && router.await) {
-          if (!req.stream) {
-            res.exposeAborted();
-          }
-          await router.lookup(req, res);
-          if (_pools.length < _poolsSize) {
-            _pools.push(res);
-          }
-          return;
-        }
-
-        router.lookup(req, res);
-        if (_pools.length < _poolsSize) {
-          _pools.push(res);
-        }
-      });
 
       _ws.forEach(({ path, options }) => {
         this._app.ws(path, options);
@@ -371,7 +300,7 @@ class App {
         )
       );
     }
-    this.runModern();
+    this.run();
     return this.listenSocket(port, host as string, is_ssl);
   }
 
