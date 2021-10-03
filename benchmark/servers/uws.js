@@ -6,19 +6,19 @@ const app = uWS.App();
 const keys = [];
 const regex = pathToRegexp('/profile/:id', keys);
 app
-  .get('/', async (_, response) => {
+  .get('/', (_, response) => {
     response.end('');
   })
-  .get('/user/:id', async (response, request) =>
+  .get('/user/:id', (response, request) =>
     response.end(request.getParameter(0))
   )
-  .get('/profile/:id', async (response, request) => {
+  .get('/profile/:id', (response, request) => {
     request.path = request.getUrl();
     const id = regex.exec(request.path);
 
     response.end(id[1]);
   })
-  .post('/user', async (response) => {
+  .post('/user', (response) => {
     response.end('');
   })
   .get('/test/simple/:id', async (response, request) =>
