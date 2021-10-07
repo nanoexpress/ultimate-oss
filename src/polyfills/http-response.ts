@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
-import { createReadStream, ReadStream, statSync } from 'fs';
-import { Readable } from 'stream';
+import { createReadStream, statSync } from 'fs';
+import { EventEmitter, Readable } from 'stream';
 import uWS from 'uWebSockets.js';
 import {
   BrotliCompress,
@@ -17,6 +17,7 @@ import {
   resAbortHandler,
   resAbortHandlerExpose,
   resConfig,
+  resEvents,
   resHeaders,
   response as resResponse
 } from '../constants';
@@ -49,9 +50,13 @@ class HttpResponse {
 
   protected [resConfig]: INanoexpressOptions;
 
+  protected [resEvents]: EventEmitter | null;
+
   public done: boolean;
 
   public aborted: boolean;
+
+  protected closed: boolean;
 
   public serialize?: (
     data: Record<string, unknown> | string | number | boolean
@@ -65,6 +70,7 @@ class HttpResponse {
     this[resConfig] = config;
     this.done = false;
     this.aborted = false;
+    this.closed = false;
     this[resAbortHandler] = [];
     this[resAbortHandlerExpose] = false;
 
@@ -73,6 +79,94 @@ class HttpResponse {
     this[resHeaders] = {};
 
     this.statusCode = 200;
+  }
+
+  protected registerEvents(): this {
+    const emitter = this[resEvents];
+
+    if (emitter) {
+      emitter
+        .on('pipe', (stream) => {
+          this.stream(stream);
+        })
+        .on('unpipe', () => {
+          this.aborted = true;
+        })
+        .on('error', () => {
+          this.aborted = true;
+          this.end();
+        })
+        .on('end', () => {
+          this.end();
+        });
+    }
+
+    return this;
+  }
+
+  /**
+   * Registers event to response
+   * @param eventName Event name
+   * @param eventArgument Any argument
+   * @returns HttpResponse instance
+   * @example res.on('end', (eventArgument) => {...})
+   */
+  on(
+    eventName: string | symbol,
+    eventArgument: (eventArgument: unknown) => void
+  ): this {
+    let emitter = this[resEvents];
+
+    if (!emitter) {
+      this[resEvents] = new EventEmitter();
+    }
+    emitter = this[resEvents] as EventEmitter;
+    emitter.on(eventName, eventArgument);
+
+    this.registerEvents();
+
+    return this;
+  }
+
+  /**
+   * Registers event to response to be fired once
+   * @param eventName Event name
+   * @param eventArgument Any argument
+   * @returns HttpResponse instance
+   * @example res.once('end', (eventArgument) => {...})
+   */
+  once(
+    eventName: string | symbol,
+    eventArgument: (eventArgument: unknown) => void
+  ): this {
+    let emitter = this[resEvents];
+
+    if (!emitter) {
+      this[resEvents] = new EventEmitter();
+    }
+    emitter = this[resEvents] as EventEmitter;
+    emitter.once(eventName, eventArgument);
+
+    this.registerEvents();
+
+    return this;
+  }
+
+  /**
+   * Emits event to response
+   * @param eventName Event name
+   * @param eventArgument Any argument
+   * @returns Emit response
+   * @example res.emit('end', 1)
+   */
+  emit(eventName: string | symbol, eventArgument: never): boolean {
+    let emitter = this[resEvents];
+
+    if (!emitter) {
+      this[resEvents] = new EventEmitter();
+    }
+    emitter = this[resEvents] as EventEmitter;
+    return emitter.emit(eventName, eventArgument);
   }
 
   /**
@@ -87,6 +181,7 @@ class HttpResponse {
     this[resResponse] = res;
     this.done = false;
     this.aborted = res.aborted || false;
+    this.closed = res.aborted || false;
     this[resAbortHandler].length = 0;
 
     this[resHeaders] = null;
@@ -207,6 +302,20 @@ class HttpResponse {
   }
 
   /**
+   * @deprecated Use `res.stream` instead of
+   * Streams input stream to response output
+   * @param stream Input stream
+   * @param size Stream size
+   * @param compressed Compressed status
+   * @returns HttpResponse instance
+   * @example res.pipe(readableStream)
+   * @alias res.stream(readableStream)
+   */
+  pipe(stream: Readable, size?: number, compressed?: boolean): this {
+    return this.stream(stream, size, compressed);
+  }
+
+  /**
    * Streams input stream to response output
    * @param stream Input stream
    * @param size Stream size
@@ -219,15 +328,19 @@ class HttpResponse {
     if (!this.done && this[resResponse] && this[resResponse] !== null) {
       const res = this[resResponse] as uWS.HttpResponse;
       if (compressed) {
-        /* const compressedStream = this.compressStream(stream);
+        const compressedStream = this.compressStream(stream);
 
         if (compressedStream) {
           stream = compressedStream;
-        } */
+        }
       }
 
       if (compressed || !size) {
-        stream.on('data', (buffer) => {
+        stream.on('data', (buffer: Buffer): void => {
+          if (this.closed) {
+            this.end();
+            return;
+          }
           if (this.aborted) {
             stream.destroy();
             return;
@@ -240,7 +353,11 @@ class HttpResponse {
           );
         });
       } else {
-        stream.on('data', (buffer) => {
+        stream.on('data', (buffer: Buffer): void => {
+          if (this.closed) {
+            this.end();
+            return;
+          }
           if (this.aborted) {
             stream.destroy();
             return;
@@ -248,7 +365,7 @@ class HttpResponse {
           buffer = buffer.buffer.slice(
             buffer.byteOffset,
             Number(buffer.byteOffset) + Number(buffer.byteLength)
-          );
+          ) as Buffer;
           const lastOffset = res.getWriteOffset();
 
           // First try
@@ -297,7 +414,7 @@ class HttpResponse {
    * @example res.compressStream(writableStream)
    */
   compressStream(
-    stream: ReadStream,
+    stream: Readable,
     options?: BrotliOptions | ZlibOptions,
     priority = ['gzip', 'br', 'deflate']
   ): BrotliCompress | Gzip | Deflate | null {
