@@ -7,16 +7,17 @@ import uWS, {
   us_listen_socket,
   WebSocketBehavior
 } from 'uWebSockets.js';
-import FindRoute from './find-route';
-import _gc from './helpers/gc';
-import { HttpResponse } from './polyfills';
-import Route from './route';
-import { HttpHandler, HttpMethod } from './types/find-route';
+import { HttpHandler, HttpMethod } from '../types/find-route';
 import {
   HttpRequest,
   INanoexpressOptions,
   IWebsocketRoute
-} from './types/nanoexpress';
+} from '../types/nanoexpress';
+import { response as resResponse } from './constants';
+import FindRoute from './find-route';
+import _gc from './helpers/gc';
+import { HttpResponse } from './polyfills';
+import Route from './route';
 
 class App {
   get config(): INanoexpressOptions {
@@ -184,7 +185,7 @@ class App {
           async (
             rawRes: uWS_HttpResponse,
             rawReq: uWS_HttpRequest
-          ): Promise<void> => {
+          ): Promise<uWS_HttpResponse | void> => {
             let res: HttpResponse | undefined;
             const req = rawReq as HttpRequest;
             req.url = fetchUrl ? req.getUrl() : (route.path as string);
@@ -224,13 +225,16 @@ class App {
               if (_pools.length < _poolsSize) {
                 _pools.push(res);
               }
-              return;
+              return res[resResponse] as uWS_HttpResponse;
             }
 
             router.lookup(req, res);
             if (_pools.length < _poolsSize) {
               _pools.push(res);
             }
+            res.onAborted(() => {
+              console.log('aborted??');
+            });
           }
         );
       }

@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
-import { createReadStream, statSync } from 'fs';
-import { EventEmitter, Readable } from 'stream';
+import { EventEmitter } from 'events';
+import { createReadStream, ReadStream, statSync } from 'fs';
 import uWS from 'uWebSockets.js';
 import {
   BrotliCompress,
@@ -12,6 +12,7 @@ import {
   Gzip,
   ZlibOptions
 } from 'zlib';
+import { HttpRequest, INanoexpressOptions } from '../../types/nanoexpress';
 import {
   request as resRequest,
   resAbortHandler,
@@ -23,7 +24,6 @@ import {
 } from '../constants';
 import httpCodes from '../helpers/http-codes';
 import { getMime } from '../helpers/mime';
-import { HttpRequest, INanoexpressOptions } from '../types/nanoexpress';
 
 /**
  * HttpResponse class
@@ -34,9 +34,9 @@ import { HttpRequest, INanoexpressOptions } from '../types/nanoexpress';
  * @example new HttpResponse().setResponse(uWS.HttpResponse)
  */
 class HttpResponse {
-  protected [resRequest]: HttpRequest | null;
+  public [resRequest]: HttpRequest | null;
 
-  protected [resResponse]: uWS.HttpResponse | null;
+  public [resResponse]: uWS.HttpResponse | null;
 
   // Expose functionality properties
   protected [resHeaders]: Record<
@@ -56,7 +56,7 @@ class HttpResponse {
 
   public aborted: boolean;
 
-  protected closed: boolean;
+  protected registered: boolean;
 
   public serialize?: (
     data: Record<string, unknown> | string | number | boolean
@@ -70,7 +70,8 @@ class HttpResponse {
     this[resConfig] = config;
     this.done = false;
     this.aborted = false;
-    this.closed = false;
+    this.registered = false;
+    this[resEvents] = null;
     this[resAbortHandler] = [];
     this[resAbortHandlerExpose] = false;
 
@@ -84,7 +85,8 @@ class HttpResponse {
   protected registerEvents(): this {
     const emitter = this[resEvents];
 
-    if (emitter) {
+    if (emitter && !this.registered) {
+      this.exposeAborted();
       emitter
         .on('pipe', (stream) => {
           this.stream(stream);
@@ -95,10 +97,8 @@ class HttpResponse {
         .on('error', () => {
           this.aborted = true;
           this.end();
-        })
-        .on('end', () => {
-          this.end();
         });
+      this.registered = true;
     }
 
     return this;
@@ -113,7 +113,7 @@ class HttpResponse {
    */
   on(
     eventName: string | symbol,
-    eventArgument: (eventArgument: unknown) => void
+    eventArgument: (eventArgument?: unknown) => void
   ): this {
     let emitter = this[resEvents];
 
@@ -137,7 +137,7 @@ class HttpResponse {
    */
   once(
     eventName: string | symbol,
-    eventArgument: (eventArgument: unknown) => void
+    eventArgument: (eventArgument?: unknown) => void
   ): this {
     let emitter = this[resEvents];
 
@@ -159,7 +159,7 @@ class HttpResponse {
    * @returns Emit response
    * @example res.emit('end', 1)
    */
-  emit(eventName: string | symbol, eventArgument: never): boolean {
+  emit(eventName: string | symbol, eventArgument?: never): boolean {
     let emitter = this[resEvents];
 
     if (!emitter) {
@@ -181,7 +181,8 @@ class HttpResponse {
     this[resResponse] = res;
     this.done = false;
     this.aborted = res.aborted || false;
-    this.closed = res.aborted || false;
+    this.registered = false;
+    this[resAbortHandlerExpose] = false;
     this[resAbortHandler].length = 0;
 
     this[resHeaders] = null;
@@ -311,7 +312,7 @@ class HttpResponse {
    * @example res.pipe(readableStream)
    * @alias res.stream(readableStream)
    */
-  pipe(stream: Readable, size?: number, compressed?: boolean): this {
+  pipe(stream: ReadStream, size?: number, compressed?: boolean): this {
     return this.stream(stream, size, compressed);
   }
 
@@ -324,23 +325,23 @@ class HttpResponse {
    * @example res.stream(readableStream)
    */
   // eslint-disable-next-line max-lines-per-function
-  stream(stream: Readable, size?: number, compressed = false): this {
+  stream(stream: ReadStream, size?: number, compressed = false): this {
     if (!this.done && this[resResponse] && this[resResponse] !== null) {
       const res = this[resResponse] as uWS.HttpResponse;
+      this.exposeAborted();
+
       if (compressed) {
         const compressedStream = this.compressStream(stream);
 
         if (compressedStream) {
-          stream = compressedStream;
+          stream = compressedStream as unknown as ReadStream;
         }
+      } else if (!size && stream.path) {
+        ({ size } = statSync(stream.path));
       }
 
       if (compressed || !size) {
         stream.on('data', (buffer: Buffer): void => {
-          if (this.closed) {
-            this.end();
-            return;
-          }
           if (this.aborted) {
             stream.destroy();
             return;
@@ -354,11 +355,7 @@ class HttpResponse {
         });
       } else {
         stream.on('data', (buffer: Buffer): void => {
-          if (this.closed) {
-            this.end();
-            return;
-          }
-          if (this.aborted) {
+          if (this.done || this.aborted) {
             stream.destroy();
             return;
           }
@@ -369,10 +366,10 @@ class HttpResponse {
           const lastOffset = res.getWriteOffset();
 
           // First try
-          const [ok, done] = res.tryEnd(buffer, size);
+          const [ok, done] = res.tryEnd(buffer, size as number);
 
           if (done) {
-            stream.destroy();
+            this.done = true;
           } else if (!ok) {
             // pause because backpressure
             stream.pause();
@@ -381,10 +378,10 @@ class HttpResponse {
             res.onWritable((offset) => {
               const [writeOk, writeDone] = res.tryEnd(
                 buffer.slice(offset - lastOffset),
-                size
+                size as number
               );
               if (writeDone) {
-                stream.destroy();
+                this.done = true;
               } else if (writeOk) {
                 stream.resume();
               }
@@ -396,7 +393,7 @@ class HttpResponse {
       stream
         .on('error', (error) => {
           stream.destroy(error);
-          this.end();
+          this.aborted = true;
         })
         .on('end', () => {
           this.end();
@@ -414,7 +411,7 @@ class HttpResponse {
    * @example res.compressStream(writableStream)
    */
   compressStream(
-    stream: Readable,
+    stream: ReadStream,
     options?: BrotliOptions | ZlibOptions,
     priority = ['gzip', 'br', 'deflate']
   ): BrotliCompress | Gzip | Deflate | null {
@@ -551,6 +548,14 @@ class HttpResponse {
         this[resAbortHandler].forEach((callback) => callback());
       });
       this[resAbortHandlerExpose] = true;
+    }
+
+    return this;
+  }
+
+  onAborted(handler: () => void): this {
+    if (this[resAbortHandlerExpose]) {
+      this[resAbortHandler].push(handler);
     }
 
     return this;

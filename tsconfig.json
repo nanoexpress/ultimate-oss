@@ -1,5 +1,5 @@
 {
-  "include": ["exposes", "src", "utils", "*.cjs", "*.d.ts"],
+  "include": ["exposes", "src", "utils", "*.cjs", "types"],
   "exclude": ["node_modules", "examples", "tests"],
   "compilerOptions": {
     "target": "es2018",
@@ -40,7 +40,7 @@
     "baseUrl": "src",
     // "paths": {},
     // "rootDirs": [],
-    "typeRoots": ["./node_modules/@types", "src/types"],
+    "typeRoots": ["./node_modules/@types", "types"],
     // "types": [],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

@@ -1,6 +1,6 @@
 import { Key } from 'path-to-regexp';
 import { HttpRequest } from 'uWebSockets.js';
-import { HttpResponse } from '../polyfills';
+import { HttpResponse } from '../src/polyfills';
 
 export interface HttpRequestExtended<T> extends HttpRequest {
   method: T;

@@ -1,7 +1,7 @@
 import { RecognizedString, WebSocketBehavior } from 'uWebSockets.js';
 import { invalid, _gc } from './helpers';
-import { HttpHandler, HttpMethod, UnpreparedRoute } from './types/find-route';
-import { IWebsocketRoute } from './types/nanoexpress';
+import { HttpHandler, HttpMethod, UnpreparedRoute } from '../types/find-route';
+import { IWebsocketRoute } from '../types/nanoexpress';
 
 export default class Route {
   _routers: UnpreparedRoute[];

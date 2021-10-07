@@ -1,16 +1,16 @@
 /* eslint-disable max-lines */
 import fastDecodeURI from 'fast-decode-uri-component';
 import { pathToRegexp } from 'path-to-regexp';
-import { _gc } from './helpers';
-import invalid from './helpers/invalid';
-import { HttpResponse } from './polyfills';
 import {
   HttpHandler,
   HttpMethod,
   HttpRequestExtended,
   PreparedRoute,
   UnpreparedRoute
-} from './types/find-route';
+} from '../types/find-route';
+import { _gc } from './helpers';
+import invalid from './helpers/invalid';
+import { HttpResponse } from './polyfills';
 
 export default class FindRoute {
   protected options;
