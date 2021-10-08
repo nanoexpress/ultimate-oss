@@ -403,6 +403,25 @@ class App {
 
     return false;
   }
+
+  /**
+   * @deprecated There no way to disable these methods as they are not available by default
+   */
+  disable(tag: string): this {
+    console.warn(
+      `[Server]: The tag [${tag}] cannot be disabled as not set, not supported and not available`
+    );
+    return this;
+  }
+
+  /**
+   * @deprecated Please use configuration at initialization such as `nanoexpress({json_spaces:2})` insteadof `app.set('json_spaces', 2)`
+   */
+  set(key: keyof INanoexpressOptions, value: string | number): this {
+    // @ts-ignore
+    this.config[key] = value;
+    return this;
+  }
 }
 
 export default App;

@@ -2,7 +2,7 @@
   "name": "@nanoexpress/pro-slim",
   "version": "3.0.0",
   "description": "nanoexpress for enterprise users & teams",
-  "main": "src/nanoexpress.ts",
+  "main": "cjs/nanoexpress.js",
   "module": "esm/nanoexpress.js",
   "typings": "typings/nanoexpress.d.ts",
   "scripts": {
