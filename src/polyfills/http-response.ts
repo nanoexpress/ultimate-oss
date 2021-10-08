@@ -58,6 +58,8 @@ class HttpResponse {
 
   protected registered: boolean;
 
+  protected streaming: boolean;
+
   public serialize?: (
     data: Record<string, unknown> | string | number | boolean
   ) => string;
@@ -71,6 +73,7 @@ class HttpResponse {
     this.done = false;
     this.aborted = false;
     this.registered = false;
+    this.streaming = false;
     this[resEvents] = null;
     this[resAbortHandler] = [];
     this[resAbortHandlerExpose] = false;
@@ -87,8 +90,10 @@ class HttpResponse {
 
     if (emitter && !this.registered) {
       this.exposeAborted();
+
       emitter
         .on('pipe', (stream) => {
+          this.streaming = true;
           this.stream(stream);
         })
         .on('unpipe', () => {
@@ -181,7 +186,9 @@ class HttpResponse {
     this[resResponse] = res;
     this.done = false;
     this.aborted = res.aborted || false;
+    this.streaming = false;
     this.registered = false;
+    this[resEvents] = null;
     this[resAbortHandlerExpose] = false;
     this[resAbortHandler].length = 0;
 
@@ -200,9 +207,9 @@ class HttpResponse {
    * @example res.end('text');
    */
   end(body?: uWS.RecognizedString, closeConnection?: boolean): this {
-    const { statusCode, done } = this;
+    const { statusCode, done, streaming } = this;
     const res = this[resResponse];
-    if (!done && res) {
+    if (!done && res && streaming) {
       res.writeStatus(httpCodes[statusCode]);
       res.end(body, closeConnection);
       this.done = true;
@@ -346,7 +353,7 @@ class HttpResponse {
             stream.destroy();
             return;
           }
-          this.write(
+          res.write(
             buffer.buffer.slice(
               buffer.byteOffset,
               Number(buffer.byteOffset) + Number(buffer.byteLength)
@@ -376,6 +383,10 @@ class HttpResponse {
 
             // Register async handlers for drainage
             res.onWritable((offset) => {
+              if (this.done || this.aborted) {
+                stream.destroy();
+                return true;
+              }
               const [writeOk, writeDone] = res.tryEnd(
                 buffer.slice(offset - lastOffset),
                 size as number
@@ -396,6 +407,7 @@ class HttpResponse {
           this.aborted = true;
         })
         .on('end', () => {
+          this.streaming = false;
           this.end();
         });
     }
@@ -528,9 +540,8 @@ class HttpResponse {
    */
   write(chunk: uWS.RecognizedString | ArrayBuffer): this {
     const res = this[resResponse];
-    if (!this.done && res) {
+    if (!this.done && res && !this.streaming) {
       res.write(chunk);
-      this.done = true;
       return this;
     }
     return this;

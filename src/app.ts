@@ -232,9 +232,6 @@ class App {
             if (_pools.length < _poolsSize) {
               _pools.push(res);
             }
-            res.onAborted(() => {
-              console.log('aborted??');
-            });
           }
         );
       }
