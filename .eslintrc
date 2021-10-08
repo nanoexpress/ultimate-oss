@@ -7,6 +7,10 @@
     "extraFileExtensions": [".cjs", ".d.ts"]
   },
   "rules": {
+    "node/no-unsupported-features/es-syntax": [
+      "error",
+      { "ignores": ["modules"] }
+    ],
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/naming-convention": "off",

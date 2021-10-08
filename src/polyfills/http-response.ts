@@ -209,7 +209,8 @@ class HttpResponse {
   end(body?: uWS.RecognizedString, closeConnection?: boolean): this {
     const { statusCode, done, streaming } = this;
     const res = this[resResponse];
-    if (!done && res && streaming) {
+
+    if (!done && res && !streaming) {
       res.writeStatus(httpCodes[statusCode]);
       res.end(body, closeConnection);
       this.done = true;

@@ -1,22 +1,23 @@
 import { RecognizedString, WebSocketBehavior } from 'uWebSockets.js';
-import { invalid, _gc } from './helpers';
 import { HttpHandler, HttpMethod, UnpreparedRoute } from '../types/find-route';
 import { IWebsocketRoute } from '../types/nanoexpress';
+import App from './app';
+import { appInstance, routerInstances, wsInstances } from './constants';
+import { invalid, _gc } from './helpers';
 
-export default class Route {
-  _routers: UnpreparedRoute[];
+export default class Router {
+  [routerInstances]: UnpreparedRoute[];
 
-  _ws: IWebsocketRoute[];
+  [wsInstances]: IWebsocketRoute[];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _app: any;
+  [appInstance]?: App;
 
   _basePath: string;
 
   constructor() {
-    this._routers = [];
-    this._ws = [];
-    this._app = null;
+    this[routerInstances] = [];
+    this[wsInstances] = [];
     this._basePath = '';
 
     return this;
@@ -27,6 +28,7 @@ export default class Route {
     path: string | RegExp,
     ...handlers: HttpHandler<HttpMethod>[]
   ): this {
+    const app = this[appInstance];
     const normalisedPath =
       // eslint-disable-next-line no-nested-ternary
       this._basePath === '*'
@@ -35,11 +37,11 @@ export default class Route {
         ? this._basePath
         : `${this._basePath}${path}`;
 
-    if (this._app) {
-      this._app.on(method, normalisedPath, ...handlers);
+    if (app) {
+      app.on(method, normalisedPath, ...handlers);
     } else {
       handlers.forEach((handler) => {
-        this._routers.push({ method, path: normalisedPath, handler });
+        this[routerInstances].push({ method, path: normalisedPath, handler });
       });
     }
 
@@ -54,8 +56,34 @@ export default class Route {
       middlewares.unshift(path);
       path = '*';
     }
-    middlewares.forEach((handler) => {
-      this.on('ANY', path as string, handler);
+    middlewares.forEach((handler: Router | HttpHandler<HttpMethod>) => {
+      if (handler instanceof Router) {
+        const _routers = handler[routerInstances];
+        const _ws = handler[wsInstances];
+
+        handler._basePath = path as string;
+        handler[appInstance] = this[appInstance];
+
+        _routers.forEach(
+          ({ method, path: routePath, handler: routeHandler }) => {
+            const normalisedPath =
+              // eslint-disable-next-line no-nested-ternary
+              path === '*'
+                ? '*'
+                : routePath === '/'
+                ? path
+                : `${path}${routePath}`;
+
+            this.on(method, normalisedPath as string, routeHandler);
+          }
+        );
+        this[wsInstances].push(..._ws);
+
+        _routers.length = 0;
+        _ws.length = 0;
+      } else {
+        this.on('ANY', path as string | RegExp, handler);
+      }
     });
 
     _gc();
@@ -91,7 +119,10 @@ export default class Route {
         : path === '/'
         ? this._basePath
         : `${this._basePath}${path}`;
-    this._ws.push({ path: normalisedPath, options } as IWebsocketRoute);
+    this[wsInstances].push({
+      path: normalisedPath,
+      options
+    } as IWebsocketRoute);
 
     return this;
   }
@@ -102,8 +133,9 @@ export default class Route {
     isBinary?: boolean,
     compress?: boolean
   ): boolean {
-    if (this._app) {
-      return this._app.publish(topic, message, isBinary, compress);
+    const app = this[appInstance];
+    if (app) {
+      return app.publish(topic, message, isBinary, compress);
     }
     invalid(
       'nanoexpress [Router]: Please attach to `Application` before using publish'

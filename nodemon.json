@@ -1,0 +1,15 @@
+{
+  "verbose": true,
+  "ignore": ["build", ".vscode", ".circle", "node_modules"],
+  "ext": "js,json,yml",
+  "watch": ["cjs", "esm", "examples"],
+  "env": { "NODE_ENV": "development" },
+  "args": [
+    "--enable-source-maps",
+    "--trace-deprecation",
+    "--trace-uncaught",
+    "--trace-warnings",
+    "--experimental-json-modules",
+    "--experimental-wasm-modules"
+  ]
+}

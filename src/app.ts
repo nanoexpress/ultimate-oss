@@ -13,11 +13,16 @@ import {
   INanoexpressOptions,
   IWebsocketRoute
 } from '../types/nanoexpress';
-import { response as resResponse } from './constants';
+import {
+  appInstance,
+  response as resResponse,
+  routerInstances,
+  wsInstances
+} from './constants';
 import FindRoute from './find-route';
 import _gc from './helpers/gc';
 import { HttpResponse } from './polyfills';
-import Route from './route';
+import Router from './router';
 
 class App {
   get config(): INanoexpressOptions {
@@ -40,7 +45,7 @@ class App {
 
   protected _app: TemplatedApp;
 
-  _router: FindRoute;
+  protected _router: FindRoute;
 
   protected _ws: IWebsocketRoute[];
 
@@ -82,21 +87,25 @@ class App {
 
   use(
     basePath: string | HttpHandler<HttpMethod>,
-    ...middlewares: Array<HttpHandler<HttpMethod> | Route>
+    ...middlewares: Array<HttpHandler<HttpMethod> | Router>
   ): this {
     if (typeof basePath === 'function') {
       middlewares.unshift(basePath);
       basePath = '*';
     }
-    middlewares.forEach((handler: Route | HttpHandler<HttpMethod>) => {
-      if (handler instanceof Route) {
-        const { _routers, _ws } = handler;
+    middlewares.forEach((handler: Router | HttpHandler<HttpMethod>) => {
+      if (handler instanceof Router) {
+        const _routers = handler[routerInstances];
+        const _ws = handler[wsInstances];
+
+        handler[appInstance] = this;
+        handler._basePath = basePath as string;
+
         _routers.forEach(({ method, path, handler: routeHandler }) => {
-          this._router.on(method, path as string, routeHandler);
+          handler.on(method, path, routeHandler);
         });
         this._ws.push(..._ws);
-        handler._app = this;
-        handler._basePath = basePath as string;
+
         _routers.length = 0;
         _ws.length = 0;
       } else {

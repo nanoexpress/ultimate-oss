@@ -209,6 +209,11 @@ export default class FindRoute {
     for (let i = 0, len = routes.length; i < len; i += 1) {
       const route = routes[i];
 
+      // Early return for performance reason
+      if (res.done) {
+        return res;
+      }
+
       if (route.method === 'ANY' || route.method === req.method) {
         let found = false;
         if (route.all) {
