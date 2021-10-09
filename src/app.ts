@@ -148,6 +148,15 @@ class App {
     return this.on('DEL', path, ...(handlers as HttpHandler<HttpMethod>[]));
   }
 
+  /**
+   * @param path The accessible path to be called route handler
+   * @param handlers List of middlewares and/or routes
+   * @returns App
+   */
+  all(path: string | RegExp, ...handlers: HttpHandler<'ANY'>[]): this {
+    return this.on('ANY', path, ...(handlers as HttpHandler<HttpMethod>[]));
+  }
+
   ws(path: RecognizedString, options: WebSocketBehavior): this {
     this._app.ws(path, options);
 
@@ -261,57 +270,55 @@ class App {
   listenSocket(
     port: number,
     host = 'localhost',
-    is_ssl?: boolean
+    is_ssl: boolean,
+    handler: () => void
   ): Promise<us_listen_socket> {
     const { _config: config } = this;
 
-    if (this.https && config.https?.separateServer && !this._separateServed) {
+    if (
+      (port === 80 || port === 443) &&
+      this.https &&
+      config.https?.separateServer &&
+      !this._separateServed
+    ) {
       const httpsPort =
         typeof config.https.separateServer === 'number'
           ? config.https.separateServer
           : 443;
       this._separateServed = true;
       return Promise.all([
-        this.listen(port || 80, host, false),
-        this.listen(httpsPort, host, true)
+        this.listenSocket(port, host, false, handler),
+        this.listenSocket(httpsPort, host, true, handler)
       ]);
     }
 
-    return this._appApplyListen(host, port, is_ssl);
+    return this._appApplyListen(host, port, is_ssl, handler);
   }
 
   listen(
-    port:
-      | number
-      | number[]
-      | Array<{ host: string; port: number; is_ssl?: boolean }>,
-    host: string | string[] = 'localhost',
-    is_ssl?: boolean
+    ...args: Array<number | string | boolean | (() => void)>
   ): Promise<us_listen_socket> {
-    if (Array.isArray(port)) {
-      return Promise.all(
-        port.map(
-          (
-            listenObject:
-              | { host: string; port: number; is_ssl?: boolean }
-              | number,
-            index: number
-          ): Promise<us_listen_socket> => {
-            if (typeof listenObject === 'object') {
-              return this.listen(
-                listenObject.port,
-                listenObject.host,
-                listenObject.is_ssl
-              );
-            }
+    let port = 8000;
+    let host = 'localhost';
+    let ssl = false;
+    let handler: () => void = () => {};
 
-            return this.listen(port, Array.isArray(host) ? host[index] : host);
-          }
-        )
-      );
-    }
+    args.forEach((listenArg): void => {
+      if (typeof +listenArg === 'number' && !Number.isNaN(+listenArg)) {
+        port = +listenArg;
+      } else if (typeof listenArg === 'function') {
+        handler = listenArg;
+      } else if (
+        typeof listenArg === 'string' &&
+        (listenArg === 'localhost' || listenArg.includes('.'))
+      ) {
+        host = listenArg;
+      } else if (listenArg === true) {
+        ssl = true;
+      }
+    });
     this.run();
-    return this.listenSocket(port, host as string, is_ssl);
+    return this.listenSocket(port, host, ssl, handler);
   }
 
   close(port: number, host = 'localhost'): boolean {
@@ -328,7 +335,8 @@ class App {
   protected _appApplyListen(
     host: string,
     port: number,
-    is_ssl?: boolean
+    is_ssl = false,
+    handler: () => void
   ): Promise<us_listen_socket> {
     const { _console, _config: config, _app: app } = this;
 
@@ -357,6 +365,7 @@ class App {
             ).toFixed(2)}ms]`
           );
           _gc();
+          handler();
           return resolve(token);
         }
         const _errorContext = 'error' in _console ? _console : console;
@@ -374,7 +383,7 @@ class App {
         return reject(err);
       };
 
-      if (host) {
+      if (host && host !== 'localhost') {
         app.listen(host, port, onListenHandler);
       } else {
         app.listen(port, onListenHandler);

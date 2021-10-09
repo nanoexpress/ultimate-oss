@@ -1,9 +1,9 @@
-import HttpResponse from '../polyfills/http-response';
 import {
   HttpHandler,
   HttpMethod,
   HttpRequestExtended
 } from '../../types/find-route';
+import HttpResponse from '../polyfills/http-response';
 
 type LegacyHttpHandler<T> = (
   req: HttpRequestExtended<T>,
@@ -16,9 +16,9 @@ type LegacyHttpHandler<T> = (
   | Promise<HttpResponse | Record<string, unknown> | string>;
 
 export default (
-    middleware: LegacyHttpHandler<HttpMethod>
-  ): HttpHandler<HttpMethod> =>
-  (
+  middleware: LegacyHttpHandler<HttpMethod>
+): HttpHandler<HttpMethod> => {
+  const httpHandler = (
     req: HttpRequestExtended<HttpMethod>,
     res: HttpResponse
   ): Promise<HttpResponse> =>
@@ -27,7 +27,11 @@ export default (
         if (err) {
           reject(err);
         } else {
-          resolve(res);
+          // @ts-ignore
+          resolve();
         }
       });
     });
+  httpHandler.raw = middleware;
+  return httpHandler;
+};

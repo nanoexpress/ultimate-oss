@@ -1,6 +1,6 @@
 import { pathToRegexp } from 'path-to-regexp';
 import uWS from 'uWebSockets.js';
-import { nanoexpress } from '../esm/nanoexpress.js';
+import nanoexpress from '../esm/nanoexpress.js';
 
 const app = nanoexpress();
 app.setNotFoundHandler((req, res) => {

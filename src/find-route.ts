@@ -8,9 +8,9 @@ import {
   PreparedRoute,
   UnpreparedRoute
 } from '../types/find-route';
-import legacyUtil from './utils/legacy';
 import { _gc } from './helpers';
 import { HttpResponse } from './polyfills';
+import legacyUtil from './utils/legacy';
 
 export default class FindRoute {
   protected options;
@@ -221,6 +221,17 @@ export default class FindRoute {
         } else if (route.regex && (route.path as RegExp).test(req.path)) {
           found = true;
         }
+
+        console.log(
+          found,
+          req,
+          route,
+          // @ts-ignore
+          route.handler.raw
+            ? // @ts-ignore
+              route.handler.raw.toString()
+            : route.handler.toString()
+        );
 
         if (found) {
           if (route.fetch_params && route.param_keys) {
