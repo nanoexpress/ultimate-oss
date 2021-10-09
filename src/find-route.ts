@@ -8,8 +8,8 @@ import {
   PreparedRoute,
   UnpreparedRoute
 } from '../types/find-route';
+import legacyUtil from './utils/legacy';
 import { _gc } from './helpers';
-import invalid from './helpers/invalid';
 import { HttpResponse } from './polyfills';
 
 export default class FindRoute {
@@ -80,9 +80,7 @@ export default class FindRoute {
     route.legacy = route.handler.toString().includes('next(');
 
     if (route.legacy) {
-      invalid(
-        'nanoexpress: pro-slim does not allow any legacy middlewares, if you need to use lagacy Express.js middlewares, please use `utils/legacy`'
-      );
+      route.handler = legacyUtil(route.handler);
     }
 
     if (!this.fetchParams && route.fetch_params) {

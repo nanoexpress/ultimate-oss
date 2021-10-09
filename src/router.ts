@@ -111,6 +111,15 @@ export default class Router {
     return this.on('DEL', path, ...(handlers as HttpHandler<HttpMethod>[]));
   }
 
+  /**
+   * @param path The accessible path to be called route handler
+   * @param handlers List of middlewares and/or routes
+   * @returns Router
+   */
+  all(path: string | RegExp, ...handlers: HttpHandler<'ANY'>[]): this {
+    return this.on('ANY', path, ...(handlers as HttpHandler<HttpMethod>[]));
+  }
+
   ws(path: RecognizedString, options?: WebSocketBehavior): this {
     const normalisedPath =
       // eslint-disable-next-line no-nested-ternary
