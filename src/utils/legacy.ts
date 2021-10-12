@@ -3,6 +3,7 @@ import {
   HttpMethod,
   HttpRequestExtended
 } from '../../types/find-route';
+import { warn } from '../helpers/loggy';
 import HttpResponse from '../polyfills/http-response';
 
 type LegacyHttpHandler<T> = (
@@ -18,6 +19,9 @@ type LegacyHttpHandler<T> = (
 export default (
   middleware: LegacyHttpHandler<HttpMethod>
 ): HttpHandler<HttpMethod> => {
+  warn(
+    'legacy middlewares is deprecated and in future we will remove express.js middlewares support'
+  );
   const httpHandler = (
     req: HttpRequestExtended<HttpMethod>,
     res: HttpResponse

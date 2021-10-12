@@ -8,7 +8,7 @@ import {
   PreparedRoute,
   UnpreparedRoute
 } from '../types/find-route';
-import { _gc } from './helpers';
+import { debug, _gc } from './helpers';
 import { HttpResponse } from './polyfills';
 import legacyUtil from './utils/legacy';
 
@@ -25,6 +25,14 @@ export default class FindRoute {
 
   protected defaultRoute: HttpHandler<HttpMethod> | null;
 
+  protected errorRoute:
+    | ((
+        err: Error,
+        req: HttpRequestExtended<HttpMethod>,
+        res: HttpResponse
+      ) => void)
+    | null;
+
   constructor(options = {}) {
     this.options = options;
     this.routes = [];
@@ -32,6 +40,7 @@ export default class FindRoute {
     this.await = false;
     this.fetchParams = false;
     this.defaultRoute = null;
+    this.errorRoute = null;
   }
 
   setNotFoundHandler(handler: HttpHandler<HttpMethod>): this {
@@ -40,7 +49,30 @@ export default class FindRoute {
     return this;
   }
 
-  // eslint-disable-next-line class-methods-use-this, max-lines-per-function
+  setErrorHandler(
+    handler: (
+      err: Error,
+      req: HttpRequestExtended<HttpMethod>,
+      res: HttpResponse
+    ) => void
+  ): this {
+    this.errorRoute = handler;
+
+    return this;
+  }
+
+  handleError(
+    error: Error,
+    req: HttpRequestExtended<HttpMethod>,
+    res: HttpResponse
+  ): this {
+    if (this.errorRoute) {
+      this.errorRoute(error, req, res);
+    }
+    return this;
+  }
+
+  // eslint-disable-next-line class-methods-use-this, max-lines-per-function, complexity
   parse(incomingRoute: UnpreparedRoute): PreparedRoute {
     const route: PreparedRoute = {
       ...incomingRoute,
@@ -64,12 +96,13 @@ export default class FindRoute {
         route.originalPath = route.path;
         route.path = pathToRegexp(route.path, route.param_keys);
         route.regex = true;
-      } else if (route.path.indexOf('*') !== -1) {
-        route.param_keys = [];
+      } else if (route.method === ('*' as HttpMethod)) {
         route.originalPath = route.path;
-        route.path = pathToRegexp(route.path, route.param_keys);
-        route.fetch_params = route.param_keys.length > 0;
-        route.regex = true;
+        route.all = true;
+      } else if (route.path.indexOf('/*') !== -1) {
+        route.originalPath = route.path;
+        route.path = route.path.substr(0, route.path.indexOf('/*'));
+        route.all = true;
       }
     } else if (route.path instanceof RegExp) {
       route.regex = true;
@@ -121,9 +154,21 @@ export default class FindRoute {
 
     this.routes.push(this.parse({ method, path, handler }));
 
+    debug(
+      'new route registered [%s] %s',
+      method === ('*' as HttpMethod) ? 'middleware' : method,
+      path
+    );
     _gc();
 
     return this;
+  }
+
+  apply(
+    path: string | RegExp | Array<string | RegExp>,
+    handler: HttpHandler<HttpMethod> | HttpHandler<HttpMethod>[]
+  ): this {
+    return this.on('*' as HttpMethod, path, handler);
   }
 
   off(
@@ -212,28 +257,22 @@ export default class FindRoute {
         return res;
       }
 
-      if (route.method === 'ANY' || route.method === req.method) {
+      if (
+        route.method === 'ANY' ||
+        route.method === ('*' as HttpMethod) ||
+        route.method === req.method
+      ) {
         let found = false;
         if (route.all) {
-          found = true;
+          found = route.path ? req.path.includes(route.path as string) : true;
         } else if (route.path === req.path) {
           found = true;
         } else if (route.regex && (route.path as RegExp).test(req.path)) {
           found = true;
         }
 
-        console.log(
-          found,
-          req,
-          route,
-          // @ts-ignore
-          route.handler.raw
-            ? // @ts-ignore
-              route.handler.raw.toString()
-            : route.handler.toString()
-        );
-
         if (found) {
+          debug('routes lookup route found [%o]', route);
           if (route.fetch_params && route.param_keys) {
             const exec = (route.path as RegExp).exec(req.path);
 

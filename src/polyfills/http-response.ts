@@ -23,6 +23,7 @@ import {
   response as resResponse
 } from '../constants';
 import httpCodes from '../helpers/http-codes';
+import { debug, warn } from '../helpers/loggy';
 import { getMime } from '../helpers/mime';
 
 /**
@@ -93,13 +94,18 @@ class HttpResponse {
 
       emitter
         .on('pipe', (stream) => {
+          debug('stream.pipe(res) %s', stream);
+
           this.streaming = true;
           this.stream(stream);
         })
         .on('unpipe', () => {
+          debug('stream.unpipe(res)');
+
           this.aborted = true;
         })
         .on('error', () => {
+          debug('stream.pipe(res) error');
           this.aborted = true;
           this.end();
         });
@@ -128,6 +134,8 @@ class HttpResponse {
     emitter = this[resEvents] as EventEmitter;
     emitter.on(eventName, eventArgument);
 
+    debug('res.on %s %s', eventName, eventArgument);
+
     this.registerEvents();
 
     return this;
@@ -152,6 +160,8 @@ class HttpResponse {
     emitter = this[resEvents] as EventEmitter;
     emitter.once(eventName, eventArgument);
 
+    debug('res.once %s %s', eventName, eventArgument);
+
     this.registerEvents();
 
     return this;
@@ -170,6 +180,8 @@ class HttpResponse {
     if (!emitter) {
       this[resEvents] = new EventEmitter();
     }
+    debug('res.emit %s %s', eventName, eventArgument);
+
     emitter = this[resEvents] as EventEmitter;
     return emitter.emit(eventName, eventArgument);
   }
@@ -211,6 +223,8 @@ class HttpResponse {
     const res = this[resResponse];
 
     if (!done && res && !streaming) {
+      debug('res.end(body) called');
+
       res.writeStatus(httpCodes[statusCode]);
       res.end(body, closeConnection);
       this.done = true;
@@ -228,6 +242,8 @@ class HttpResponse {
    */
 
   status(code: number): this {
+    debug('res.status(%d)', code);
+
     this.statusCode = code;
 
     return this;
@@ -271,6 +287,19 @@ class HttpResponse {
     this.statusCode = code as number;
     this.setHeader('Location', path as string);
 
+    return this.end();
+  }
+
+  /**
+   * Sends status with empty body
+   * @param code Status code
+   * @returns HttpResponse instance
+   * @example res.sendStatus(204);
+   */
+  sendStatus(code: number): this {
+    debug('res.sendStatus(%d)', code);
+
+    this.statusCode = code;
     return this.end();
   }
 
@@ -321,6 +350,8 @@ class HttpResponse {
    * @alias res.stream(readableStream)
    */
   pipe(stream: ReadStream, size?: number, compressed?: boolean): this {
+    debug('res.pipe(%o, %d, %j)', stream, size, compressed);
+
     return this.stream(stream, size, compressed);
   }
 
@@ -337,6 +368,8 @@ class HttpResponse {
     if (!this.done && this[resResponse] && this[resResponse] !== null) {
       const res = this[resResponse] as uWS.HttpResponse;
       this.exposeAborted();
+
+      debug('res.stream(%o, %d, %j)', stream, size, compressed);
 
       if (compressed) {
         const compressedStream = this.compressStream(stream);
@@ -542,6 +575,7 @@ class HttpResponse {
   write(chunk: uWS.RecognizedString | ArrayBuffer): this {
     const res = this[resResponse];
     if (!this.done && res && !this.streaming) {
+      debug('res.write(%s)', chunk);
       res.write(chunk);
       return this;
     }
@@ -555,8 +589,10 @@ class HttpResponse {
   exposeAborted(): this {
     const res = this[resResponse];
     if (!this[resAbortHandlerExpose] && res) {
+      debug('res.onAborted is exposed');
       res.onAborted(() => {
         this.aborted = true;
+        warn('res.onAborted is called');
         this[resAbortHandler].forEach((callback) => callback());
       });
       this[resAbortHandlerExpose] = true;
@@ -567,6 +603,7 @@ class HttpResponse {
 
   onAborted(handler: () => void): this {
     if (this[resAbortHandlerExpose]) {
+      debug('res.onAborted called');
       this[resAbortHandler].push(handler);
     }
 
@@ -582,6 +619,7 @@ class HttpResponse {
   getHeader(key: string): string | number | boolean | null {
     const headers = this[resHeaders];
     if (headers && headers[key]) {
+      debug('res.getHeader(%s)', key);
       return headers[key];
     }
     return null;
@@ -594,6 +632,7 @@ class HttpResponse {
    * @example res.hasHeader('cookie');
    */
   hasHeader(key: string): boolean {
+    debug('res.hasHeader(%s)', key);
     return this.getHeader(key) !== null;
   }
 
@@ -609,10 +648,23 @@ class HttpResponse {
       this[resHeaders] = {};
     }
 
+    debug('res.setHeader(%s, %s)', key, value);
     const headers = this[resHeaders] as Record<string, typeof value>;
     headers[key] = value;
 
     return this;
+  }
+
+  /**
+   * Set response header value by key
+   * @param key Header key
+   * @param value Header value
+   * @returns HttpResponse instance
+   * @example res.set('content-type', 'application/json');
+   * @alias res.setHeader('content-type', 'application/json');
+   */
+  set(key: string, value: string | number | boolean): this {
+    return this.setHeader(key, value);
   }
 
   /**
@@ -653,6 +705,7 @@ class HttpResponse {
    * @example res.type('application/json');
    */
   type(contentType: string): this {
+    debug('res.type(%s)', contentType);
     return this.setHeader('content-type', contentType);
   }
 }

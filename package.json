@@ -35,6 +35,7 @@
   },
   "homepage": "https://github.com/nanoexpress/pro-slim#readme",
   "dependencies": {
+    "debug": "^4.3.2",
     "fast-decode-uri-component": "^1.0.1",
     "path-to-regexp": "^6.2.0",
     "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v19.5.0.tar.gz"
@@ -43,6 +44,7 @@
     "@commitlint/cli": "^13.2.0",
     "@rollup/plugin-commonjs": "^21.0.0",
     "@rollup/plugin-node-resolve": "^13.0.5",
+    "@types/debug": "^4.1.7",
     "@types/node": "^16.10.2",
     "baretest": "^2.x",
     "commitlint-config-airlight": "^1.0.4",

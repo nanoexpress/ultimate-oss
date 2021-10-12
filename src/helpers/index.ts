@@ -4,4 +4,5 @@ import httpMethods from './http-methods';
 import invalid from './invalid';
 import { getMime, mimes } from './mime';
 
+export * from './loggy';
 export { _gc, httpMethods, httpCodes, invalid, mimes, getMime };

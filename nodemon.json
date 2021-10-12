@@ -3,13 +3,18 @@
   "ignore": ["build", ".vscode", ".circle", "node_modules"],
   "ext": "js,json,yml",
   "watch": ["cjs", "esm", "examples"],
-  "env": { "NODE_ENV": "development" },
+  "env": {
+    "NODE_ENV": "development",
+    "DEBUG_COLORS": true,
+    "DEBUG": "*"
+  },
   "args": [
     "--enable-source-maps",
     "--trace-deprecation",
     "--trace-uncaught",
     "--trace-warnings",
     "--experimental-json-modules",
-    "--experimental-wasm-modules"
+    "--experimental-wasm-modules",
+    "--es-module-specifier-resolution=node"
   ]
 }

@@ -4,7 +4,9 @@ import App from './app';
 import { exposeWebsocket } from './exposes/index';
 import Router from './router';
 
-const nanoexpress = (options: INanoexpressOptions = {}): App => {
+const nanoexpress = (
+  options: INanoexpressOptions = { ignoreTrailingSlash: true }
+): App => {
   let app;
 
   if (options.https && options.isSSL !== false) {

@@ -82,7 +82,7 @@ export default class Router {
         _routers.length = 0;
         _ws.length = 0;
       } else {
-        this.on('ANY', path as string | RegExp, handler);
+        this.apply(path as string | RegExp, handler);
       }
     });
 
@@ -112,12 +112,36 @@ export default class Router {
   }
 
   /**
+   *
+   * @param path
+   * @param handlers
+   * @alias Router.del
+   * @returns Router
+   */
+  delete(path: string | RegExp, ...handlers: HttpHandler<'DEL'>[]): this {
+    return this.del(path, ...handlers);
+  }
+
+  /**
    * @param path The accessible path to be called route handler
    * @param handlers List of middlewares and/or routes
    * @returns Router
    */
   all(path: string | RegExp, ...handlers: HttpHandler<'ANY'>[]): this {
     return this.on('ANY', path, ...(handlers as HttpHandler<HttpMethod>[]));
+  }
+
+  /**
+   * @param path The accessible path to be called route handler
+   * @param handlers List of middlewares and/or routes
+   * @returns Router
+   */
+  apply(path: string | RegExp, ...handlers: HttpHandler<'ANY'>[]): this {
+    return this.on(
+      '*' as HttpMethod,
+      path,
+      ...(handlers as HttpHandler<HttpMethod>[])
+    );
   }
 
   ws(path: RecognizedString, options?: WebSocketBehavior): this {

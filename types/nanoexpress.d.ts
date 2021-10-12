@@ -10,6 +10,7 @@ import { HttpMethod } from './find-route';
 export interface INanoexpressOptions {
   isSSL?: boolean;
   https?: AppOptions & { separateServer?: number | boolean };
+  ignoreTrailingSlash: boolean;
   poolSize?: number;
   console?: Console;
   json_spaces?: number;
