@@ -5,7 +5,6 @@ import {
   WebSocket,
   WebSocketBehavior
 } from 'uWebSockets.js';
-import { HttpMethod } from './find-route';
 
 export interface INanoexpressOptions {
   isSSL?: boolean;
@@ -17,9 +16,12 @@ export interface INanoexpressOptions {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   json_replacer?: (this: any, key: string, value: any) => any;
 }
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'OPTIONS' | 'DEL' | 'ANY';
 
 export interface HttpRequest extends uWS_HttpRequest {
+  baseUrl: string;
   url: string;
+  originalUrl: string;
   path: string;
   method: HttpMethod;
   stream: boolean;

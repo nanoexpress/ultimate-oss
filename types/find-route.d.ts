@@ -1,14 +1,11 @@
 import { Key } from 'path-to-regexp';
-import { HttpRequest } from 'uWebSockets.js';
 import { HttpResponse } from '../src/polyfills';
+import { HttpMethod, HttpRequest } from './nanoexpress';
 
-export interface HttpRequestExtended<T> extends HttpRequest {
+export interface HttpRequestExtended<T> extends Omit<HttpRequest, 'method'> {
   method: T;
-  path: string;
-  params?: Record<string, string>;
 }
 
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'OPTIONS' | 'DEL' | 'ANY';
 export type HttpHandler<T> = (
   req: HttpRequestExtended<T>,
   res: HttpResponse
@@ -21,6 +18,7 @@ export type HttpHandler<T> = (
 export interface UnpreparedRoute {
   method: HttpMethod;
   path: string | RegExp;
+  baseUrl: string;
   handler: HttpHandler<HttpMethod>;
 }
 
@@ -31,6 +29,7 @@ export interface PreparedRoute extends Omit<UnpreparedRoute, 'path'> {
   fetch_params: boolean;
   param_keys?: Key[];
   path: RegExp | string;
+  baseUrl: string;
   originalPath: string | null;
   regex: boolean;
   legacy: boolean;

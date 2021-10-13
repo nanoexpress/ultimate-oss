@@ -3,17 +3,17 @@ import fastDecodeURI from 'fast-decode-uri-component';
 import { pathToRegexp } from 'path-to-regexp';
 import {
   HttpHandler,
-  HttpMethod,
   HttpRequestExtended,
   PreparedRoute,
   UnpreparedRoute
 } from '../types/find-route';
+import { HttpMethod, INanoexpressOptions } from '../types/nanoexpress';
 import { debug, _gc } from './helpers';
 import { HttpResponse } from './polyfills';
 import legacyUtil from './utils/legacy';
 
 export default class FindRoute {
-  protected options;
+  protected options: INanoexpressOptions;
 
   protected routes: PreparedRoute[];
 
@@ -33,7 +33,7 @@ export default class FindRoute {
       ) => void)
     | null;
 
-  constructor(options = {}) {
+  constructor(options: INanoexpressOptions) {
     this.options = options;
     this.routes = [];
     this.async = false;
@@ -74,10 +74,17 @@ export default class FindRoute {
 
   // eslint-disable-next-line class-methods-use-this, max-lines-per-function, complexity
   parse(incomingRoute: UnpreparedRoute): PreparedRoute {
+    const { options: config } = this;
+
     const route: PreparedRoute = {
       ...incomingRoute,
       originalPath:
-        incomingRoute.path instanceof RegExp ? null : incomingRoute.path,
+        // eslint-disable-next-line no-nested-ternary
+        incomingRoute.path instanceof RegExp
+          ? null
+          : incomingRoute.path !== '/'
+          ? incomingRoute.baseUrl + incomingRoute.path
+          : incomingRoute.baseUrl,
       all: false,
       regex: false,
       fetch_params: false,
@@ -87,8 +94,19 @@ export default class FindRoute {
     };
 
     if (typeof route.path === 'string') {
+      if (
+        config.ignoreTrailingSlash &&
+        route.path !== '*' &&
+        route.path.charAt(route.path.length - 1) !== '/' &&
+        route.path.charAt(route.path.length - 1) !== '*' &&
+        route.path.lastIndexOf('.') < route.path.length - 4
+      ) {
+        route.path += '/';
+      }
+
       route.path = fastDecodeURI(route.path);
-      if (route.path === '*' || route.path === '/*') {
+
+      if (route.path === '*' || route.baseUrl === '*') {
         route.all = true;
       } else if (route.path.indexOf(':') !== -1) {
         route.fetch_params = true;
@@ -96,12 +114,19 @@ export default class FindRoute {
         route.originalPath = route.path;
         route.path = pathToRegexp(route.path, route.param_keys);
         route.regex = true;
-      } else if (route.method === ('*' as HttpMethod)) {
-        route.originalPath = route.path;
-        route.all = true;
       } else if (route.path.indexOf('/*') !== -1) {
-        route.originalPath = route.path;
-        route.path = route.path.substr(0, route.path.indexOf('/*'));
+        route.baseUrl = route.path.substr(0, route.path.indexOf('/*') + 1);
+        route.path = route.path.substr(route.baseUrl.length);
+        route.all = true;
+      } else if (
+        route.baseUrl.length > 1 &&
+        route.baseUrl.indexOf('/*') !== -1
+      ) {
+        route.baseUrl = route.baseUrl.substr(
+          0,
+          route.baseUrl.indexOf('/*') + 1
+        );
+        route.originalPath = route.baseUrl;
         route.all = true;
       }
     } else if (route.path instanceof RegExp) {
@@ -114,6 +139,8 @@ export default class FindRoute {
 
     if (route.legacy) {
       route.handler = legacyUtil(route.handler);
+      route.async = true;
+      route.await = true;
     }
 
     if (!this.fetchParams && route.fetch_params) {
@@ -125,58 +152,51 @@ export default class FindRoute {
     if (!this.await && route.await) {
       this.await = true;
     }
+
+    debug('new route registered [%s] %s', route.method, route.path);
+
     return route;
   }
 
   on(
     method: HttpMethod,
     path: string | RegExp | Array<string | RegExp>,
-    handler: HttpHandler<HttpMethod> | HttpHandler<HttpMethod>[]
+    handler: HttpHandler<HttpMethod> | HttpHandler<HttpMethod>[],
+    baseUrl: string
   ): this {
     if (Array.isArray(method)) {
       method.forEach((methodId) => {
-        this.on(methodId, path, handler);
+        this.on(methodId, path, handler, baseUrl);
       });
       return this;
     }
     if (Array.isArray(path)) {
       path.forEach((pathId) => {
-        this.on(method, pathId, handler);
+        this.on(method, pathId, handler, baseUrl);
       });
       return this;
     }
     if (Array.isArray(handler)) {
       handler.forEach((handlerId) => {
-        this.on(method, path, handlerId);
+        this.on(method, path, handlerId, baseUrl);
       });
       return this;
     }
 
-    this.routes.push(this.parse({ method, path, handler }));
+    this.routes.push(this.parse({ method, path, baseUrl, handler }));
 
-    debug(
-      'new route registered [%s] %s',
-      method === ('*' as HttpMethod) ? 'middleware' : method,
-      path
-    );
     _gc();
 
     return this;
   }
 
-  apply(
-    path: string | RegExp | Array<string | RegExp>,
-    handler: HttpHandler<HttpMethod> | HttpHandler<HttpMethod>[]
-  ): this {
-    return this.on('*' as HttpMethod, path, handler);
-  }
-
   off(
     method: HttpMethod,
     path: string,
-    handler: HttpHandler<HttpMethod>
+    handler: HttpHandler<HttpMethod>,
+    baseUrl: string
   ): this {
-    const parsed = this.parse({ method, path, handler });
+    const parsed = this.parse({ method, path, baseUrl, handler });
 
     if (!handler) {
       this.routes = this.routes.filter(
@@ -249,30 +269,66 @@ export default class FindRoute {
     const { routes } = this;
     let response;
 
+    /* console.log(
+      req,
+      routes.map((route) => ({
+        ...route,
+        // @ts-ignore
+        handler: route.handler.displayName || route.handler.name
+      }))
+    ); */
     for (let i = 0, len = routes.length; i < len; i += 1) {
       const route = routes[i];
 
       // Early return for performance reason
       if (res.done) {
+        debug('routes lookup early exit');
         return res;
       }
 
-      if (
-        route.method === 'ANY' ||
-        route.method === ('*' as HttpMethod) ||
-        route.method === req.method
-      ) {
+      if (route.method === 'ANY' || route.method === req.method) {
         let found = false;
         if (route.all) {
-          found = route.path ? req.path.includes(route.path as string) : true;
-        } else if (route.path === req.path) {
-          found = true;
+          found =
+            route.path && route.path !== '*'
+              ? req.path.includes(route.path as string)
+              : true;
         } else if (route.regex && (route.path as RegExp).test(req.path)) {
           found = true;
+        } else if (route.path === req.originalUrl) {
+          found = true;
+        } else if (route.baseUrl && req.path.startsWith(route.baseUrl)) {
+          // TODO: How to fix falsely results?
+          // found = true;
+          // console.log('what?', req);
+        } else {
+          // console.log('not found', req, route);
         }
 
         if (found) {
-          debug('routes lookup route found [%o]', route);
+          // Prepare url after found
+          if (
+            route.baseUrl !== '' &&
+            route.baseUrl !== '*' &&
+            req.path.indexOf(route.baseUrl) !== -1
+          ) {
+            req.baseUrl = route.baseUrl;
+            req.path = req.path.substr(req.baseUrl.length);
+            req.url = req.url.substr(req.baseUrl.length);
+
+            // console.log('first match', req, route);
+          } else if (
+            route.baseUrl !== '' &&
+            route.baseUrl !== '*' &&
+            req.baseUrl === route.baseUrl
+          ) {
+            // console.log('second match', req, route);
+            // when matches by baseUrl
+          } else {
+            // console.log('default match');
+            // on other use-cases
+          }
+
           if (route.fetch_params && route.param_keys) {
             const exec = (route.path as RegExp).exec(req.path);
 
@@ -287,6 +343,7 @@ export default class FindRoute {
               (req.params as Record<string, string>)[key] = value;
             }
           }
+
           if (route.async || route.legacy) {
             // eslint-disable-next-line no-await-in-loop
             response = await route.handler(req, res);
@@ -294,17 +351,26 @@ export default class FindRoute {
             response = route.handler(req, res);
           }
 
-          if (res.done || response === res) {
+          // console.log('\n', 'RESPONSE', response, res, '\n');
+
+          if (res.streaming || res.done || response === res) {
+            debug('routes lookup was done');
             return res;
           }
-          if (!res.done && response) {
+          if (!res.streaming && !res.done && response) {
             return res.send(response as string | Record<string, unknown>);
           }
         }
       }
     }
 
-    if (response === undefined && this.defaultRoute !== null) {
+    if (
+      !res.done &&
+      !res.streaming &&
+      response === undefined &&
+      this.defaultRoute !== null
+    ) {
+      debug('routes lookup was not found any route, fallback to not-found');
       const notFound = this.defaultRoute(req, res);
 
       if (notFound !== res) {

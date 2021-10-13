@@ -7,17 +7,14 @@ import uWS, {
   us_listen_socket,
   WebSocketBehavior
 } from 'uWebSockets.js';
+import { HttpHandler, HttpRequestExtended } from '../types/find-route';
 import {
-  HttpHandler,
   HttpMethod,
-  HttpRequestExtended
-} from '../types/find-route';
-import {
   HttpRequest,
   INanoexpressOptions,
   IWebsocketRoute
 } from '../types/nanoexpress';
-import { appInstance, routerInstances, wsInstances } from './constants';
+import { routerInstances, wsInstances } from './constants';
 import FindRoute from './find-route';
 import _gc from './helpers/gc';
 import { debug } from './helpers/loggy';
@@ -105,23 +102,27 @@ class App {
       middlewares.unshift(basePath);
       basePath = '*';
     }
+    if (Array.isArray(basePath)) {
+      if (basePath.every((path) => typeof path === 'function')) {
+        return this.use('*', ...basePath);
+      }
+    }
     middlewares.forEach((handler: Router | HttpHandler<HttpMethod>) => {
       if (handler instanceof Router) {
         const _routers = handler[routerInstances];
         const _ws = handler[wsInstances];
 
-        handler[appInstance] = this;
-        handler._basePath = basePath as string;
-
         _routers.forEach(({ method, path, handler: routeHandler }) => {
-          handler.on(method, path, routeHandler);
+          this._router.on(method, path, routeHandler, basePath as string);
         });
         this._ws.push(..._ws);
 
         _routers.length = 0;
         _ws.length = 0;
+      } else if (Array.isArray(handler)) {
+        this.use(basePath, handler);
       } else {
-        this._router.apply(basePath as string, handler);
+        this._router.on('ANY', '/', handler, basePath as string);
       }
     });
 
@@ -131,33 +132,48 @@ class App {
   on(
     method: HttpMethod,
     path: string | RegExp,
-    ...handlers: HttpHandler<HttpMethod>[]
+    handlers: HttpHandler<HttpMethod> | HttpHandler<HttpMethod>[],
+    baseUrl: string
   ): this {
-    handlers.forEach((handler) => {
-      this._router.on(method.toUpperCase() as HttpMethod, path, handler);
-    });
+    if (Array.isArray(handlers)) {
+      handlers.forEach((handler) => {
+        this._router.on(
+          method.toUpperCase() as HttpMethod,
+          path,
+          handler,
+          baseUrl
+        );
+      });
+    } else {
+      this._router.on(
+        method.toUpperCase() as HttpMethod,
+        path,
+        handlers,
+        baseUrl
+      );
+    }
     _gc();
     return this;
   }
 
   get(path: string | RegExp, ...handlers: HttpHandler<'GET'>[]): this {
-    return this.on('GET', path, ...(handlers as HttpHandler<HttpMethod>[]));
+    return this.on('GET', path, handlers as HttpHandler<HttpMethod>[], '');
   }
 
   post(path: string | RegExp, ...handlers: HttpHandler<'POST'>[]): this {
-    return this.on('POST', path, ...(handlers as HttpHandler<HttpMethod>[]));
+    return this.on('POST', path, handlers as HttpHandler<HttpMethod>[], '');
   }
 
   put(path: string | RegExp, ...handlers: HttpHandler<'PUT'>[]): this {
-    return this.on('PUT', path, ...(handlers as HttpHandler<HttpMethod>[]));
+    return this.on('PUT', path, handlers as HttpHandler<HttpMethod>[], '');
   }
 
   options(path: string | RegExp, ...handlers: HttpHandler<'OPTIONS'>[]): this {
-    return this.on('OPTIONS', path, ...(handlers as HttpHandler<HttpMethod>[]));
+    return this.on('OPTIONS', path, handlers as HttpHandler<HttpMethod>[], '');
   }
 
   del(path: string | RegExp, ...handlers: HttpHandler<'DEL'>[]): this {
-    return this.on('DEL', path, ...(handlers as HttpHandler<HttpMethod>[]));
+    return this.on('DEL', path, handlers as HttpHandler<HttpMethod>[], '');
   }
 
   /**
@@ -177,7 +193,7 @@ class App {
    * @returns App
    */
   all(path: string | RegExp, ...handlers: HttpHandler<'ANY'>[]): this {
-    return this.on('ANY', path, ...(handlers as HttpHandler<HttpMethod>[]));
+    return this.on('ANY', path, handlers as HttpHandler<HttpMethod>[], '');
   }
 
   ws(path: RecognizedString, options: WebSocketBehavior): this {
@@ -207,101 +223,71 @@ class App {
     } = this;
 
     if (!_ran) {
-      for (const route of router.search()) {
-        if (route.regex && !route.originalPath) {
-          continue; // TO-DO: handle later
+      const handler = async (
+        rawRes: uWS_HttpResponse,
+        rawReq: uWS_HttpRequest
+      ): Promise<uWS_HttpResponse | void> => {
+        let res: HttpResponse | undefined;
+        const req = rawReq as HttpRequest;
+
+        req.url = req.getUrl();
+        req.originalUrl = req.url;
+        req.path = req.originalUrl;
+        req.baseUrl = '';
+
+        req.method = req.getMethod().toUpperCase() as HttpMethod;
+
+        req.headers = {};
+
+        if (
+          config.ignoreTrailingSlash &&
+          req.path.charAt(req.path.length - 1) !== '/' &&
+          req.path.lastIndexOf('.') < req.path.length - 4
+        ) {
+          req.url += '/';
+          req.path += '/';
+          req.originalUrl += '/';
         }
 
-        const keys =
-          route.fetch_params && route.param_keys
-            ? route.param_keys.map((param) => param.name)
-            : [];
-        const isBody = route.method === 'POST' || route.method === 'PUT';
-        const isAny = route.method === 'ANY';
-        const isSuball = route.method === ('*' as HttpMethod);
+        if (req.method === 'POST' || req.method === 'PUT') {
+          // get body or create transform here
+        }
 
-        const fetchUrl = isAny || route.fetch_params;
-        const originalPath = route.originalPath as string;
-        const registerPath = originalPath.endsWith('/')
-          ? originalPath.substr(0, originalPath.length - 1)
-          : originalPath;
-        const method = isSuball
-          ? null
-          : (route.method.toLowerCase() as Lowercase<HttpMethod>);
+        if (_pools.length > 0) {
+          res = _pools.shift() as HttpResponse;
+          res.setResponse(rawRes, req);
+        } else {
+          res = new HttpResponse(config);
+          res.setResponse(rawRes, req);
+        }
 
-        const handler = async (
-          rawRes: uWS_HttpResponse,
-          rawReq: uWS_HttpRequest
-        ): Promise<uWS_HttpResponse | void> => {
-          let res: HttpResponse | undefined;
-          const req = rawReq as HttpRequest;
-          req.url =
-            fetchUrl || isSuball ? req.getUrl() : (route.path as string);
+        if (res.aborted || res.done || req.method === 'OPTIONS') {
+          debug('early returned ranning %o', {
+            aborted: res.aborted,
+            done: res.done,
+            method: req.method
+          });
+          return;
+        }
 
-          req.path = req.url;
-          req.method =
-            isAny || isSuball
-              ? (req.getMethod().toUpperCase() as HttpMethod)
-              : route.method;
-
-          req.headers = {};
-
-          if (isBody) {
-            // get body or create transform here
-          }
-
-          if (_pools.length > 0) {
-            res = _pools.shift() as HttpResponse;
-            res.setResponse(rawRes, req);
-          } else {
-            res = new HttpResponse(config);
-            res.setResponse(rawRes, req);
-          }
-
-          if (res.aborted || res.done || req.method === 'OPTIONS') {
-            debug('early returned ranning %o', {
-              aborted: res.aborted,
-              done: res.done,
-              method: req.method
-            });
-            return;
-          }
-
-          if (route.fetch_params) {
-            req.params = {};
-            for (let i = 0, len = keys.length; i < len; i += 1) {
-              (req.params as Record<string, string>)[keys[i]] =
-                req.getParameter(i);
-            }
-          }
-
-          if (route.legacy || (router.async && router.await)) {
-            res.exposeAborted();
-            await router.lookup(req, res).catch((err) => {
-              this._router.handleError(err, req, res as HttpResponse);
-            });
-            if (_pools.length < _poolsSize) {
-              _pools.push(res);
-            }
-            return rawRes;
-          }
-
-          router.lookup(req, res);
+        if (router.async && router.await) {
+          res.exposeAborted();
+          await router.lookup(req, res).catch((err) => {
+            this._router.handleError(err, req, res as HttpResponse);
+          });
           if (_pools.length < _poolsSize) {
             _pools.push(res);
           }
-        };
-
-        if (isSuball) {
-          app.any(registerPath, handler);
-          app.any(`${registerPath}/*`, handler);
-        } else if (method && config.ignoreTrailingSlash) {
-          app[method](registerPath, handler);
-          app[method](`${registerPath}/`, handler);
-        } else if (method) {
-          app[method](originalPath, handler);
+          return rawRes;
         }
-      }
+
+        router.lookup(req, res);
+        if (_pools.length < _poolsSize) {
+          _pools.push(res);
+        }
+      };
+
+      app.any('/*', handler);
 
       _ws.forEach(({ path, options }) => {
         this._app.ws(path, options);

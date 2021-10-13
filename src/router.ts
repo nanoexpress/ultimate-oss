@@ -1,6 +1,6 @@
 import { RecognizedString, WebSocketBehavior } from 'uWebSockets.js';
-import { HttpHandler, HttpMethod, UnpreparedRoute } from '../types/find-route';
-import { IWebsocketRoute } from '../types/nanoexpress';
+import { HttpHandler, UnpreparedRoute } from '../types/find-route';
+import { HttpMethod, IWebsocketRoute } from '../types/nanoexpress';
 import App from './app';
 import { appInstance, routerInstances, wsInstances } from './constants';
 import { invalid, _gc } from './helpers';
@@ -26,22 +26,28 @@ export default class Router {
   on(
     method: HttpMethod,
     path: string | RegExp,
-    ...handlers: HttpHandler<HttpMethod>[]
+    handlers: HttpHandler<HttpMethod> | HttpHandler<HttpMethod>[],
+    baseUrl: string
   ): this {
     const app = this[appInstance];
-    const normalisedPath =
-      // eslint-disable-next-line no-nested-ternary
-      this._basePath === '*'
-        ? '*'
-        : path === '/'
-        ? this._basePath
-        : `${this._basePath}${path}`;
 
     if (app) {
-      app.on(method, normalisedPath, ...handlers);
-    } else {
+      app.on(method, path, handlers, baseUrl);
+    } else if (Array.isArray(handlers)) {
       handlers.forEach((handler) => {
-        this[routerInstances].push({ method, path: normalisedPath, handler });
+        this[routerInstances].push({
+          method,
+          path,
+          baseUrl,
+          handler
+        });
+      });
+    } else {
+      this[routerInstances].push({
+        method,
+        path,
+        baseUrl,
+        handler: handlers
       });
     }
 
@@ -56,6 +62,11 @@ export default class Router {
       middlewares.unshift(path);
       path = '*';
     }
+    if (Array.isArray(path)) {
+      if (path.every((routePath) => typeof routePath === 'function')) {
+        return this.use('*', ...path);
+      }
+    }
     middlewares.forEach((handler: Router | HttpHandler<HttpMethod>) => {
       if (handler instanceof Router) {
         const _routers = handler[routerInstances];
@@ -66,23 +77,17 @@ export default class Router {
 
         _routers.forEach(
           ({ method, path: routePath, handler: routeHandler }) => {
-            const normalisedPath =
-              // eslint-disable-next-line no-nested-ternary
-              path === '*'
-                ? '*'
-                : routePath === '/'
-                ? path
-                : `${path}${routePath}`;
-
-            this.on(method, normalisedPath as string, routeHandler);
+            this.on(method, routePath as string, routeHandler, path as string);
           }
         );
         this[wsInstances].push(..._ws);
 
         _routers.length = 0;
         _ws.length = 0;
+      } else if (Array.isArray(handler)) {
+        this.use(path, handler);
       } else {
-        this.apply(path as string | RegExp, handler);
+        this.on('ANY', path as string | RegExp, handler, this._basePath);
       }
     });
 
@@ -92,23 +97,48 @@ export default class Router {
   }
 
   get(path: string | RegExp, ...handlers: HttpHandler<'GET'>[]): this {
-    return this.on('GET', path, ...(handlers as HttpHandler<HttpMethod>[]));
+    return this.on(
+      'GET',
+      path,
+      handlers as HttpHandler<HttpMethod>[],
+      this._basePath
+    );
   }
 
   post(path: string | RegExp, ...handlers: HttpHandler<'POST'>[]): this {
-    return this.on('POST', path, ...(handlers as HttpHandler<HttpMethod>[]));
+    return this.on(
+      'POST',
+      path,
+      handlers as HttpHandler<HttpMethod>[],
+      this._basePath
+    );
   }
 
   put(path: string | RegExp, ...handlers: HttpHandler<'PUT'>[]): this {
-    return this.on('PUT', path, ...(handlers as HttpHandler<HttpMethod>[]));
+    return this.on(
+      'PUT',
+      path,
+      handlers as HttpHandler<HttpMethod>[],
+      this._basePath
+    );
   }
 
   options(path: string | RegExp, ...handlers: HttpHandler<'OPTIONS'>[]): this {
-    return this.on('OPTIONS', path, ...(handlers as HttpHandler<HttpMethod>[]));
+    return this.on(
+      'OPTIONS',
+      path,
+      handlers as HttpHandler<HttpMethod>[],
+      this._basePath
+    );
   }
 
   del(path: string | RegExp, ...handlers: HttpHandler<'DEL'>[]): this {
-    return this.on('DEL', path, ...(handlers as HttpHandler<HttpMethod>[]));
+    return this.on(
+      'DEL',
+      path,
+      handlers as HttpHandler<HttpMethod>[],
+      this._basePath
+    );
   }
 
   /**
@@ -128,19 +158,11 @@ export default class Router {
    * @returns Router
    */
   all(path: string | RegExp, ...handlers: HttpHandler<'ANY'>[]): this {
-    return this.on('ANY', path, ...(handlers as HttpHandler<HttpMethod>[]));
-  }
-
-  /**
-   * @param path The accessible path to be called route handler
-   * @param handlers List of middlewares and/or routes
-   * @returns Router
-   */
-  apply(path: string | RegExp, ...handlers: HttpHandler<'ANY'>[]): this {
     return this.on(
-      '*' as HttpMethod,
+      'ANY',
       path,
-      ...(handlers as HttpHandler<HttpMethod>[])
+      handlers as HttpHandler<HttpMethod>[],
+      this._basePath
     );
   }
 

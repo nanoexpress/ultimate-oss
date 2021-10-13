@@ -57,9 +57,9 @@ class HttpResponse {
 
   public aborted: boolean;
 
-  protected registered: boolean;
+  public streaming: boolean;
 
-  protected streaming: boolean;
+  protected registered: boolean;
 
   public serialize?: (
     data: Record<string, unknown> | string | number | boolean
@@ -94,11 +94,12 @@ class HttpResponse {
 
       emitter
         .on('pipe', (stream) => {
-          debug('stream.pipe(res) %s', stream);
+          debug('stream.pipe(res)');
 
           this.streaming = true;
           this.stream(stream);
         })
+
         .on('unpipe', () => {
           debug('stream.unpipe(res)');
 
@@ -134,7 +135,7 @@ class HttpResponse {
     emitter = this[resEvents] as EventEmitter;
     emitter.on(eventName, eventArgument);
 
-    debug('res.on %s %s', eventName, eventArgument);
+    debug('res.on(%s, handler)', eventName);
 
     this.registerEvents();
 
@@ -160,7 +161,59 @@ class HttpResponse {
     emitter = this[resEvents] as EventEmitter;
     emitter.once(eventName, eventArgument);
 
-    debug('res.once %s %s', eventName, eventArgument);
+    debug('res.once(%s, handler)', eventName);
+
+    this.registerEvents();
+
+    return this;
+  }
+
+  /**
+   * Removes event from response
+   * @param eventName Event name
+   * @param eventArgument Any argument
+   * @returns HttpResponse instance
+   * @example res.off('end', (eventArgument) => {...})
+   */
+  off(
+    eventName: string | symbol,
+    eventArgument: (eventArgument?: unknown) => void
+  ): this {
+    let emitter = this[resEvents];
+
+    if (!emitter) {
+      return this;
+    }
+    emitter = this[resEvents] as EventEmitter;
+    emitter.off(eventName, eventArgument);
+
+    debug('res.off(%s, handler)', eventName);
+
+    this.registerEvents();
+
+    return this;
+  }
+
+  /**
+   * Removes listener from response
+   * @param eventName Event name
+   * @param eventArgument Any argument
+   * @returns HttpResponse instance
+   * @example res.removeListener('end', (eventArgument) => {...})
+   */
+  removeListener(
+    eventName: string | symbol,
+    eventArgument: (eventArgument?: unknown) => void
+  ): this {
+    let emitter = this[resEvents];
+
+    if (!emitter) {
+      return this;
+    }
+    emitter = this[resEvents] as EventEmitter;
+    emitter.removeListener(eventName, eventArgument);
+
+    debug('res.removeListener(%s, handler)', eventName);
 
     this.registerEvents();
 
@@ -180,7 +233,7 @@ class HttpResponse {
     if (!emitter) {
       this[resEvents] = new EventEmitter();
     }
-    debug('res.emit %s %s', eventName, eventArgument);
+    debug('res.emit(%s, argument)', eventName);
 
     emitter = this[resEvents] as EventEmitter;
     return emitter.emit(eventName, eventArgument);
@@ -350,7 +403,7 @@ class HttpResponse {
    * @alias res.stream(readableStream)
    */
   pipe(stream: ReadStream, size?: number, compressed?: boolean): this {
-    debug('res.pipe(%o, %d, %j)', stream, size, compressed);
+    debug('res.pipe(stream, %d, %j)', size, compressed);
 
     return this.stream(stream, size, compressed);
   }
@@ -368,8 +421,16 @@ class HttpResponse {
     if (!this.done && this[resResponse] && this[resResponse] !== null) {
       const res = this[resResponse] as uWS.HttpResponse;
       this.exposeAborted();
-
-      debug('res.stream(%o, %d, %j)', stream, size, compressed);
+      let calledData = false;
+      const hotfixUnsupportedStreams = setTimeout(() => {
+        if (stream.path) {
+          stream.close();
+          warn(
+            'res.stream(stream) data was not called, but mimicked by nanoexpress, performance may be dropped and even can be stuck at responses, so please use official middlewares to avoid such errors'
+          );
+          this.stream(createReadStream(stream.path), size, compressed);
+        }
+      }, 100);
 
       if (compressed) {
         const compressedStream = this.compressStream(stream);
@@ -377,33 +438,45 @@ class HttpResponse {
         if (compressedStream) {
           stream = compressedStream as unknown as ReadStream;
         }
-      } else if (!size && stream.path) {
+      } else if (!(size || Number.isNaN(size)) && stream.path) {
         ({ size } = statSync(stream.path));
       }
 
-      if (compressed || !size) {
-        stream.on('data', (buffer: Buffer): void => {
-          if (this.aborted) {
-            stream.destroy();
-            return;
-          }
-          res.write(
-            buffer.buffer.slice(
-              buffer.byteOffset,
-              Number(buffer.byteOffset) + Number(buffer.byteLength)
-            )
-          );
-        });
+      if (compressed || !size || Number.isNaN(size)) {
+        debug('res.stream:compressed(stream, %d, %j)', size, compressed);
+        stream
+          .on('data', (buffer: Buffer): void => {
+            clearTimeout(hotfixUnsupportedStreams);
+            calledData = true;
+            if (this.aborted || this.done) {
+              return;
+            }
+            res.write(
+              buffer.buffer.slice(
+                buffer.byteOffset,
+                Number(buffer.byteOffset) + Number(buffer.byteLength)
+              )
+            );
+          })
+          .on('finish', () => {
+            this.streaming = false;
+            this.emit('finish');
+            res.end();
+          });
       } else {
+        debug('res.stream:uncompressed(stream, %d, %j)', size, compressed);
+        // eslint-disable-next-line max-lines-per-function
         stream.on('data', (buffer: Buffer): void => {
+          clearTimeout(hotfixUnsupportedStreams);
+          calledData = true;
           if (this.done || this.aborted) {
-            stream.destroy();
             return;
           }
           buffer = buffer.buffer.slice(
             buffer.byteOffset,
             Number(buffer.byteOffset) + Number(buffer.byteLength)
           ) as Buffer;
+
           const lastOffset = res.getWriteOffset();
 
           // First try
@@ -418,7 +491,6 @@ class HttpResponse {
             // Register async handlers for drainage
             res.onWritable((offset) => {
               if (this.done || this.aborted) {
-                stream.destroy();
                 return true;
               }
               const [writeOk, writeDone] = res.tryEnd(
@@ -439,10 +511,19 @@ class HttpResponse {
         .on('error', (error) => {
           stream.destroy(error);
           this.aborted = true;
+          this.emit('error', error as never);
         })
-        .on('end', () => {
-          this.streaming = false;
-          this.end();
+        .on('close', () => {
+          if (calledData) {
+            this.streaming = false;
+            this.emit('close');
+            this.end();
+          }
+        })
+        .on('finish', () => {
+          if (calledData) {
+            stream.close();
+          }
         });
     }
     return this;
@@ -603,7 +684,6 @@ class HttpResponse {
 
   onAborted(handler: () => void): this {
     if (this[resAbortHandlerExpose]) {
-      debug('res.onAborted called');
       this[resAbortHandler].push(handler);
     }
 
@@ -619,7 +699,7 @@ class HttpResponse {
   getHeader(key: string): string | number | boolean | null {
     const headers = this[resHeaders];
     if (headers && headers[key]) {
-      debug('res.getHeader(%s)', key);
+      debug("res.getHeader('%s')", key);
       return headers[key];
     }
     return null;
@@ -632,7 +712,7 @@ class HttpResponse {
    * @example res.hasHeader('cookie');
    */
   hasHeader(key: string): boolean {
-    debug('res.hasHeader(%s)', key);
+    debug("res.hasHeader('%s')", key);
     return this.getHeader(key) !== null;
   }
 
@@ -648,7 +728,7 @@ class HttpResponse {
       this[resHeaders] = {};
     }
 
-    debug('res.setHeader(%s, %s)', key, value);
+    debug("res.setHeader('%s', '%s')", key, value);
     const headers = this[resHeaders] as Record<string, typeof value>;
     headers[key] = value;
 
