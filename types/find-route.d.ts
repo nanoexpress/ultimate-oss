@@ -19,6 +19,7 @@ export interface UnpreparedRoute {
   method: HttpMethod;
   path: string | RegExp;
   baseUrl: string;
+  originalUrl?: string;
   handler: HttpHandler<HttpMethod>;
 }
 
