@@ -120,7 +120,8 @@ class HttpResponse {
    * Registers event to response
    * @param eventName Event name
    * @param eventArgument Any argument
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.on('end', (eventArgument) => {...})
    */
   on(
@@ -146,7 +147,8 @@ class HttpResponse {
    * Registers event to response to be fired once
    * @param eventName Event name
    * @param eventArgument Any argument
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.once('end', (eventArgument) => {...})
    */
   once(
@@ -172,7 +174,8 @@ class HttpResponse {
    * Removes event from response
    * @param eventName Event name
    * @param eventArgument Any argument
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.off('end', (eventArgument) => {...})
    */
   off(
@@ -198,7 +201,8 @@ class HttpResponse {
    * Removes listener from response
    * @param eventName Event name
    * @param eventArgument Any argument
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.removeListener('end', (eventArgument) => {...})
    */
   removeListener(
@@ -225,6 +229,7 @@ class HttpResponse {
    * @param eventName Event name
    * @param eventArgument Any argument
    * @returns Emit response
+   * @memberof nanoexpress.HttpResponse
    * @example res.emit('end', 1)
    */
   emit(eventName: string | symbol, eventArgument?: never): boolean {
@@ -243,7 +248,8 @@ class HttpResponse {
    * Set new HttpResponse for current pool
    * @param res Native uWS.HttpResponse instance
    * @param req HttpResponse instance
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.setResponse(res, req)
    */
   setResponse(res: uWS.HttpResponse, req: HttpRequest): this {
@@ -269,7 +275,8 @@ class HttpResponse {
    * Ends this response by copying the contents of body.
    * @param body Body content
    * @param closeConnection Gives boolean to connection statement
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.end('text');
    */
   end(body?: uWS.RecognizedString, closeConnection?: boolean): this {
@@ -311,7 +318,8 @@ class HttpResponse {
    * Sets response status
    * @deprecated Please use `res.statusCode` instead
    * @param code Status code
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.status(204);
    */
 
@@ -327,7 +335,8 @@ class HttpResponse {
    * Combine of `res.status` and `res.setHeaders`
    * @param code Status code
    * @param headers Record object containing headers
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.writeHead(200, {'X-Header': 1234});
    */
   writeHead(
@@ -349,6 +358,14 @@ class HttpResponse {
     return this;
   }
 
+  /**
+   * Redirect current locate to new
+   * @param code Redirect code
+   * @param path Path to be redirected
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
+   * @example res.redirect('/foo');
+   */
   redirect(code: number | string, path?: string): this {
     if (!path && typeof code === 'string') {
       path = code;
@@ -367,7 +384,8 @@ class HttpResponse {
   /**
    * Sends status with empty body
    * @param code Status code
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.sendStatus(204);
    */
   sendStatus(code: number): this {
@@ -381,7 +399,8 @@ class HttpResponse {
    * Sends this response by copying the contents of body.
    * @param body Body content
    * @param closeConnection Gives boolean to connection statement
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.send({status: 'success'});
    */
   send(
@@ -419,7 +438,8 @@ class HttpResponse {
    * @param stream Input stream
    * @param size Stream size
    * @param compressed Compressed status
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.pipe(readableStream)
    * @alias res.stream(readableStream)
    */
@@ -434,7 +454,8 @@ class HttpResponse {
    * @param stream Input stream
    * @param size Stream size
    * @param compressed Compressed status
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.stream(readableStream)
    */
   // eslint-disable-next-line max-lines-per-function
@@ -564,7 +585,8 @@ class HttpResponse {
    * @param stream Readable stream
    * @param options One of compressions (BrotliCompress, ZlibOptions)
    * @param priority Compression picking priority
-   * @returns Compressed stream
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.compressStream(writableStream)
    */
   compressStream(
@@ -613,7 +635,8 @@ class HttpResponse {
    * @param path File absolute path
    * @param lastModified Sets `Last-Modified` header to prevent infinite re-loading
    * @param compressed Compresses file and saves bandwidth of user
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.sendFile('foo.mp4')
    */
   // eslint-disable-next-line max-lines-per-function
@@ -680,7 +703,8 @@ class HttpResponse {
   /**
    * Enters or continues chunked encoding mode. Writes part of the response. End with zero length write.
    * @param chunk Content response chunk
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.write(Buffer.from('Hi'));
    */
   write(chunk: uWS.RecognizedString | ArrayBuffer): this {
@@ -725,6 +749,7 @@ class HttpResponse {
    * @param key Header key
    * @returns Returns value of header got by key
    * @example res.getHeader('cookie');
+   * @memberof nanoexpress.HttpResponse
    */
   getHeader(key: string): RecognizedString | null {
     const headers = this[resHeaders];
@@ -740,6 +765,7 @@ class HttpResponse {
    * @param key Header key
    * @returns Returns `true` if header exists whereas `false` in other cases
    * @example res.hasHeader('cookie');
+   * @memberof nanoexpress.HttpResponse
    */
   hasHeader(key: string): boolean {
     debug("res.hasHeader('%s')", key);
@@ -750,7 +776,8 @@ class HttpResponse {
    * Set response header value by key
    * @param key Header key
    * @param value Header value
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.setHeader('content-type', 'application/json');
    */
   setHeader(key: string, value: string | number | boolean): this {
@@ -770,7 +797,8 @@ class HttpResponse {
    * Set response header value by key
    * @param key Header key
    * @param value Header value
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.set('content-type', 'application/json');
    * @alias res.setHeader('content-type', 'application/json');
    */
@@ -781,7 +809,8 @@ class HttpResponse {
   /**
    * Set response headers by Record dict
    * @param headers Header key/value record dict
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.setHeaders({'content-type':'application/json'});
    */
   setHeaders(headers: Record<string, RecognizedString>): this {
@@ -798,7 +827,8 @@ class HttpResponse {
   /**
    * Remove response header value by key
    * @param key Header key
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.removeHeader('cookie');
    */
   removeHeader(key: string): this {
@@ -813,7 +843,8 @@ class HttpResponse {
   /**
    * Set response content type
    * @param contentType Content type
-   * @returns HttpResponse instance
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
    * @example res.type('application/json');
    */
   type(contentType: string): this {

@@ -4,6 +4,13 @@ import App from './app';
 import { exposeWebsocket } from './exposes/index';
 import Router from './router';
 
+/**
+ * Instance initializer for nanoexpress
+ * @param options Instance options
+ * @param options.enableExpressCompatibility Sets polyfill status
+ * @param options.ignoreTrailingSlash Normalizes trailing slash on routes
+ * @returns
+ */
 const nanoexpress = (
   options: INanoexpressOptions = {
     ignoreTrailingSlash: true,

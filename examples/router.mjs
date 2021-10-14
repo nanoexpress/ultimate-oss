@@ -1,6 +1,7 @@
 import { pathToRegexp } from 'path-to-regexp';
 import uWS from 'uWebSockets.js';
 import nanoexpress from '../esm/nanoexpress.js';
+import express from './swagger/node_modules/express/index.js';
 
 const app = nanoexpress();
 app.setNotFoundHandler((req, res) => {
@@ -12,7 +13,7 @@ app
     response.end('');
   })
   .get('/user/:id', (request, response) => {
-    return request.params.id;
+    response.end(request.params.id);
   })
   .post('/user', (request, response) => {
     response.end('');
@@ -23,12 +24,29 @@ app
 
 app.listen(4000);
 
+const app2 = express();
+app2
+  .get('/', (_, response) => {
+    response.end('');
+  })
+  .get('/user/:id', (request, response) => {
+    response.end(request.params.id);
+  })
+  .post('/user', (request, response) => {
+    response.end('');
+  })
+  .get('/test/simple/:id', async (request) => ({
+    id: request.params.id
+  }));
+
+app2.listen(4100, () => console.log('express.js listening at :4100'));
+
 // uWS
-const app2 = uWS.App();
+const app3 = uWS.App();
 
 const keys = [];
 const regex = pathToRegexp('/profile/:id', keys);
-app2
+app3
   .get('/', async (response) => {
     response.end('');
   })
@@ -53,4 +71,4 @@ app2
   );
 
 // eslint-disable-next-line no-console
-app2.listen(5000, (token) => token && console.log('listen to 5000'));
+app3.listen(4200, (token) => token && console.log('listen to 4200'));
