@@ -472,6 +472,24 @@ class HttpResponse {
         ({ size } = statSync(stream.path));
       }
 
+      const onclose = (): void => {
+        if (calledData) {
+          this.done = true;
+          this.streaming = false;
+          this.emit('close');
+        } else if (stream.path) {
+          stream.close();
+          warn(
+            'res.stream(stream) data was not called, but mimicked by [nanoexpress], performance may be dropped and even can be stuck at responses, so please use official middlewares to avoid such errors'
+          );
+          this.stream(createReadStream(stream.path), size, compressed);
+        }
+      };
+      const onfinish = (): void => {
+        if (calledData) {
+          stream.close();
+        }
+      };
       if (compressed || !size || Number.isNaN(size)) {
         debug('res.stream:compressed(stream, %d, %j)', size, compressed);
         stream
@@ -487,25 +505,8 @@ class HttpResponse {
               )
             );
           })
-          .on('close', () => {
-            if (calledData) {
-              res.end();
-              this.done = true;
-              this.streaming = false;
-              this.emit('close');
-            } else if (stream.path) {
-              stream.close();
-              warn(
-                'res.stream(stream) data was not called, but mimicked by [nanoexpress], performance may be dropped and even can be stuck at responses, so please use official middlewares to avoid such errors'
-              );
-              this.stream(createReadStream(stream.path), size, compressed);
-            }
-          })
-          .on('finish', () => {
-            if (calledData) {
-              stream.close();
-            }
-          });
+          .on('close', onclose)
+          .on('finish', onfinish);
       } else {
         debug('res.stream:uncompressed(stream, %d, %j)', size, compressed);
         stream.on('data', (buffer: Buffer): void => {
@@ -519,17 +520,13 @@ class HttpResponse {
           ) as Buffer;
 
           const lastOffset = res.getWriteOffset();
-
-          // First try
           const [ok, done] = res.tryEnd(buffer, size as number);
 
           if (done) {
             this.done = true;
           } else if (!ok) {
-            // pause because backpressure
             stream.pause();
 
-            // Register async handlers for drainage
             res.onWritable((offset) => {
               if (this.done || this.aborted) {
                 return true;
@@ -554,24 +551,8 @@ class HttpResponse {
           this.aborted = true;
           this.emit('error', error as never);
         })
-        .on('close', () => {
-          if (calledData) {
-            this.done = true;
-            this.streaming = false;
-            this.emit('close');
-          } else if (stream.path) {
-            stream.close();
-            warn(
-              'res.stream(stream) data was not called, but mimicked by [nanoexpress], performance may be dropped and even can be stuck at responses, so please use official middlewares to avoid such errors'
-            );
-            this.stream(createReadStream(stream.path), size, compressed);
-          }
-        })
-        .on('finish', () => {
-          if (calledData) {
-            stream.close();
-          }
-        });
+        .on('close', onclose)
+        .on('finish', onfinish);
     }
     return this;
   }
@@ -660,7 +641,6 @@ class HttpResponse {
     }
     this.setHeader('content-type', getMime(path) as string);
 
-    // write data
     let start: number | undefined = 0;
     let end: number | undefined = 0;
 

@@ -178,48 +178,6 @@ export default class RouteEngine {
     return this;
   }
 
-  search(
-    param?: Record<keyof PreparedRoute, PreparedRoute[keyof PreparedRoute]>
-  ): PreparedRoute[] {
-    const { routes } = this;
-
-    return param
-      ? routes.filter((route) =>
-          Object.keys(param).every(
-            (key: string): boolean =>
-              (param as unknown as PreparedRoute)[
-                key as keyof PreparedRoute
-              ] ===
-              (route as unknown as PreparedRoute)[key as keyof PreparedRoute]
-          )
-        )
-      : routes;
-  }
-
-  find(
-    method: HttpMethod,
-    path: string,
-    handlers: HttpHandler<HttpMethod>[] = []
-  ): HttpHandler<HttpMethod>[] {
-    const { routes } = this;
-
-    for (let i = 0, len = routes.length; i < len; i += 1) {
-      const route = routes[i];
-
-      if (route.method === method) {
-        if (route.regex && (route.path as RegExp).test(path)) {
-          handlers.push(route.handler);
-        } else if (route.path === path) {
-          handlers.push(route.handler);
-        }
-      }
-    }
-
-    _gc();
-
-    return handlers;
-  }
-
   async lookup(
     req: HttpRequestExtended<HttpMethod>,
     res: HttpResponse
@@ -227,14 +185,6 @@ export default class RouteEngine {
     const { routes } = this;
     let response;
 
-    /* console.log(
-      req,
-      routes.map((route) => ({
-        ...route,
-        // @ts-ignore
-        handler: route.handler.displayName || route.handler.name
-      }))
-    ); */
     for (let i = 0, len = routes.length; i < len; i += 1) {
       const route = routes[i];
 
@@ -247,8 +197,6 @@ export default class RouteEngine {
       if (route.method === 'ANY' || route.method === req.method) {
         let found = false;
 
-        // console.log(req, route);
-
         if (route.all) {
           found =
             route.path && route.path !== '*'
@@ -260,16 +208,6 @@ export default class RouteEngine {
           found = true;
         } else if (route.originalUrl === req.originalUrl) {
           found = true;
-        } else if (route.baseUrl && req.path.indexOf(route.baseUrl) === 0) {
-          // TODO: How to fix falsely results?
-          // found = true;
-          req.baseUrl = route.baseUrl;
-          // req.path = req.originalUrl.substr(req.baseUrl.length);
-          // req.url = req.originalUrl.substr(req.baseUrl.length);
-
-          // console.log('what?', req, route);
-        } else {
-          // console.log('not found', req, route);
         }
 
         if (found) {
@@ -302,21 +240,12 @@ export default class RouteEngine {
             route.baseUrl !== '' &&
             route.baseUrl !== '*' &&
             req.baseUrl === route.baseUrl
-          ) {
-            // console.log('second match', req, route);
-            // when matches by baseUrl
-          } else {
-            // console.log('default match');
-            // on other use-cases
-          }
-
-          if (route.async || route.legacy) {
-            response = await route.handler(req, res);
-          } else {
-            response = route.handler(req, res);
-          }
-
-          // console.log('\n', 'RESPONSE', response, res, '\n');
+          )
+            if (route.async || route.legacy) {
+              response = await route.handler(req, res);
+            } else {
+              response = route.handler(req, res);
+            }
 
           if (res.streaming || res.done || response === res) {
             debug('routes lookup was done');
@@ -325,8 +254,6 @@ export default class RouteEngine {
           if (!res.streaming && !res.done && response) {
             return res.send(response as string | Record<string, unknown>);
           }
-        } else {
-          // console.log('not found', req, route);
         }
       }
     }
