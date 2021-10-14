@@ -14,7 +14,6 @@ import {
   INanoexpressOptions,
   IWebsocketRoute
 } from '../types/nanoexpress';
-import { slashify } from './helpers';
 import _gc from './helpers/gc';
 import { debug, warn } from './helpers/loggy';
 import { HttpResponse } from './polyfills';
@@ -179,9 +178,11 @@ class App extends RouterTemplate {
           debug(
             'res.redirect called instead of fast quick-fix on route ending without "/" for express.js middlewares compatibility'
           );
-          req.url = slashify(req.url);
-          req.path = slashify(req.path);
-          req.originalUrl = slashify(req.originalUrl);
+          // req.url = slashify(req.url);
+          // req.path = slashify(req.path);
+          // req.originalUrl = slashify(req.originalUrl);
+          res.redirect(`http://${req.getHeader('host')}${req.originalUrl}/`);
+          return rawRes;
         }
 
         if (res.aborted || res.done || req.method === 'OPTIONS') {

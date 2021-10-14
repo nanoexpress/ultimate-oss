@@ -1,4 +1,5 @@
 // eslint-disable-next-line node/no-unpublished-import
+import express from 'express';
 import nanoexpress from '../../esm/nanoexpress.js';
 import * as swagger from './swagger.js';
 
@@ -12,7 +13,7 @@ app.setErrorHandler(function notFoundHandler(error, req, res) {
  * Middlewares
  */
 // Documentation middleware
-app.use(swagger.serve);
+app.use('/api-docs/*', swagger.serve);
 app.get('/api-docs', swagger.documentation);
 
 app.get('/', async function root() {
@@ -21,7 +22,6 @@ app.get('/', async function root() {
 
 app.listen(5000);
 
-/*
 const app2 = express();
 
 app2.use('/api-docs', swagger.serve);
@@ -37,4 +37,4 @@ app2.all((req, res) => {
 
 app2.listen(7000, () => {
   console.log('HTTP Server (express) at :7000');
-});*/
+});

@@ -107,7 +107,7 @@ export default class Router {
       } else {
         this.on(
           'ANY',
-          '/',
+          '*',
           handler,
           path as string,
           this._basePath + (path as string)

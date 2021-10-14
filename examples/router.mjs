@@ -29,7 +29,7 @@ const app2 = uWS.App();
 const keys = [];
 const regex = pathToRegexp('/profile/:id', keys);
 app2
-  .get('/', async (_, response) => {
+  .get('/', async (response) => {
     response.end('');
   })
   .get('/user/:id', async (response, request) =>

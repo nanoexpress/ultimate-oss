@@ -8,7 +8,7 @@ import {
   UnpreparedRoute
 } from '../types/find-route';
 import { HttpMethod, INanoexpressOptions } from '../types/nanoexpress';
-import { debug, _gc } from './helpers';
+import { debug, slashify, _gc } from './helpers';
 import { HttpResponse } from './polyfills';
 import legacyUtil from './utils/legacy';
 
@@ -46,20 +46,14 @@ export default class RouteEngine {
     };
 
     if (typeof route.path === 'string') {
-      if (
-        config.ignoreTrailingSlash &&
-        route.path !== '*' &&
-        route.path.charAt(route.path.length - 1) !== '/' &&
-        route.path.charAt(route.path.length - 1) !== '*' &&
-        (route.path.lastIndexOf('.') === -1 ||
-          route.path.lastIndexOf('.') < route.path.length - 4)
-      ) {
-        route.path += '/';
+      if (config.ignoreTrailingSlash) {
+        route.path = slashify(route.path);
+        route.originalUrl = slashify(route.originalUrl);
       }
 
       route.path = fastDecodeURI(route.path);
 
-      if (route.path === '*' || route.baseUrl === '*') {
+      if (route.baseUrl === '*') {
         route.all = true;
       } else if (route.path.indexOf(':') !== -1) {
         route.fetch_params = true;
@@ -74,9 +68,10 @@ export default class RouteEngine {
         route.baseUrl.length > 1 &&
         route.baseUrl.indexOf('/*') !== -1
       ) {
-        route.baseUrl = route.baseUrl.substr(
+        route.baseUrl = route.baseUrl.substring(0, route.baseUrl.indexOf('/*'));
+        route.originalUrl = route.originalUrl.substring(
           0,
-          route.baseUrl.indexOf('/*') + 1
+          route.originalUrl.indexOf('/*') + 1
         );
         route.all = true;
       }
@@ -248,49 +243,33 @@ export default class RouteEngine {
 
       if (route.method === 'ANY' || route.method === req.method) {
         let found = false;
+
+        // console.log(req, route);
+
         if (route.all) {
           found =
             route.path && route.path !== '*'
               ? req.path.includes(route.path as string)
-              : true;
+              : req.originalUrl.substr(route.originalUrl.length).length > 1;
         } else if (route.regex && (route.path as RegExp).test(req.path)) {
           found = true;
         } else if (route.path === req.path && route.baseUrl === req.baseUrl) {
           found = true;
         } else if (route.originalUrl === req.originalUrl) {
           found = true;
-        } else if (route.baseUrl && req.path.startsWith(route.baseUrl)) {
+        } else if (route.baseUrl && req.path.indexOf(route.baseUrl) === 0) {
           // TODO: How to fix falsely results?
           // found = true;
-          // console.log('what?', req);
+          req.baseUrl = route.baseUrl;
+          // req.path = req.originalUrl.substr(req.baseUrl.length);
+          // req.url = req.originalUrl.substr(req.baseUrl.length);
+
+          // console.log('what?', req, route);
         } else {
           // console.log('not found', req, route);
         }
 
         if (found) {
-          // Prepare url after found
-          if (
-            route.baseUrl !== '' &&
-            route.baseUrl !== '*' &&
-            req.path.indexOf(route.baseUrl) !== -1
-          ) {
-            req.baseUrl = route.baseUrl;
-            req.path = req.path.substr(req.baseUrl.length);
-            req.url = req.url.substr(req.baseUrl.length);
-
-            // console.log('first match', req, route);
-          } else if (
-            route.baseUrl !== '' &&
-            route.baseUrl !== '*' &&
-            req.baseUrl === route.baseUrl
-          ) {
-            // console.log('second match', req, route);
-            // when matches by baseUrl
-          } else {
-            // console.log('default match');
-            // on other use-cases
-          }
-
           if (route.fetch_params && route.param_keys) {
             const exec = (route.path as RegExp).exec(req.path);
 
@@ -304,6 +283,27 @@ export default class RouteEngine {
 
               (req.params as Record<string, string>)[key] = value;
             }
+          }
+
+          // Prepare url after found
+          if (
+            route.baseUrl !== '' &&
+            route.baseUrl !== '*' &&
+            req.path.indexOf(route.baseUrl) === 0
+          ) {
+            req.baseUrl = route.baseUrl;
+            req.path = req.originalUrl.substr(req.baseUrl.length);
+            req.url = req.originalUrl.substr(req.baseUrl.length);
+          } else if (
+            route.baseUrl !== '' &&
+            route.baseUrl !== '*' &&
+            req.baseUrl === route.baseUrl
+          ) {
+            // console.log('second match', req, route);
+            // when matches by baseUrl
+          } else {
+            // console.log('default match');
+            // on other use-cases
           }
 
           if (route.async || route.legacy) {
@@ -322,6 +322,8 @@ export default class RouteEngine {
           if (!res.streaming && !res.done && response) {
             return res.send(response as string | Record<string, unknown>);
           }
+        } else {
+          // console.log('not found', req, route);
         }
       }
     }
