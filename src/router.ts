@@ -103,13 +103,13 @@ export default class Router {
         _routers.length = 0;
         _ws.length = 0;
       } else if (Array.isArray(handler)) {
-        this.use(path, handler);
+        this.use(path, ...handler);
       } else {
         this.on(
           'ANY',
-          path as string,
+          '/',
           handler,
-          this._basePath,
+          path as string,
           this._basePath + (path as string)
         );
       }

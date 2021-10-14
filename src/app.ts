@@ -14,6 +14,7 @@ import {
   INanoexpressOptions,
   IWebsocketRoute
 } from '../types/nanoexpress';
+import { slashify } from './helpers';
 import _gc from './helpers/gc';
 import { debug, warn } from './helpers/loggy';
 import { HttpResponse } from './polyfills';
@@ -157,17 +158,6 @@ class App extends RouterTemplate {
 
         req.headers = {};
 
-        if (
-          options.ignoreTrailingSlash &&
-          req.path.charAt(req.path.length - 1) !== '/' &&
-          (req.path.lastIndexOf('.') === -1 ||
-            req.path.lastIndexOf('.') < req.path.length - 4)
-        ) {
-          req.url += '/';
-          req.path += '/';
-          req.originalUrl += '/';
-        }
-
         if (req.method === 'POST' || req.method === 'PUT') {
           // get body or create transform here
         }
@@ -178,6 +168,20 @@ class App extends RouterTemplate {
         } else {
           res = new HttpResponse(options);
           res.setResponse(rawRes, req);
+        }
+
+        if (
+          options.ignoreTrailingSlash &&
+          req.path.charAt(req.path.length - 1) !== '/' &&
+          (req.path.lastIndexOf('.') === -1 ||
+            req.path.lastIndexOf('.') < req.path.length - 4)
+        ) {
+          debug(
+            'res.redirect called instead of fast quick-fix on route ending without "/" for express.js middlewares compatibility'
+          );
+          req.url = slashify(req.url);
+          req.path = slashify(req.path);
+          req.originalUrl = slashify(req.originalUrl);
         }
 
         if (res.aborted || res.done || req.method === 'OPTIONS') {

@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import { EventEmitter } from 'events';
 import { createReadStream, ReadStream, statSync } from 'fs';
-import uWS from 'uWebSockets.js';
+import uWS, { RecognizedString } from 'uWebSockets.js';
 import {
   BrotliCompress,
   BrotliOptions,
@@ -40,10 +40,7 @@ class HttpResponse {
   public [resResponse]: uWS.HttpResponse | null;
 
   // Expose functionality properties
-  protected [resHeaders]: Record<
-    string,
-    string | number | boolean | null
-  > | null;
+  protected [resHeaders]: Record<string, RecognizedString | null> | null;
 
   protected [resAbortHandler]: (() => void)[];
 
@@ -59,6 +56,8 @@ class HttpResponse {
 
   public streaming: boolean;
 
+  protected _headersSet = false;
+
   protected registered: boolean;
 
   public serialize?: (
@@ -73,6 +72,7 @@ class HttpResponse {
     this[resConfig] = config;
     this.done = false;
     this.aborted = false;
+    this._headersSet = false;
     this.registered = false;
     this.streaming = false;
     this[resEvents] = null;
@@ -81,7 +81,7 @@ class HttpResponse {
 
     this[resRequest] = null;
     this[resResponse] = null;
-    this[resHeaders] = {};
+    this[resHeaders] = null;
 
     this.statusCode = 200;
   }
@@ -251,6 +251,7 @@ class HttpResponse {
     this[resResponse] = res;
     this.done = false;
     this.aborted = res.aborted || false;
+    this._headersSet = false;
     this.streaming = false;
     this.registered = false;
     this[resEvents] = null;
@@ -272,13 +273,33 @@ class HttpResponse {
    * @example res.end('text');
    */
   end(body?: uWS.RecognizedString, closeConnection?: boolean): this {
-    const { statusCode, done, streaming } = this;
+    const {
+      statusCode,
+      done,
+      streaming,
+      _headersSet,
+      [resHeaders]: _headers
+    } = this;
     const res = this[resResponse];
 
     if (!done && res && !streaming) {
-      debug('res.end(body) called');
+      debug(
+        'res.end(body) called with status %d and has headers',
+        statusCode,
+        _headersSet
+      );
 
       res.writeStatus(httpCodes[statusCode]);
+      // headers
+      if (_headersSet) {
+        for (const header in _headers) {
+          const value = _headers[header];
+          // eslint-disable-next-line max-depth
+          if (value) {
+            res.writeHeader(header, value);
+          }
+        }
+      }
       res.end(body, closeConnection);
       this.done = true;
       this[resResponse] = null;
@@ -310,8 +331,8 @@ class HttpResponse {
    * @example res.writeHead(200, {'X-Header': 1234});
    */
   writeHead(
-    code: number | Record<string, string | number | boolean>,
-    headers?: Record<string, string | number | boolean>
+    code: number | Record<string, RecognizedString>,
+    headers?: Record<string, RecognizedString>
   ): this {
     if (typeof code === 'object' && !headers) {
       headers = code;
@@ -705,7 +726,7 @@ class HttpResponse {
    * @returns Returns value of header got by key
    * @example res.getHeader('cookie');
    */
-  getHeader(key: string): string | number | boolean | null {
+  getHeader(key: string): RecognizedString | null {
     const headers = this[resHeaders];
     if (headers && headers[key]) {
       debug("res.getHeader('%s')", key);
@@ -738,6 +759,7 @@ class HttpResponse {
     }
 
     debug("res.setHeader('%s', '%s')", key, value);
+    this._headersSet = true;
     const headers = this[resHeaders] as Record<string, typeof value>;
     headers[key] = value;
 
@@ -762,7 +784,8 @@ class HttpResponse {
    * @returns HttpResponse instance
    * @example res.setHeaders({'content-type':'application/json'});
    */
-  setHeaders(headers: Record<string, string | number | boolean>): this {
+  setHeaders(headers: Record<string, RecognizedString>): this {
+    this._headersSet = true;
     if (this[resHeaders]) {
       Object.assign(this[resHeaders], headers);
     } else {
