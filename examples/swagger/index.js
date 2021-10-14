@@ -5,6 +5,8 @@ import * as swagger from './swagger.js';
 const app = nanoexpress();
 
 app.setErrorHandler(function notFoundHandler(error, req, res) {
+  console.log('\n\n\n', error, '\n\n\n', res, '\n\n\n');
+
   return res.send({ error: error.stack_trace });
 });
 

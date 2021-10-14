@@ -107,7 +107,7 @@ class App extends RouterTemplate {
     req: HttpRequestExtended<HttpMethod>,
     res: HttpResponse
   ): this {
-    if (this.errorRoute) {
+    if (res && !res.aborted && !res.done && !res.streaming && this.errorRoute) {
       this.errorRoute(error, req, res);
     }
     return this;

@@ -448,10 +448,24 @@ class HttpResponse {
               )
             );
           })
+          .on('close', () => {
+            if (calledData) {
+              res.end();
+              this.done = true;
+              this.streaming = false;
+              this.emit('close');
+            } else if (stream.path) {
+              stream.close();
+              warn(
+                'res.stream(stream) data was not called, but mimicked by [nanoexpress], performance may be dropped and even can be stuck at responses, so please use official middlewares to avoid such errors'
+              );
+              this.stream(createReadStream(stream.path), size, compressed);
+            }
+          })
           .on('finish', () => {
-            this.streaming = false;
-            this.emit('finish');
-            res.end();
+            if (calledData) {
+              stream.close();
+            }
           });
       } else {
         debug('res.stream:uncompressed(stream, %d, %j)', size, compressed);
@@ -504,9 +518,9 @@ class HttpResponse {
         })
         .on('close', () => {
           if (calledData) {
+            this.done = true;
             this.streaming = false;
             this.emit('close');
-            this.end();
           } else if (stream.path) {
             stream.close();
             warn(
