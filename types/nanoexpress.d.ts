@@ -10,6 +10,7 @@ export interface INanoexpressOptions {
   isSSL?: boolean;
   https?: AppOptions & { separateServer?: number | boolean };
   ignoreTrailingSlash: boolean;
+  enableExpressCompatibility: boolean;
   poolSize?: number;
   console?: Console;
   json_spaces?: number;

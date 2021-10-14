@@ -5,7 +5,10 @@ import { exposeWebsocket } from './exposes/index';
 import Router from './router';
 
 const nanoexpress = (
-  options: INanoexpressOptions = { ignoreTrailingSlash: true }
+  options: INanoexpressOptions = {
+    ignoreTrailingSlash: true,
+    enableExpressCompatibility: false
+  }
 ): App => {
   let app;
 

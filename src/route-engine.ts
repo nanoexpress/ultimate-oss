@@ -8,7 +8,7 @@ import {
   UnpreparedRoute
 } from '../types/find-route';
 import { HttpMethod, INanoexpressOptions } from '../types/nanoexpress';
-import { debug, slashify, _gc } from './helpers';
+import { debug, invalid, slashify, _gc } from './helpers';
 import { HttpResponse } from './polyfills';
 import legacyUtil from './utils/legacy';
 
@@ -83,9 +83,15 @@ export default class RouteEngine {
     route.legacy = route.handler.toString().includes('next(');
 
     if (route.legacy) {
-      route.handler = legacyUtil(route.handler);
-      route.async = true;
-      route.await = true;
+      if (config.enableExpressCompatibility) {
+        route.handler = legacyUtil(route.handler);
+        route.async = true;
+        route.await = true;
+      } else {
+        invalid(
+          'Express.js compatibility mode is disabled, please enable before using *express.js* middlewares, but take care - performance will not be same as disabled'
+        );
+      }
     }
 
     if (!this.fetchParams && route.fetch_params) {
@@ -273,6 +279,7 @@ export default class RouteEngine {
           if (route.fetch_params && route.param_keys) {
             const exec = (route.path as RegExp).exec(req.path);
 
+            req.params = {} as Record<string, string>;
             for (
               let p = 0, lenp = route.param_keys.length;
               exec && p < lenp;
@@ -281,7 +288,7 @@ export default class RouteEngine {
               const key = route.param_keys[p].name;
               const value = exec[p + 1];
 
-              (req.params as Record<string, string>)[key] = value;
+              req.params[key] = value;
             }
           }
 

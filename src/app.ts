@@ -175,14 +175,17 @@ class App extends RouterTemplate {
           (req.path.lastIndexOf('.') === -1 ||
             req.path.lastIndexOf('.') < req.path.length - 4)
         ) {
-          debug(
-            'res.redirect called instead of fast quick-fix on route ending without "/" for express.js middlewares compatibility'
-          );
-          // req.url = slashify(req.url);
-          // req.path = slashify(req.path);
-          // req.originalUrl = slashify(req.originalUrl);
-          res.redirect(`http://${req.getHeader('host')}${req.originalUrl}/`);
-          return rawRes;
+          if (options.enableExpressCompatibility) {
+            debug(
+              'res.redirect called instead of fast quick-fix on route ending without "/" for express.js middlewares compatibility'
+            );
+            res.redirect(`http://${req.getHeader('host')}${req.originalUrl}/`);
+            return rawRes;
+          }
+
+          req.url += '/';
+          req.path += '/';
+          req.originalUrl += '/';
         }
 
         if (res.aborted || res.done || req.method === 'OPTIONS') {
@@ -205,7 +208,7 @@ class App extends RouterTemplate {
           return rawRes;
         }
 
-        response = _engine.lookup(req, res);
+        _engine.lookup(req, res);
         if (_pools.length < _poolsSize) {
           _pools.push(res);
         }
@@ -218,14 +221,13 @@ class App extends RouterTemplate {
           this.defaultRoute !== null
         ) {
           debug('routes lookup was not found any route, fallback to not-found');
-          const notFound = this.defaultRoute(req, res);
+          const notFound = await this.defaultRoute(req, res);
 
           if (notFound !== res) {
             res.send(notFound as string | Record<string, unknown>);
           }
-
-          return rawRes;
         }
+        return rawRes;
       };
 
       app.any('/*', handler);

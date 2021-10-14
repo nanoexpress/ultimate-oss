@@ -1,7 +1,7 @@
 {
   "verbose": true,
   "ignore": ["build", ".vscode", ".circle", "node_modules"],
-  "ext": "js,json,yml",
+  "ext": "mjs,js,json,yml",
   "watch": ["cjs", "esm", "examples"],
   "env": {
     "NODE_ENV": "development",

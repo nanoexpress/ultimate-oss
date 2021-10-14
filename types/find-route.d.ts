@@ -9,11 +9,7 @@ export interface HttpRequestExtended<T> extends Omit<HttpRequest, 'method'> {
 export type HttpHandler<T> = (
   req: HttpRequestExtended<T>,
   res: HttpResponse
-) =>
-  | HttpResponse
-  | string
-  | Record<string, unknown>
-  | Promise<HttpResponse | Record<string, unknown> | string>;
+) => HttpResponse | Promise<HttpResponse | Record<string, unknown> | string>;
 
 export interface UnpreparedRoute {
   method: HttpMethod;
