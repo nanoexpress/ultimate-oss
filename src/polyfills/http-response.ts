@@ -422,15 +422,6 @@ class HttpResponse {
       const res = this[resResponse] as uWS.HttpResponse;
       this.exposeAborted();
       let calledData = false;
-      const hotfixUnsupportedStreams = setTimeout(() => {
-        if (stream.path) {
-          stream.close();
-          warn(
-            'res.stream(stream) data was not called, but mimicked by nanoexpress, performance may be dropped and even can be stuck at responses, so please use official middlewares to avoid such errors'
-          );
-          this.stream(createReadStream(stream.path), size, compressed);
-        }
-      }, 100);
 
       if (compressed) {
         const compressedStream = this.compressStream(stream);
@@ -446,7 +437,6 @@ class HttpResponse {
         debug('res.stream:compressed(stream, %d, %j)', size, compressed);
         stream
           .on('data', (buffer: Buffer): void => {
-            clearTimeout(hotfixUnsupportedStreams);
             calledData = true;
             if (this.aborted || this.done) {
               return;
@@ -467,7 +457,6 @@ class HttpResponse {
         debug('res.stream:uncompressed(stream, %d, %j)', size, compressed);
         // eslint-disable-next-line max-lines-per-function
         stream.on('data', (buffer: Buffer): void => {
-          clearTimeout(hotfixUnsupportedStreams);
           calledData = true;
           if (this.done || this.aborted) {
             return;
@@ -518,6 +507,12 @@ class HttpResponse {
             this.streaming = false;
             this.emit('close');
             this.end();
+          } else if (stream.path) {
+            stream.close();
+            warn(
+              'res.stream(stream) data was not called, but mimicked by [nanoexpress], performance may be dropped and even can be stuck at responses, so please use official middlewares to avoid such errors'
+            );
+            this.stream(createReadStream(stream.path), size, compressed);
           }
         })
         .on('finish', () => {

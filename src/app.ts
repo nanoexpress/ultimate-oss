@@ -1,4 +1,4 @@
-/* eslint-disable complexity, max-lines, max-lines-per-function */
+/* eslint-disable complexity, max-lines, max-lines-per-function, import/no-cycle */
 import uWS, {
   HttpRequest as uWS_HttpRequest,
   HttpResponse as uWS_HttpResponse,
@@ -14,35 +14,30 @@ import {
   INanoexpressOptions,
   IWebsocketRoute
 } from '../types/nanoexpress';
-import { routerInstances, wsInstances } from './constants';
-import FindRoute from './find-route';
 import _gc from './helpers/gc';
-import { debug } from './helpers/loggy';
+import { debug, warn } from './helpers/loggy';
 import { HttpResponse } from './polyfills';
-import Router from './router';
+import RouteEngine from './route-engine';
+import RouterTemplate from './router';
 
-class App {
-  get config(): INanoexpressOptions {
-    return this._config;
-  }
-
+class App extends RouterTemplate {
   get https(): boolean {
-    return this._config.https !== undefined && this._config.isSSL !== false;
+    return this._options.https !== undefined && this._options.isSSL !== false;
   }
 
   get _console(): Console {
-    return this._config.console || console;
+    return this._options.console || console;
   }
 
   get raw(): TemplatedApp {
     return this._app;
   }
 
-  protected _config: INanoexpressOptions;
-
   protected _app: TemplatedApp;
 
-  protected _router: FindRoute;
+  protected _options: INanoexpressOptions;
+
+  protected _engine: RouteEngine;
 
   protected _ws: IWebsocketRoute[];
 
@@ -58,26 +53,39 @@ class App {
 
   protected _instance: Record<string, us_listen_socket | null>;
 
-  constructor(config: INanoexpressOptions, app: TemplatedApp) {
-    this._config = config;
+  protected defaultRoute: HttpHandler<HttpMethod> | null;
+
+  protected errorRoute:
+    | ((
+        err: Error,
+        req: HttpRequestExtended<HttpMethod>,
+        res: HttpResponse
+      ) => void)
+    | null;
+
+  constructor(options: INanoexpressOptions, app: TemplatedApp) {
+    super();
+    this._options = options;
     this._app = app;
-    this._router = new FindRoute(config);
+    this._engine = new RouteEngine(options);
+
+    this.defaultRoute = null;
+    this.errorRoute = null;
 
     this._ws = [];
     this._pools = [];
-    this._poolsSize = config?.poolSize || 10;
+    this._poolsSize = options.poolSize || 10;
 
     this.time = process.hrtime();
     this._separateServed = false;
     this._ran = false;
 
     this._instance = {};
-
     return this;
   }
 
   setNotFoundHandler(handler: HttpHandler<HttpMethod>): this {
-    this._router.setNotFoundHandler(handler);
+    this.defaultRoute = handler;
 
     return this;
   }
@@ -89,111 +97,20 @@ class App {
       res: HttpResponse
     ) => void
   ): this {
-    this._router.setErrorHandler(handler);
+    this.errorRoute = handler;
 
     return this;
   }
 
-  use(
-    basePath: string | HttpHandler<HttpMethod>,
-    ...middlewares: Array<HttpHandler<HttpMethod> | Router>
+  handleError(
+    error: Error,
+    req: HttpRequestExtended<HttpMethod>,
+    res: HttpResponse
   ): this {
-    if (typeof basePath === 'function') {
-      middlewares.unshift(basePath);
-      basePath = '*';
+    if (this.errorRoute) {
+      this.errorRoute(error, req, res);
     }
-    if (Array.isArray(basePath)) {
-      if (basePath.every((path) => typeof path === 'function')) {
-        return this.use('*', ...basePath);
-      }
-    }
-    middlewares.forEach((handler: Router | HttpHandler<HttpMethod>) => {
-      if (handler instanceof Router) {
-        const _routers = handler[routerInstances];
-        const _ws = handler[wsInstances];
-
-        _routers.forEach(({ method, path, handler: routeHandler }) => {
-          this._router.on(method, path, routeHandler, basePath as string);
-        });
-        this._ws.push(..._ws);
-
-        _routers.length = 0;
-        _ws.length = 0;
-      } else if (Array.isArray(handler)) {
-        this.use(basePath, handler);
-      } else {
-        this._router.on('ANY', '/', handler, basePath as string);
-      }
-    });
-
     return this;
-  }
-
-  on(
-    method: HttpMethod,
-    path: string | RegExp,
-    handlers: HttpHandler<HttpMethod> | HttpHandler<HttpMethod>[],
-    baseUrl: string
-  ): this {
-    if (Array.isArray(handlers)) {
-      handlers.forEach((handler) => {
-        this._router.on(
-          method.toUpperCase() as HttpMethod,
-          path,
-          handler,
-          baseUrl
-        );
-      });
-    } else {
-      this._router.on(
-        method.toUpperCase() as HttpMethod,
-        path,
-        handlers,
-        baseUrl
-      );
-    }
-    _gc();
-    return this;
-  }
-
-  get(path: string | RegExp, ...handlers: HttpHandler<'GET'>[]): this {
-    return this.on('GET', path, handlers as HttpHandler<HttpMethod>[], '');
-  }
-
-  post(path: string | RegExp, ...handlers: HttpHandler<'POST'>[]): this {
-    return this.on('POST', path, handlers as HttpHandler<HttpMethod>[], '');
-  }
-
-  put(path: string | RegExp, ...handlers: HttpHandler<'PUT'>[]): this {
-    return this.on('PUT', path, handlers as HttpHandler<HttpMethod>[], '');
-  }
-
-  options(path: string | RegExp, ...handlers: HttpHandler<'OPTIONS'>[]): this {
-    return this.on('OPTIONS', path, handlers as HttpHandler<HttpMethod>[], '');
-  }
-
-  del(path: string | RegExp, ...handlers: HttpHandler<'DEL'>[]): this {
-    return this.on('DEL', path, handlers as HttpHandler<HttpMethod>[], '');
-  }
-
-  /**
-   *
-   * @param path
-   * @param handlers
-   * @alias app.del
-   * @returns App
-   */
-  delete(path: string | RegExp, ...handlers: HttpHandler<'DEL'>[]): this {
-    return this.del(path, ...handlers);
-  }
-
-  /**
-   * @param path The accessible path to be called route handler
-   * @param handlers List of middlewares and/or routes
-   * @returns App
-   */
-  all(path: string | RegExp, ...handlers: HttpHandler<'ANY'>[]): this {
-    return this.on('ANY', path, handlers as HttpHandler<HttpMethod>[], '');
   }
 
   ws(path: RecognizedString, options: WebSocketBehavior): this {
@@ -214,11 +131,11 @@ class App {
   run(): this {
     const {
       _app: app,
-      _config: config,
+      _options: options,
       _ws,
       _pools,
       _poolsSize,
-      _router: router,
+      _engine,
       _ran
     } = this;
 
@@ -228,6 +145,7 @@ class App {
         rawReq: uWS_HttpRequest
       ): Promise<uWS_HttpResponse | void> => {
         let res: HttpResponse | undefined;
+        let response;
         const req = rawReq as HttpRequest;
 
         req.url = req.getUrl();
@@ -240,9 +158,10 @@ class App {
         req.headers = {};
 
         if (
-          config.ignoreTrailingSlash &&
+          options.ignoreTrailingSlash &&
           req.path.charAt(req.path.length - 1) !== '/' &&
-          req.path.lastIndexOf('.') < req.path.length - 4
+          (req.path.lastIndexOf('.') === -1 ||
+            req.path.lastIndexOf('.') < req.path.length - 4)
         ) {
           req.url += '/';
           req.path += '/';
@@ -257,7 +176,7 @@ class App {
           res = _pools.shift() as HttpResponse;
           res.setResponse(rawRes, req);
         } else {
-          res = new HttpResponse(config);
+          res = new HttpResponse(options);
           res.setResponse(rawRes, req);
         }
 
@@ -270,10 +189,10 @@ class App {
           return;
         }
 
-        if (router.async && router.await) {
+        if (_engine.async && _engine.await) {
           res.exposeAborted();
-          await router.lookup(req, res).catch((err) => {
-            this._router.handleError(err, req, res as HttpResponse);
+          response = await _engine.lookup(req, res).catch((err) => {
+            this.handleError(err, req, res as HttpResponse);
           });
           if (_pools.length < _poolsSize) {
             _pools.push(res);
@@ -281,16 +200,33 @@ class App {
           return rawRes;
         }
 
-        router.lookup(req, res);
+        response = _engine.lookup(req, res);
         if (_pools.length < _poolsSize) {
           _pools.push(res);
+        }
+
+        if (
+          res &&
+          !res.done &&
+          !res.streaming &&
+          response === undefined &&
+          this.defaultRoute !== null
+        ) {
+          debug('routes lookup was not found any route, fallback to not-found');
+          const notFound = this.defaultRoute(req, res);
+
+          if (notFound !== res) {
+            res.send(notFound as string | Record<string, unknown>);
+          }
+
+          return rawRes;
         }
       };
 
       app.any('/*', handler);
 
-      _ws.forEach(({ path, options }) => {
-        this._app.ws(path, options);
+      _ws.forEach(({ path, options: wsOptions }) => {
+        app.ws(path, wsOptions);
       });
       // Cleanup GC
       _ws.length = 0;
@@ -308,17 +244,17 @@ class App {
     is_ssl: boolean,
     handler: () => void
   ): Promise<us_listen_socket> {
-    const { _config: config } = this;
+    const { _options: options } = this;
 
     if (
       (port === 80 || port === 443) &&
       this.https &&
-      config.https?.separateServer &&
+      options.https?.separateServer &&
       !this._separateServed
     ) {
       const httpsPort =
-        typeof config.https.separateServer === 'number'
-          ? config.https.separateServer
+        typeof options.https.separateServer === 'number'
+          ? options.https.separateServer
           : 443;
       this._separateServed = true;
       return Promise.all([
@@ -373,7 +309,7 @@ class App {
     is_ssl = false,
     handler: () => void
   ): Promise<us_listen_socket> {
-    const { _console, _config: config, _app: app } = this;
+    const { _console, _options: options, _app: app } = this;
 
     // eslint-disable-next-line no-nested-ternary
     const sslString = is_ssl ? 'HTTPS ' : is_ssl === false ? 'HTTP ' : '';
@@ -407,9 +343,9 @@ class App {
 
         const err = new Error(
           this.https &&
-          (!config.https ||
-            !config.https.cert_file_name ||
-            !config.https.key_file_name)
+          (!options.https ||
+            !options.https.cert_file_name ||
+            !options.https.key_file_name)
             ? `[${sslString}Server]: SSL certificate was not defined or loaded`
             : `[${sslString}Server]: failed to host at [${id}]`
         );
@@ -452,7 +388,7 @@ class App {
    * @deprecated There no way to disable these methods as they are not available by default
    */
   disable(tag: string): this {
-    console.warn(
+    warn(
       `[Server]: The tag [${tag}] cannot be disabled as not set, not supported and not available`
     );
     return this;
@@ -463,7 +399,7 @@ class App {
    */
   set(key: keyof INanoexpressOptions, value: string | number): this {
     // @ts-ignore
-    this.config[key] = value;
+    this._options[key] = value;
     return this;
   }
 }

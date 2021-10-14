@@ -19,7 +19,7 @@ export interface UnpreparedRoute {
   method: HttpMethod;
   path: string | RegExp;
   baseUrl: string;
-  originalUrl?: string;
+  originalUrl: string;
   handler: HttpHandler<HttpMethod>;
 }
 
@@ -31,7 +31,6 @@ export interface PreparedRoute extends Omit<UnpreparedRoute, 'path'> {
   param_keys?: Key[];
   path: RegExp | string;
   baseUrl: string;
-  originalPath: string | null;
   regex: boolean;
   legacy: boolean;
 }

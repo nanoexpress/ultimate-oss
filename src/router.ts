@@ -1,17 +1,21 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any, max-lines, import/no-cycle, max-lines-per-function */
+
 import { RecognizedString, WebSocketBehavior } from 'uWebSockets.js';
 import { HttpHandler, UnpreparedRoute } from '../types/find-route';
 import { HttpMethod, IWebsocketRoute } from '../types/nanoexpress';
 import App from './app';
 import { appInstance, routerInstances, wsInstances } from './constants';
 import { invalid, _gc } from './helpers';
+import RouteEngine from './route-engine';
 
 export default class Router {
+  protected [appInstance]: App | Router;
+
+  protected _engine?: RouteEngine;
+
   [routerInstances]: UnpreparedRoute[];
 
   [wsInstances]: IWebsocketRoute[];
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [appInstance]?: App;
 
   _basePath: string;
 
@@ -27,19 +31,21 @@ export default class Router {
     method: HttpMethod,
     path: string | RegExp,
     handlers: HttpHandler<HttpMethod> | HttpHandler<HttpMethod>[],
-    baseUrl: string
+    baseUrl: string,
+    originalUrl: string
   ): this {
-    const app = this[appInstance];
+    const { _engine } = this;
 
-    if (app) {
-      app.on(method, path, handlers, baseUrl);
+    if (_engine) {
+      _engine.on(method, path, handlers, baseUrl, originalUrl);
     } else if (Array.isArray(handlers)) {
       handlers.forEach((handler) => {
         this[routerInstances].push({
           method,
           path,
           baseUrl,
-          handler
+          handler,
+          originalUrl
         });
       });
     } else {
@@ -47,7 +53,8 @@ export default class Router {
         method,
         path,
         baseUrl,
-        handler: handlers
+        handler: handlers,
+        originalUrl
       });
     }
 
@@ -55,15 +62,20 @@ export default class Router {
   }
 
   use(
-    path: string | HttpHandler<HttpMethod>,
-    ...middlewares: HttpHandler<HttpMethod>[]
+    path: string | HttpHandler<HttpMethod> | Router,
+    ...middlewares: Array<HttpHandler<HttpMethod> | Router>
   ): this {
-    if (typeof path === 'function') {
+    if (typeof path === 'function' || path instanceof Router) {
       middlewares.unshift(path);
       path = '*';
     }
     if (Array.isArray(path)) {
-      if (path.every((routePath) => typeof routePath === 'function')) {
+      if (
+        path.every(
+          (routePath) =>
+            typeof routePath === 'function' || path instanceof Router
+        )
+      ) {
         return this.use('*', ...path);
       }
     }
@@ -72,12 +84,18 @@ export default class Router {
         const _routers = handler[routerInstances];
         const _ws = handler[wsInstances];
 
+        handler[appInstance] = this;
         handler._basePath = path as string;
-        handler[appInstance] = this[appInstance];
 
         _routers.forEach(
-          ({ method, path: routePath, handler: routeHandler }) => {
-            this.on(method, routePath as string, routeHandler, path as string);
+          ({ method, path: routePath, handler: routeHandler, baseUrl }) => {
+            this.on(
+              method,
+              routePath as string,
+              routeHandler,
+              path as string,
+              (path as string) + baseUrl + (routePath as string)
+            );
           }
         );
         this[wsInstances].push(..._ws);
@@ -87,7 +105,13 @@ export default class Router {
       } else if (Array.isArray(handler)) {
         this.use(path, handler);
       } else {
-        this.on('ANY', path as string | RegExp, handler, this._basePath);
+        this.on(
+          'ANY',
+          path as string,
+          handler,
+          this._basePath,
+          this._basePath + (path as string)
+        );
       }
     });
 
@@ -101,7 +125,8 @@ export default class Router {
       'GET',
       path,
       handlers as HttpHandler<HttpMethod>[],
-      this._basePath
+      this._basePath,
+      ''
     );
   }
 
@@ -110,7 +135,8 @@ export default class Router {
       'POST',
       path,
       handlers as HttpHandler<HttpMethod>[],
-      this._basePath
+      this._basePath,
+      ''
     );
   }
 
@@ -119,7 +145,8 @@ export default class Router {
       'PUT',
       path,
       handlers as HttpHandler<HttpMethod>[],
-      this._basePath
+      this._basePath,
+      ''
     );
   }
 
@@ -128,7 +155,8 @@ export default class Router {
       'OPTIONS',
       path,
       handlers as HttpHandler<HttpMethod>[],
-      this._basePath
+      this._basePath,
+      ''
     );
   }
 
@@ -137,7 +165,8 @@ export default class Router {
       'DEL',
       path,
       handlers as HttpHandler<HttpMethod>[],
-      this._basePath
+      this._basePath,
+      ''
     );
   }
 
@@ -162,7 +191,8 @@ export default class Router {
       'ANY',
       path,
       handlers as HttpHandler<HttpMethod>[],
-      this._basePath
+      this._basePath,
+      ''
     );
   }
 
@@ -174,6 +204,7 @@ export default class Router {
         : path === '/'
         ? this._basePath
         : `${this._basePath}${path}`;
+
     this[wsInstances].push({
       path: normalisedPath,
       options
@@ -182,6 +213,14 @@ export default class Router {
     return this;
   }
 
+  /**
+   * @deprecated Use `app.publish()` for safety, this method will not work anymore
+   * @param topic
+   * @param message
+   * @param isBinary
+   * @param compress
+   * @returns Status of publish
+   */
   publish(
     topic: RecognizedString,
     message: RecognizedString,

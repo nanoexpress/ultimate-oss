@@ -12,7 +12,7 @@ import { debug, _gc } from './helpers';
 import { HttpResponse } from './polyfills';
 import legacyUtil from './utils/legacy';
 
-export default class FindRoute {
+export default class RouteEngine {
   protected options: INanoexpressOptions;
 
   protected routes: PreparedRoute[];
@@ -23,53 +23,12 @@ export default class FindRoute {
 
   public fetchParams: boolean;
 
-  protected defaultRoute: HttpHandler<HttpMethod> | null;
-
-  protected errorRoute:
-    | ((
-        err: Error,
-        req: HttpRequestExtended<HttpMethod>,
-        res: HttpResponse
-      ) => void)
-    | null;
-
   constructor(options: INanoexpressOptions) {
     this.options = options;
     this.routes = [];
     this.async = false;
     this.await = false;
     this.fetchParams = false;
-    this.defaultRoute = null;
-    this.errorRoute = null;
-  }
-
-  setNotFoundHandler(handler: HttpHandler<HttpMethod>): this {
-    this.defaultRoute = handler;
-
-    return this;
-  }
-
-  setErrorHandler(
-    handler: (
-      err: Error,
-      req: HttpRequestExtended<HttpMethod>,
-      res: HttpResponse
-    ) => void
-  ): this {
-    this.errorRoute = handler;
-
-    return this;
-  }
-
-  handleError(
-    error: Error,
-    req: HttpRequestExtended<HttpMethod>,
-    res: HttpResponse
-  ): this {
-    if (this.errorRoute) {
-      this.errorRoute(error, req, res);
-    }
-    return this;
   }
 
   // eslint-disable-next-line class-methods-use-this, max-lines-per-function, complexity
@@ -78,13 +37,6 @@ export default class FindRoute {
 
     const route: PreparedRoute = {
       ...incomingRoute,
-      originalPath:
-        // eslint-disable-next-line no-nested-ternary
-        incomingRoute.path instanceof RegExp
-          ? null
-          : incomingRoute.path !== '/'
-          ? incomingRoute.baseUrl + incomingRoute.path
-          : incomingRoute.baseUrl,
       all: false,
       regex: false,
       fetch_params: false,
@@ -99,7 +51,8 @@ export default class FindRoute {
         route.path !== '*' &&
         route.path.charAt(route.path.length - 1) !== '/' &&
         route.path.charAt(route.path.length - 1) !== '*' &&
-        route.path.lastIndexOf('.') < route.path.length - 4
+        (route.path.lastIndexOf('.') === -1 ||
+          route.path.lastIndexOf('.') < route.path.length - 4)
       ) {
         route.path += '/';
       }
@@ -111,7 +64,6 @@ export default class FindRoute {
       } else if (route.path.indexOf(':') !== -1) {
         route.fetch_params = true;
         route.param_keys = [];
-        route.originalPath = route.path;
         route.path = pathToRegexp(route.path, route.param_keys);
         route.regex = true;
       } else if (route.path.indexOf('/*') !== -1) {
@@ -126,12 +78,10 @@ export default class FindRoute {
           0,
           route.baseUrl.indexOf('/*') + 1
         );
-        route.originalPath = route.baseUrl;
         route.all = true;
       }
     } else if (route.path instanceof RegExp) {
       route.regex = true;
-      route.originalPath = null;
     }
     route.async = route.handler.constructor.name === 'AsyncFunction';
     route.await = route.handler.toString().includes('await');
@@ -153,7 +103,13 @@ export default class FindRoute {
       this.await = true;
     }
 
-    debug('new route registered [%s] %s', route.method, route.path);
+    debug(
+      'route registered [%s] baseurl(%s) path(%s) - originalurl(%s)',
+      route.method,
+      route.baseUrl,
+      route.path,
+      route.originalUrl
+    );
 
     return route;
   }
@@ -162,28 +118,31 @@ export default class FindRoute {
     method: HttpMethod,
     path: string | RegExp | Array<string | RegExp>,
     handler: HttpHandler<HttpMethod> | HttpHandler<HttpMethod>[],
-    baseUrl: string
+    baseUrl: string,
+    originalUrl: string
   ): this {
     if (Array.isArray(method)) {
       method.forEach((methodId) => {
-        this.on(methodId, path, handler, baseUrl);
+        this.on(methodId, path, handler, baseUrl, originalUrl);
       });
       return this;
     }
     if (Array.isArray(path)) {
       path.forEach((pathId) => {
-        this.on(method, pathId, handler, baseUrl);
+        this.on(method, pathId, handler, baseUrl, originalUrl);
       });
       return this;
     }
     if (Array.isArray(handler)) {
       handler.forEach((handlerId) => {
-        this.on(method, path, handlerId, baseUrl);
+        this.on(method, path, handlerId, baseUrl, originalUrl);
       });
       return this;
     }
 
-    this.routes.push(this.parse({ method, path, baseUrl, handler }));
+    this.routes.push(
+      this.parse({ method, path, baseUrl, originalUrl, handler })
+    );
 
     _gc();
 
@@ -194,9 +153,10 @@ export default class FindRoute {
     method: HttpMethod,
     path: string,
     handler: HttpHandler<HttpMethod>,
-    baseUrl: string
+    baseUrl: string,
+    originalUrl: string
   ): this {
-    const parsed = this.parse({ method, path, baseUrl, handler });
+    const parsed = this.parse({ method, path, baseUrl, originalUrl, handler });
 
     if (!handler) {
       this.routes = this.routes.filter(
@@ -295,7 +255,9 @@ export default class FindRoute {
               : true;
         } else if (route.regex && (route.path as RegExp).test(req.path)) {
           found = true;
-        } else if (route.path === req.originalUrl) {
+        } else if (route.path === req.path && route.baseUrl === req.baseUrl) {
+          found = true;
+        } else if (route.originalUrl === req.originalUrl) {
           found = true;
         } else if (route.baseUrl && req.path.startsWith(route.baseUrl)) {
           // TODO: How to fix falsely results?
@@ -362,22 +324,6 @@ export default class FindRoute {
           }
         }
       }
-    }
-
-    if (
-      !res.done &&
-      !res.streaming &&
-      response === undefined &&
-      this.defaultRoute !== null
-    ) {
-      debug('routes lookup was not found any route, fallback to not-found');
-      const notFound = this.defaultRoute(req, res);
-
-      if (notFound !== res) {
-        return res.send(notFound as string | Record<string, unknown>);
-      }
-
-      return notFound;
     }
   }
 }
