@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 import { EventEmitter } from 'events';
 import { createReadStream, ReadStream, statSync } from 'fs';
 import uWS, { RecognizedString } from 'uWebSockets.js';
@@ -301,7 +300,6 @@ class HttpResponse {
       if (_headersSet) {
         for (const header in _headers) {
           const value = _headers[header];
-          // eslint-disable-next-line max-depth
           if (value) {
             res.writeHeader(header, value);
           }
@@ -458,7 +456,6 @@ class HttpResponse {
    * @memberof nanoexpress.HttpResponse
    * @example res.stream(readableStream)
    */
-  // eslint-disable-next-line max-lines-per-function
   stream(stream: ReadStream, size?: number, compressed = false): this {
     if (!this.done && this[resResponse] && this[resResponse] !== null) {
       const res = this[resResponse] as uWS.HttpResponse;
@@ -511,7 +508,6 @@ class HttpResponse {
           });
       } else {
         debug('res.stream:uncompressed(stream, %d, %j)', size, compressed);
-        // eslint-disable-next-line max-lines-per-function
         stream.on('data', (buffer: Buffer): void => {
           calledData = true;
           if (this.done || this.aborted) {
@@ -639,7 +635,6 @@ class HttpResponse {
    * @memberof nanoexpress.HttpResponse
    * @example res.sendFile('foo.mp4')
    */
-  // eslint-disable-next-line max-lines-per-function
   sendFile(path: string, lastModified = true, compressed = false): this {
     const req = this[resRequest];
     const headers = req?.headers;

@@ -1,4 +1,3 @@
-/* eslint-disable complexity, max-lines, max-lines-per-function, import/no-cycle */
 import uWS, {
   HttpRequest as uWS_HttpRequest,
   HttpResponse as uWS_HttpResponse,
@@ -317,8 +316,6 @@ class App extends RouterTemplate {
     handler: () => void
   ): Promise<us_listen_socket> {
     const { _console, _options: options, _app: app } = this;
-
-    // eslint-disable-next-line no-nested-ternary
     const sslString = is_ssl ? 'HTTPS ' : is_ssl === false ? 'HTTP ' : '';
 
     return new Promise((resolve, reject): void => {

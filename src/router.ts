@@ -1,5 +1,3 @@
-/* eslint-disable  @typescript-eslint/no-explicit-any, max-lines, import/no-cycle, max-lines-per-function */
-
 import { RecognizedString, WebSocketBehavior } from 'uWebSockets.js';
 import { HttpHandler, UnpreparedRoute } from '../types/find-route';
 import { HttpMethod, IWebsocketRoute } from '../types/nanoexpress';
@@ -198,7 +196,6 @@ export default class Router {
 
   ws(path: RecognizedString, options?: WebSocketBehavior): this {
     const normalisedPath =
-      // eslint-disable-next-line no-nested-ternary
       this._basePath === '*'
         ? '*'
         : path === '/'

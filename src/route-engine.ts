@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 import fastDecodeURI from 'fast-decode-uri-component';
 import { pathToRegexp } from 'path-to-regexp';
 import {
@@ -31,7 +30,6 @@ export default class RouteEngine {
     this.fetchParams = false;
   }
 
-  // eslint-disable-next-line class-methods-use-this, max-lines-per-function, complexity
   parse(incomingRoute: UnpreparedRoute): PreparedRoute {
     const { options: config } = this;
 
@@ -222,7 +220,6 @@ export default class RouteEngine {
     return handlers;
   }
 
-  // eslint-disable-next-line max-lines-per-function, complexity
   async lookup(
     req: HttpRequestExtended<HttpMethod>,
     res: HttpResponse
@@ -314,7 +311,6 @@ export default class RouteEngine {
           }
 
           if (route.async || route.legacy) {
-            // eslint-disable-next-line no-await-in-loop
             response = await route.handler(req, res);
           } else {
             response = route.handler(req, res);

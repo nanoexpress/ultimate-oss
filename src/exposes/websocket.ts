@@ -5,8 +5,6 @@ import {
   us_socket_context_t,
   WebSocketBehavior
 } from 'uWebSockets.js';
-
-// eslint-disable-next-line max-lines-per-function
 export default function exposeWebsocket(
   handler: (req: HttpRequest, res: HttpResponse) => void | Promise<void>,
   options = {}

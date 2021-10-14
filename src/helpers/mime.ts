@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 const mimes = {
   '3gp': 'video/3gpp',
   a: 'application/octet-stream',
