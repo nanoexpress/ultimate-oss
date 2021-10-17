@@ -21,9 +21,7 @@ import {
   resHeaders,
   response as resResponse
 } from '../constants';
-import httpCodes from '../helpers/http-codes';
-import { debug, warn } from '../helpers/loggy';
-import { getMime } from '../helpers/mime';
+import { debug, getMime, httpCodes, invalid, warn } from '../helpers';
 
 /**
  * HttpResponse class
@@ -574,14 +572,16 @@ class HttpResponse {
     const req = this[resRequest];
 
     if (!req) {
-      throw new Error(
+      invalid(
         'This method requires active `HttpRequest`. Please load required middleware'
       );
+      return null;
     }
     if (!req.headers) {
-      throw new Error(
+      invalid(
         'This method requires active `HttpRequest.headers`. Please load required middleware'
       );
+      return null;
     }
     const contentEncoding = req.headers['content-encoding'];
     const encoding = priority.find(

@@ -12,14 +12,14 @@ app
   .get('/', (_, response) => {
     response.end('');
   })
-  .get('/user/:id', (request, response) => {
-    response.end(request.params.id);
+  .get('/user/:id', (req, response) => {
+    response.end(req.params.id);
   })
   .post('/user', (request, response) => {
     response.end('');
   })
-  .get('/test/simple/:id', async (request) => ({
-    id: request.params.id
+  .get('/test/simple/:id', async (req) => ({
+    id: req.params.id
   }));
 
 app.listen(4000);

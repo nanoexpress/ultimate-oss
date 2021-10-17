@@ -1,3 +1,4 @@
+import { IBlock } from '@nanoexpress/route-syntax-parser/types/interfaces';
 import { Key } from 'path-to-regexp';
 import { HttpResponse } from '../src/polyfills';
 import { HttpMethod, HttpRequest } from './nanoexpress';
@@ -29,4 +30,5 @@ export interface PreparedRoute extends Omit<UnpreparedRoute, 'path'> {
   baseUrl: string;
   regex: boolean;
   legacy: boolean;
+  analyzeBlocks: IBlock[];
 }

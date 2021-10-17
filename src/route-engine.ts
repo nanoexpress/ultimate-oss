@@ -1,3 +1,4 @@
+import analyzeRoute from '@nanoexpress/route-syntax-parser';
 import fastDecodeURI from 'fast-decode-uri-component';
 import { pathToRegexp } from 'path-to-regexp';
 import {
@@ -40,7 +41,8 @@ export default class RouteEngine {
       fetch_params: false,
       async: false,
       await: false,
-      legacy: false
+      legacy: false,
+      analyzeBlocks: []
     };
 
     if (typeof route.path === 'string') {
@@ -79,6 +81,10 @@ export default class RouteEngine {
     route.async = route.handler.constructor.name === 'AsyncFunction';
     route.await = route.handler.toString().includes('await');
     route.legacy = route.handler.toString().includes('next(');
+    route.analyzeBlocks = analyzeRoute<HttpHandler<HttpMethod>>(
+      // @ts-ignore
+      route.legacy ? route.handler.raw : route.handler
+    );
 
     if (route.legacy) {
       if (config.enableExpressCompatibility) {
@@ -101,6 +107,8 @@ export default class RouteEngine {
     if (!this.await && route.await) {
       this.await = true;
     }
+
+    console.log(route);
 
     debug(
       'route registered [%s] baseurl(%s) path(%s) - originalurl(%s)',

@@ -35,6 +35,7 @@
   },
   "homepage": "https://github.com/nanoexpress/pro-slim#readme",
   "dependencies": {
+    "@nanoexpress/route-syntax-parser": "https://github.com/nanoexpress/route-syntax-parser/releases/download/v2.1.0/nanoexpress-route-syntax-parser-2.1.0.tgz",
     "debug": "^4.3.2",
     "fast-decode-uri-component": "^1.0.1",
     "path-to-regexp": "^6.2.0",
