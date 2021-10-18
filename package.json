@@ -35,9 +35,10 @@
   },
   "homepage": "https://github.com/nanoexpress/pro-slim#readme",
   "dependencies": {
-    "@nanoexpress/route-syntax-parser": "https://github.com/nanoexpress/route-syntax-parser/releases/download/v2.1.0/nanoexpress-route-syntax-parser-2.1.0.tgz",
+    "@nanoexpress/route-syntax-parser": "https://github.com/nanoexpress/route-syntax-parser/releases/download/v2.2.0/nanoexpress-route-syntax-parser-2.2.0.tgz",
     "debug": "^4.3.2",
     "fast-decode-uri-component": "^1.0.1",
+    "fast-query-parse": "^2.0.0",
     "path-to-regexp": "^6.2.0",
     "supports-color": "^9.0.2",
     "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v20.0.0.tar.gz"

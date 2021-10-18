@@ -1,3 +1,4 @@
+/* eslint-disable max-lines, max-lines-per-function, complexity, max-depth */
 import { EventEmitter } from 'events';
 import { createReadStream, ReadStream, statSync } from 'fs';
 import uWS, { RecognizedString } from 'uWebSockets.js';

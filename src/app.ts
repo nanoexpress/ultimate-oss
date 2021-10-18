@@ -1,3 +1,4 @@
+/* eslint-disable max-lines, max-lines-per-function, complexity, max-depth */
 import uWS, {
   HttpRequest as uWS_HttpRequest,
   HttpResponse as uWS_HttpResponse,

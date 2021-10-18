@@ -1,5 +1,7 @@
+/* eslint-disable max-lines, max-lines-per-function, complexity, max-depth */
 import analyzeRoute from '@nanoexpress/route-syntax-parser';
 import fastDecodeURI from 'fast-decode-uri-component';
+import queryParse from 'fast-query-parse';
 import { pathToRegexp } from 'path-to-regexp';
 import {
   HttpHandler,
@@ -84,7 +86,8 @@ export default class RouteEngine {
     route.analyzeBlocks = analyzeRoute<HttpHandler<HttpMethod>>(
       // @ts-ignore
       route.legacy ? route.handler.raw : route.handler
-    );
+      // Exclude `params` and `property` due of different realized
+    ).filter((block) => block.mode !== 'params' && block.mode !== 'property');
 
     if (route.legacy) {
       if (config.enableExpressCompatibility) {
@@ -107,8 +110,6 @@ export default class RouteEngine {
     if (!this.await && route.await) {
       this.await = true;
     }
-
-    console.log(route);
 
     debug(
       'route registered [%s] baseurl(%s) path(%s) - originalurl(%s)',
@@ -232,6 +233,24 @@ export default class RouteEngine {
               const value = exec[p + 1];
 
               req.params[key] = value;
+            }
+          }
+          if (route.analyzeBlocks && route.analyzeBlocks.length > 0) {
+            req.params = {} as Record<string, string>;
+
+            for (let a = 0, lena = route.analyzeBlocks.length; a < lena; a++) {
+              const { mode, key } = route.analyzeBlocks[a];
+
+              if (mode === 'headers') {
+                if (!req.headers) {
+                  req.headers = {};
+                }
+                req.headers[key] = req.getHeader(key);
+              } else if (mode === 'query' && !req.query) {
+                req.query = queryParse(req.getQuery());
+              } else if (mode === 'body') {
+                // skip there as it's place on another logic
+              }
             }
           }
 

@@ -1,3 +1,4 @@
+import { ParsedUrlQuery } from 'querystring';
 import {
   AppOptions,
   HttpRequest as uWS_HttpRequest,
@@ -28,6 +29,7 @@ export interface HttpRequest extends uWS_HttpRequest {
   stream: boolean;
   headers?: Record<string, string>;
   params?: Record<string, string>;
+  query?: ParsedUrlQuery | null;
 }
 
 export type WebSocketHandler = (ws: WebSocket) => void | WebSocketBehavior;
