@@ -1,4 +1,5 @@
 /* eslint-disable max-lines, max-lines-per-function, complexity, max-depth */
+import queryParse from 'fast-query-parse';
 import uWS, {
   HttpRequest as uWS_HttpRequest,
   HttpResponse as uWS_HttpResponse,
@@ -147,6 +148,7 @@ class App extends RouterTemplate {
         let res: HttpResponse | undefined;
         let response;
         const req = rawReq as HttpRequest;
+        const query = req.getQuery();
 
         req.url = req.getUrl();
         req.originalUrl = req.url;
@@ -156,6 +158,9 @@ class App extends RouterTemplate {
         req.method = req.getMethod().toUpperCase() as HttpMethod;
 
         req.headers = {};
+        req.forEach((key, value) => {
+          req.headers[key] = value;
+        });
 
         if (req.method === 'POST' || req.method === 'PUT') {
           // get body or create transform here
@@ -187,6 +192,11 @@ class App extends RouterTemplate {
           req.path += '/';
           req.originalUrl += '/';
         }
+
+        if (options.enableExpressCompatibility) {
+          req.originalUrl += `?${query}`;
+        }
+        req.query = queryParse(query);
 
         if (res.aborted || res.done || req.method === 'OPTIONS') {
           debug('early returned ranning %o', {

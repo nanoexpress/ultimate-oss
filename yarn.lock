@@ -217,9 +217,9 @@
   resolved "https://registry.yarnpkg.com/@ls-lint/ls-lint/-/ls-lint-1.10.0.tgz#cad20085edc010a3e938aa01bb66d05e5e12b3f3"
   integrity sha512-C1vrI8zFp/28CiqCQHtfu/GqUg2iLYZqtlJHCYfqlg6OJopv7lHAPS0rzk06Ev1121yj4Gi/GmXMBlF+j35DcQ==
 
-"@nanoexpress/route-syntax-parser@https://github.com/nanoexpress/route-syntax-parser/releases/download/v2.2.0/nanoexpress-route-syntax-parser-2.2.0.tgz":
-  version "2.2.0"
-  resolved "https://github.com/nanoexpress/route-syntax-parser/releases/download/v2.2.0/nanoexpress-route-syntax-parser-2.2.0.tgz#55b3c175f64fcdc4a6f2863da1365487bf6faeab"
+"@nanoexpress/route-syntax-parser@https://github.com/nanoexpress/route-syntax-parser/releases/download/v2.4.3/nanoexpress-route-syntax-parser-2.4.3.tgz":
+  version "2.4.3"
+  resolved "https://github.com/nanoexpress/route-syntax-parser/releases/download/v2.4.3/nanoexpress-route-syntax-parser-2.4.3.tgz#55ef02b3970416dae79a0b295efd6cce289d5647"
   dependencies:
     semantic-release "^18.0.0"
 
@@ -671,10 +671,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-15.6.1.tgz#32d43390d5c62c5b6ec486a9bc9c59544de39a08"
   integrity sha512-7EIraBEyRHEe7CH+Fm1XvgqU6uwZN8Q7jppJGcqjROMT29qhAuuOxYB1uEY5UMYQKEmA5D+5tBnhdaPXSsLONA==
 
-"@types/node@^16.10.9":
-  version "16.10.9"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.10.9.tgz#8f1cdd517972f76a3b928298f4c0747cd6fef25a"
-  integrity sha512-H9ReOt+yqIJPCutkTYjFjlyK6WEMQYT9hLZMlWtOjFQY2ItppsWZ6RJf8Aw+jz5qTYceuHvFgPIaKOHtLAEWBw==
+"@types/node@^16.11.1":
+  version "16.11.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.1.tgz#2e50a649a50fc403433a14f829eface1a3443e97"
+  integrity sha512-PYGcJHL9mwl1Ek3PLiYgyEKtwTMmkMw4vbiyz/ps3pfdRYLVv+SN7qHVAImrjdAXxgluDEw6Ph4lyv+m9UpRmA==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
@@ -1334,10 +1334,10 @@ commander@^8.2.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-8.2.0.tgz#37fe2bde301d87d47a53adeff8b5915db1381ca8"
   integrity sha512-LLKxDvHeL91/8MIyTAD5BFMNtoIwztGPMiM/7Bl8rIPmHCZXRxmSWr91h57dpOpnQ6jIUqEWdXE/uBYMfiVZDA==
 
-commitlint-config-airlight@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/commitlint-config-airlight/-/commitlint-config-airlight-2.0.0.tgz#9ec76662efa27ce0c3fcd8d5e1597a1ed533cb8b"
-  integrity sha512-6qt6PevkSs0sNgG9rpCGz2Zat0rYd1LwvJuulB61KkuxEgjLV8PT6JT+2C9+bBaSs3QpZP/uZhZ0nM9IpJjB8w==
+commitlint-config-airlight@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/commitlint-config-airlight/-/commitlint-config-airlight-3.0.0.tgz#cc981c15372042019a69cab87ff8d7f083fe17e0"
+  integrity sha512-zXUEXa+L+JVUgAs3tXrlz6F/dxONn3IFANouw5+cOR/arzOx13eji2veHnWJtJH182mp5WFgVLtq08ddlYS/Xg==
   dependencies:
     "@commitlint/config-conventional" "^13.2.0"
 
@@ -1843,10 +1843,10 @@ eslint-config-airbnb-typescript@^14.0.0:
   dependencies:
     eslint-config-airbnb-base "14.2.1"
 
-eslint-config-airlight-base@^3.x.x:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/eslint-config-airlight-base/-/eslint-config-airlight-base-3.0.0.tgz#3127616edebd756f32e18aaa6c807e9cf48e5a57"
-  integrity sha512-fEACCPb4Hs0NC+SOARaCpkhoUEEg5tKS3D/PpVR0m8v4MiJASgAybPQNRqW0iuh0KWLbyQNXwMBOPLP2nLeDug==
+eslint-config-airlight-base@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/eslint-config-airlight-base/-/eslint-config-airlight-base-3.0.1.tgz#f955dafd64ab63d7faa4c49da8d9037e18f09192"
+  integrity sha512-MJ5MXGPvj2+Y5uL6nAubrm6hiA0F+XV/G82UBmSEGH48RT1RaYebeHdMNZP+fsgH6w9ewsyacSf0xAY60KMiMw==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^5.0.0"
     "@typescript-eslint/parser" "^5.0.0"
@@ -1860,12 +1860,12 @@ eslint-config-airlight-base@^3.x.x:
     eslint-plugin-optimize-regex "^1.2.1"
     eslint-plugin-promise "^5.1.0"
 
-eslint-config-airlight-node@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/eslint-config-airlight-node/-/eslint-config-airlight-node-2.0.0.tgz#871eb8da1b34adeb3340a23df622046372a61698"
-  integrity sha512-wcF4MlA2VlE0W6gZbx1R5yqzjFumlaTHuzzle+goO+NkMbiyUK8Vr/JOjMDFjdu/2M6F05i8Y2+8+WL2R1QEKw==
+eslint-config-airlight-node@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/eslint-config-airlight-node/-/eslint-config-airlight-node-3.0.1.tgz#663038baadf0ac9107b8474e5ab04d797f628c85"
+  integrity sha512-WqCzWRZaTdh0nfBCOGJj6kSDXW/bqDBG1Dxsrima8AwTyPevY9YMDhIRezfteRm8eiHmpWBo9tIyShqHPFCDdw==
   dependencies:
-    eslint-config-airlight-base "^3.x.x"
+    eslint-config-airlight-base "^3.0.1"
     eslint-plugin-node "^11.1.0"
     eslint-plugin-security-node "^1.0.12"
 
@@ -3330,10 +3330,10 @@ linkify-it@^3.0.1:
   dependencies:
     uc.micro "^1.0.1"
 
-lint-staged-config-airlight@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/lint-staged-config-airlight/-/lint-staged-config-airlight-2.0.1.tgz#29e43377143c90cd08af93c0505479a35fd279a2"
-  integrity sha512-+b3TIBlKMcrQVRjpSVNPtm75HCNE8s1D3WdvSU4sQaihEOHSt0ck7GRbVjDcMSljjwvA92bwgCd4zSgLjOiVOw==
+lint-staged-config-airlight@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/lint-staged-config-airlight/-/lint-staged-config-airlight-3.0.0.tgz#6916a3c3d1dab0a4fb93cb3e20d6f875ba306537"
+  integrity sha512-xyecVseqLz5ogJcnd8G+r2MmonRpu9vwwP1EZhau5+VPlcqC6i6SkLPvSs2NRlcM7wksYfoqMRRqL03Xhn//hw==
 
 lint-staged@^11.2.3:
   version "11.2.3"
@@ -5450,10 +5450,10 @@ typedarray-to-buffer@^3.1.5:
   dependencies:
     is-typedarray "^1.0.0"
 
-typedoc@^0.22.5:
-  version "0.22.5"
-  resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.22.5.tgz#c1a7c33fcdc808f57c766584a6afb47762944229"
-  integrity sha512-KFrWGU1iKiTGw0RcyjLNYDmhd7uICU14HgBNPmFKY/sT4Pm/fraaLyWyisst9vGTUAKxqibqoDITR7+ZcAkhHg==
+typedoc@^0.22.6:
+  version "0.22.6"
+  resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.22.6.tgz#1122f83a6eb5cd7dbb26d1924de1f9de9e8c7c7e"
+  integrity sha512-ePbJqOaz0GNkU2ehRwFwBpLD4Gp6m7jbJfHysXmDdjVKc1g8DFJ83r/LOZ9TZrkC661vgpoIY3FjSPEtUilHNA==
   dependencies:
     glob "^7.2.0"
     lunr "^2.3.9"

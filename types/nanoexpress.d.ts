@@ -27,9 +27,9 @@ export interface HttpRequest extends uWS_HttpRequest {
   path: string;
   method: HttpMethod;
   stream: boolean;
-  headers?: Record<string, string>;
+  headers: Record<string, string>;
   params?: Record<string, string>;
-  query?: ParsedUrlQuery | null;
+  query: ParsedUrlQuery | null;
 }
 
 export type WebSocketHandler = (ws: WebSocket) => void | WebSocketBehavior;

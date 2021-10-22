@@ -12,6 +12,9 @@ app
   .get('/', (_, response) => {
     response.end('');
   })
+  .get('/ip', (req, response) => {
+    response.end(req.ip);
+  })
   .get('/user/:id', (req, response) => {
     response.end(req.params.id);
   })

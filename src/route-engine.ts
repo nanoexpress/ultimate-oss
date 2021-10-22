@@ -1,7 +1,6 @@
 /* eslint-disable max-lines, max-lines-per-function, complexity, max-depth */
-import analyzeRoute from '@nanoexpress/route-syntax-parser';
+import analyze from '@nanoexpress/route-syntax-parser';
 import fastDecodeURI from 'fast-decode-uri-component';
-import queryParse from 'fast-query-parse';
 import { pathToRegexp } from 'path-to-regexp';
 import {
   HttpHandler,
@@ -10,7 +9,7 @@ import {
   UnpreparedRoute
 } from '../types/find-route';
 import { HttpMethod, INanoexpressOptions } from '../types/nanoexpress';
-import { debug, invalid, slashify, _gc } from './helpers';
+import { debug, invalid, iterateBlocks, slashify, _gc } from './helpers';
 import { HttpResponse } from './polyfills';
 import legacyUtil from './utils/legacy';
 
@@ -23,14 +22,23 @@ export default class RouteEngine {
 
   public await: boolean;
 
-  public fetchParams: boolean;
+  public params = false;
+
+  public headers = false;
+
+  public cookies = false;
+
+  public query = false;
+
+  public body = false;
+
+  public property = false;
 
   constructor(options: INanoexpressOptions) {
     this.options = options;
     this.routes = [];
     this.async = false;
     this.await = false;
-    this.fetchParams = false;
   }
 
   parse(incomingRoute: UnpreparedRoute): PreparedRoute {
@@ -83,11 +91,8 @@ export default class RouteEngine {
     route.async = route.handler.constructor.name === 'AsyncFunction';
     route.await = route.handler.toString().includes('await');
     route.legacy = route.handler.toString().includes('next(');
-    route.analyzeBlocks = analyzeRoute<HttpHandler<HttpMethod>>(
-      // @ts-ignore
-      route.legacy ? route.handler.raw : route.handler
-      // Exclude `params` and `property` due of different realized
-    ).filter((block) => block.mode !== 'params' && block.mode !== 'property');
+    route.analyzeBlocks = analyze<HttpHandler<HttpMethod>>(route.handler);
+    const usedBlocks = iterateBlocks(route.analyzeBlocks);
 
     if (route.legacy) {
       if (config.enableExpressCompatibility) {
@@ -101,8 +106,8 @@ export default class RouteEngine {
       }
     }
 
-    if (!this.fetchParams && route.fetch_params) {
-      this.fetchParams = true;
+    if (!this.params && route.fetch_params) {
+      this.params = true;
     }
     if (!this.async && route.async) {
       this.async = true;
@@ -110,6 +115,21 @@ export default class RouteEngine {
     if (!this.await && route.await) {
       this.await = true;
     }
+
+    console.log({
+      usedBlocks,
+      analyze: route.analyzeBlocks,
+      handler: route.handler.toString()
+    });
+    usedBlocks.forEach((blockName): void => {
+      if (blockName === 'property') {
+        //
+      } else {
+        if (!this[blockName]) {
+          this[blockName] = true;
+        }
+      }
+    });
 
     debug(
       'route registered [%s] baseurl(%s) path(%s) - originalurl(%s)',
@@ -191,7 +211,7 @@ export default class RouteEngine {
     req: HttpRequestExtended<HttpMethod>,
     res: HttpResponse
   ): Promise<HttpResponse | string | void> {
-    const { routes } = this;
+    const { routes, options } = this;
     let response;
 
     for (let i = 0, len = routes.length; i < len; i += 1) {
@@ -235,27 +255,10 @@ export default class RouteEngine {
               req.params[key] = value;
             }
           }
-          if (route.analyzeBlocks && route.analyzeBlocks.length > 0) {
-            req.params = {} as Record<string, string>;
-
-            for (let a = 0, lena = route.analyzeBlocks.length; a < lena; a++) {
-              const { mode, key } = route.analyzeBlocks[a];
-
-              if (mode === 'headers') {
-                if (!req.headers) {
-                  req.headers = {};
-                }
-                req.headers[key] = req.getHeader(key);
-              } else if (mode === 'query' && !req.query) {
-                req.query = queryParse(req.getQuery());
-              } else if (mode === 'body') {
-                // skip there as it's place on another logic
-              }
-            }
-          }
 
           // Prepare url after found
           if (
+            options.enableExpressCompatibility &&
             route.baseUrl !== '' &&
             route.baseUrl !== '*' &&
             req.path.indexOf(route.baseUrl) === 0
@@ -263,16 +266,13 @@ export default class RouteEngine {
             req.baseUrl = route.baseUrl;
             req.path = req.originalUrl.substr(req.baseUrl.length);
             req.url = req.originalUrl.substr(req.baseUrl.length);
-          } else if (
-            route.baseUrl !== '' &&
-            route.baseUrl !== '*' &&
-            req.baseUrl === route.baseUrl
-          )
-            if (route.async || route.legacy) {
-              response = await route.handler(req, res);
-            } else {
-              response = route.handler(req, res);
-            }
+          }
+
+          if (route.async || route.legacy) {
+            response = await route.handler(req, res);
+          } else {
+            response = route.handler(req, res);
+          }
 
           if (res.streaming || res.done || response === res) {
             debug('routes lookup was done');
