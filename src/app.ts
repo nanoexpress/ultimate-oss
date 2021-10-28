@@ -172,32 +172,31 @@ class App extends RouterTemplate {
         }
 
         if (req.method === 'POST' || req.method === 'PUT') {
-          const chunks: Array<Buffer | null> = [];
-
-          /* req.stream = new Transform({
-            transform(
-              chunk: Buffer,
-              encoding: BufferEncoding | undefined,
-              callback: () => void
-            ): void {
-
-              req.stream.push(Buffer.concat(chunks as Buffer[]), encoding);
-              callback();
-            }
-          });*/
           req.stream = new Readable({
             read(): void {}
           });
-          req.pipe = (destination, opts): Writable =>
-            req.stream.pipe(destination, opts);
+          req.pipe = (destination: Writable, opts): Writable =>
+            req.stream
+              .on('error', (err) => {
+                destination.destroy();
+                destination.emit('error', err);
+              })
+              .pipe(destination, opts);
           res.exposeAborted();
-          rawRes.onData((chunk: ArrayBuffer, isLast: boolean) => {
-            chunks[0] = Buffer.from(chunk);
-            req.stream.push(Buffer.concat(chunks as Buffer[]));
+
+          let offset = 0;
+          const chunks = Buffer.allocUnsafe(+req.headers['content-length']);
+          rawRes.onData((arrayChunk: ArrayBuffer, isLast: boolean) => {
+            const chunk = Buffer.from(arrayChunk.slice(0));
+
+            req.stream.push(chunk);
+            chunks.fill(chunk, offset, offset + arrayChunk.byteLength);
+
+            offset += arrayChunk.byteLength;
 
             if (isLast) {
+              req.buffer = chunks;
               req.stream.push(null);
-              chunks[0] = null;
             }
           });
         }
@@ -221,7 +220,7 @@ class App extends RouterTemplate {
           req.originalUrl += '/';
         }
 
-        if (options.enableExpressCompatibility) {
+        if (options.enableExpressCompatibility && query) {
           req.originalUrl += `?${query}`;
         }
         req.query = queryParse(query);

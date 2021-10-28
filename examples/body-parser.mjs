@@ -3,14 +3,20 @@ import nanoexpress from '../esm';
 const app = nanoexpress();
 
 app.use(async (req) => {
-  if (req.method === 'POST') {
+  if (
+    req.method === 'POST' &&
+    req.headers['content-type'] === 'application/json'
+  ) {
     let body = '';
     req.stream.on('data', (chunk) => {
+      console.log('chunk??', chunk.toString());
       body += chunk.toString();
     });
     await new Promise((resolve) =>
       req.stream.on('end', () => {
-        req.body = JSON.parse(body);
+        if (body) {
+          req.body = JSON.parse(body);
+        }
         resolve();
       })
     );
@@ -19,10 +25,8 @@ app.use(async (req) => {
 
 app.get('/', (req, res) => res.end('ok'));
 
-app.post('/', (req, res) => {
-  // res.stream(req.stream);
-  res.pipe(req);
-  // res.send({ baz: req.body.foo });
+app.post('/', async (req, res) => {
+  req.pipe(res);
 });
 
 app.listen(4002);

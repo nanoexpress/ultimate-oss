@@ -3,7 +3,10 @@ import express from 'express';
 import nanoexpress from '../../esm/nanoexpress.js';
 import * as swagger from './swagger.js';
 
-const app = nanoexpress();
+const app = nanoexpress({
+  ignoreTrailingSlash: true,
+  enableExpressCompatibility: true
+});
 
 app.setErrorHandler(function notFoundHandler(error, req, res) {
   return res.send({ error: error.stack_trace });

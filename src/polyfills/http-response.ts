@@ -462,9 +462,10 @@ class HttpResponse {
     if (!this.done && this[resResponse] && this[resResponse] !== null) {
       const res = this[resResponse] as uWS.HttpResponse;
       const req = this[resRequest] as HttpRequest;
+      const config = this[resConfig];
 
       this.exposeAborted();
-      let calledData = false;
+      let calledData = !config.enableExpressCompatibility;
 
       if (compressed) {
         const compressedStream = this.compressStream(stream);
@@ -478,19 +479,8 @@ class HttpResponse {
         (!size || Number.isNaN(size)) &&
         req.headers['content-length']
       ) {
-        // size = +req.headers['content-length'];
+        size = +req.headers['content-length'];
       }
-
-      stream.on('', (...args) => {
-        console.log('stream any event', args);
-      });
-      stream.on('data', (chunk) => {
-        console.log(chunk, {
-          aborted: this.aborted,
-          done: this.done,
-          calledData
-        });
-      });
 
       const onclose = (): void => {
         if (calledData) {
@@ -523,7 +513,7 @@ class HttpResponse {
             res.write(
               buffer.buffer.slice(
                 buffer.byteOffset,
-                Number(buffer.byteOffset) + Number(buffer.byteLength)
+                buffer.byteOffset + buffer.byteLength
               )
             );
           })
@@ -538,7 +528,7 @@ class HttpResponse {
           }
           buffer = buffer.buffer.slice(
             buffer.byteOffset,
-            Number(buffer.byteOffset) + Number(buffer.byteLength)
+            buffer.byteOffset + buffer.byteLength
           ) as Buffer;
 
           const lastOffset = res.getWriteOffset();
@@ -549,7 +539,7 @@ class HttpResponse {
           } else if (!ok) {
             stream.pause();
 
-            res.onWritable((offset) => {
+            res.onWritable((offset: number): boolean => {
               if (this.done || this.aborted) {
                 return true;
               }

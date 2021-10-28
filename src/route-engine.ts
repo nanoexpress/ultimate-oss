@@ -116,8 +116,6 @@ export default class RouteEngine {
       this.await = true;
     }
 
-
-
     usedBlocks.forEach((blockName): void => {
       if (blockName === 'property') {
         //
@@ -223,13 +221,12 @@ export default class RouteEngine {
       if (route.method === 'ANY' || route.method === req.method) {
         let found = false;
 
-
-
         if (route.all) {
           found =
             route.path && route.path !== '*'
               ? req.path.includes(route.path as string)
-              : route.originalUrl === '*' || req.originalUrl.substr(route.originalUrl.length).length > 1;
+              : route.originalUrl === '*' ||
+                req.originalUrl.substr(route.originalUrl.length).length > 1;
         } else if (route.regex && (route.path as RegExp).test(req.path)) {
           found = true;
         } else if (route.path === req.path && route.baseUrl === req.baseUrl) {
@@ -274,12 +271,16 @@ export default class RouteEngine {
           }
 
           if (res.streaming || res.done || response === res) {
-            debug('routes lookup was done');
+            debug('routes lookup was done with HttpResponse');
             return res;
           }
           if (!res.streaming && !res.done && response) {
+            debug('routes lookup was done with async json result');
             return res.send(response as string | Record<string, unknown>);
           }
+          debug('routes lookup was done without any match');
+        } else {
+          debug('routes lookup was not found without any match');
         }
       }
     }

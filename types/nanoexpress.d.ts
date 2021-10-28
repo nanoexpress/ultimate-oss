@@ -28,12 +28,16 @@ export interface HttpRequest extends uWS_HttpRequest {
   path: string;
   method: HttpMethod;
   stream: Readable;
-  pipe: (destination: Writable, opts?: {
-    end?: boolean | undefined;
-}) => Writable;
+  pipe: (
+    destination: Writable,
+    opts?: {
+      end?: boolean | undefined;
+    }
+  ) => Writable;
   headers: Record<string, string>;
   params?: Record<string, string>;
   query: ParsedUrlQuery | null;
+  buffer?: Buffer;
 }
 
 export type WebSocketHandler = (ws: WebSocket) => void | WebSocketBehavior;
