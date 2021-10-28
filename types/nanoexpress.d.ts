@@ -1,4 +1,5 @@
 import { ParsedUrlQuery } from 'querystring';
+import { Readable, Writable } from 'stream';
 import {
   AppOptions,
   HttpRequest as uWS_HttpRequest,
@@ -26,7 +27,10 @@ export interface HttpRequest extends uWS_HttpRequest {
   originalUrl: string;
   path: string;
   method: HttpMethod;
-  stream: boolean;
+  stream: Readable;
+  pipe: (destination: Writable, opts?: {
+    end?: boolean | undefined;
+}) => Writable;
   headers: Record<string, string>;
   params?: Record<string, string>;
   query: ParsedUrlQuery | null;

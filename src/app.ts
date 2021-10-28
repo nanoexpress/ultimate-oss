@@ -1,5 +1,6 @@
 /* eslint-disable max-lines, max-lines-per-function, complexity, max-depth */
 import queryParse from 'fast-query-parse';
+import { Readable, Writable } from 'stream';
 import uWS, {
   HttpRequest as uWS_HttpRequest,
   HttpResponse as uWS_HttpResponse,
@@ -162,16 +163,43 @@ class App extends RouterTemplate {
           req.headers[key] = value;
         });
 
-        if (req.method === 'POST' || req.method === 'PUT') {
-          // get body or create transform here
-        }
-
         if (_pools.length > 0) {
           res = _pools.shift() as HttpResponse;
           res.setResponse(rawRes, req);
         } else {
           res = new HttpResponse(options);
           res.setResponse(rawRes, req);
+        }
+
+        if (req.method === 'POST' || req.method === 'PUT') {
+          const chunks: Array<Buffer | null> = [];
+
+          /* req.stream = new Transform({
+            transform(
+              chunk: Buffer,
+              encoding: BufferEncoding | undefined,
+              callback: () => void
+            ): void {
+
+              req.stream.push(Buffer.concat(chunks as Buffer[]), encoding);
+              callback();
+            }
+          });*/
+          req.stream = new Readable({
+            read(): void {}
+          });
+          req.pipe = (destination, opts): Writable =>
+            req.stream.pipe(destination, opts);
+          res.exposeAborted();
+          rawRes.onData((chunk: ArrayBuffer, isLast: boolean) => {
+            chunks[0] = Buffer.from(chunk);
+            req.stream.push(Buffer.concat(chunks as Buffer[]));
+
+            if (isLast) {
+              req.stream.push(null);
+              chunks[0] = null;
+            }
+          });
         }
 
         if (

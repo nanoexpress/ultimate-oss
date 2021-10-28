@@ -2,7 +2,7 @@
   "include": ["exposes", "src", "*.cjs", "types"],
   "exclude": ["node_modules", "examples", "tests"],
   "compilerOptions": {
-    "target": "es2018",
+    "target": "es2019",
     "module": "esnext",
     // "lib": ["es2018"],
     "allowJs": true,

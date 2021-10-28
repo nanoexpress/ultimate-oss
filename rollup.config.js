@@ -21,7 +21,7 @@ export default ['nanoexpress'].map((name) => ({
     },
     {
       format: 'cjs',
-      file: `./cjs/${name}.js`,
+      file: `./cjs/${name}.cjs`,
       strict: true,
       sourcemap: true,
       exports: 'auto'

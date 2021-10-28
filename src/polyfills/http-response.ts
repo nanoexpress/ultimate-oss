@@ -97,6 +97,9 @@ class HttpResponse {
           this.streaming = true;
           this.stream(stream);
         })
+        .on('data', () => {
+          debug('stream.pipe(res):data event');
+        })
 
         .on('unpipe', () => {
           debug('stream.unpipe(res)');
@@ -458,6 +461,8 @@ class HttpResponse {
   stream(stream: ReadStream, size?: number, compressed = false): this {
     if (!this.done && this[resResponse] && this[resResponse] !== null) {
       const res = this[resResponse] as uWS.HttpResponse;
+      const req = this[resRequest] as HttpRequest;
+
       this.exposeAborted();
       let calledData = false;
 
@@ -467,9 +472,25 @@ class HttpResponse {
         if (compressedStream) {
           stream = compressedStream as unknown as ReadStream;
         }
-      } else if (!(size || Number.isNaN(size)) && stream.path) {
+      } else if ((!size || Number.isNaN(size)) && stream.path) {
         ({ size } = statSync(stream.path));
+      } else if (
+        (!size || Number.isNaN(size)) &&
+        req.headers['content-length']
+      ) {
+        // size = +req.headers['content-length'];
       }
+
+      stream.on('', (...args) => {
+        console.log('stream any event', args);
+      });
+      stream.on('data', (chunk) => {
+        console.log(chunk, {
+          aborted: this.aborted,
+          done: this.done,
+          calledData
+        });
+      });
 
       const onclose = (): void => {
         if (calledData) {
@@ -488,12 +509,14 @@ class HttpResponse {
         if (calledData) {
           stream.close();
         }
+        this.emit('finish');
       };
       if (compressed || !size || Number.isNaN(size)) {
         debug('res.stream:compressed(stream, %d, %j)', size, compressed);
         stream
           .on('data', (buffer: Buffer): void => {
             calledData = true;
+
             if (this.aborted || this.done) {
               return;
             }

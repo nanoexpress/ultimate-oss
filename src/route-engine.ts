@@ -116,11 +116,8 @@ export default class RouteEngine {
       this.await = true;
     }
 
-    console.log({
-      usedBlocks,
-      analyze: route.analyzeBlocks,
-      handler: route.handler.toString()
-    });
+
+
     usedBlocks.forEach((blockName): void => {
       if (blockName === 'property') {
         //
@@ -226,11 +223,13 @@ export default class RouteEngine {
       if (route.method === 'ANY' || route.method === req.method) {
         let found = false;
 
+
+
         if (route.all) {
           found =
             route.path && route.path !== '*'
               ? req.path.includes(route.path as string)
-              : req.originalUrl.substr(route.originalUrl.length).length > 1;
+              : route.originalUrl === '*' || req.originalUrl.substr(route.originalUrl.length).length > 1;
         } else if (route.regex && (route.path as RegExp).test(req.path)) {
           found = true;
         } else if (route.path === req.path && route.baseUrl === req.baseUrl) {
