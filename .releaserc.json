@@ -28,15 +28,53 @@
       "@semantic-release/release-notes-generator",
       {
         "preset": "angular",
-        "parserOpts": {
-          "noteKeywords": [
-            "BREAKING CHANGE",
-            "BREAKING CHANGES",
-            "BREAKING",
-            "chore",
-            "docs"
-          ]
-        }
+        "types": [
+          {
+            "type": "feat",
+            "section": ":sparkles: Features",
+            "hidden": false
+          },
+          {
+            "type": "fix",
+            "section": ":bug: Fixes",
+            "hidden": false
+          },
+          {
+            "type": "docs",
+            "section": ":memo: Documentation",
+            "hidden": false
+          },
+          {
+            "type": "style",
+            "section": ":barber: Code-style",
+            "hidden": false
+          },
+          {
+            "type": "refactor",
+            "section": ":zap: Refactor",
+            "hidden": false
+          },
+          {
+            "type": "perf",
+            "section": ":fast_forward: Performance",
+            "hidden": false
+          },
+          {
+            "type": "test",
+            "section": ":white_check_mark: Tests",
+            "hidden": false
+          },
+          {
+            "type": "ci",
+            "section": ":repeat: CI",
+            "hidden": false
+          },
+          {
+            "type": "chore",
+            "section": ":repeat: Chore",
+            "hidden": false
+          }
+        ]
       }
     ],
     [
