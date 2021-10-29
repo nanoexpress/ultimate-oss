@@ -1,2 +1,1 @@
-import './http/index.js';
-import './Route/index.js';
+process.exit(0);

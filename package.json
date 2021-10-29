@@ -1,5 +1,6 @@
 {
   "name": "@nanoexpress/ultimate",
+  "type": "module",
   "version": "1.0.0",
   "description": "Ultimate solution based on nanoexpress and best-practices",
   "main": "cjs/nanoexpress.js",

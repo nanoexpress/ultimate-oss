@@ -41,11 +41,11 @@ jobs:
       - name: Lint code
         run: yarn lint
 
-      - name: Test code
-        run: yarn test
-
       - name: Build
         run: yarn build
+
+      - name: Test code
+        run: yarn test
 
       - name: Release
         env:
