@@ -68,7 +68,12 @@ class App extends RouterTemplate {
     this._engine = new RouteEngine(options);
 
     this.defaultRoute = null;
-    this.errorRoute = null;
+    this.errorRoute = (err, _, res): HttpResponse => {
+      return res.status(500).send({
+        status: 'error',
+        message: err.message
+      });
+    };
 
     this._ws = [];
     this._requestPools = [];
@@ -103,6 +108,7 @@ class App extends RouterTemplate {
     if (res && !res.aborted && !res.done && !res.streaming && this.errorRoute) {
       this.errorRoute(error, req, res);
     }
+
     return this;
   }
 
@@ -167,7 +173,7 @@ class App extends RouterTemplate {
             debug(
               'res.redirect called instead of fast quick-fix on route ending without "/" for express.js middlewares compatibility'
             );
-            res.redirect(`http://${req.getHeader('host')}${req.originalUrl}/`);
+            res.redirect(`http://${req.headers.host}${req.originalUrl}/`);
             return rawRes;
           }
         }
@@ -176,10 +182,10 @@ class App extends RouterTemplate {
           res.exposeAborted();
 
           rawRes.onData((arrayChunk: ArrayBuffer, isLast: boolean) => {
-            req.push(Buffer.from(arrayChunk.slice(0)));
+            req.stream.push(Buffer.from(arrayChunk.slice(0)));
 
             if (isLast) {
-              req.push(null);
+              req.stream.push(null);
             }
           });
         }
@@ -210,7 +216,6 @@ class App extends RouterTemplate {
         _engine.lookup(req, res);
         if (_requestPools.length < _poolsSize) {
           _requestPools.push(req);
-          req.drain();
         }
         if (_responsePools.length < _poolsSize) {
           _responsePools.push(res);
@@ -341,7 +346,7 @@ class App extends RouterTemplate {
             `[${sslString}Server]: started successfully at [${id}] in [${(
               (Number(end[0]) * 1000 + Number(end[1])) /
               1000000
-            ).toFixed(2)}ms]`
+            ).toFixed(2)}ms] on PID[${process.pid}]`
           );
           _gc();
           handler();

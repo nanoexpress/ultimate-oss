@@ -1,3 +1,4 @@
+import { Writable } from 'stream';
 import nanoexpress from '../src/nanoexpress';
 
 const app = nanoexpress();
@@ -20,7 +21,8 @@ app.get('/', (_, res) => res.end('ok'));
 app.post<{ headers: { origin: string }; body: { foo: 'bar' } }>(
   '/',
   async (req, res) => {
-    req.pipe(res);
+    req.pipe(res as unknown as Writable);
+    return res;
   }
 );
 

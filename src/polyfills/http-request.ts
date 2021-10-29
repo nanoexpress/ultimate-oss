@@ -9,8 +9,7 @@ import {
 } from 'uWebSockets.js';
 import { HttpMethod, INanoexpressOptions } from '../../types/nanoexpress';
 import { reqConfig, reqEvents, reqRawResponse, reqRequest } from '../constants';
-import { debug } from '../helpers';
-import HttpResponse from './http-response';
+import { invalid } from '../helpers';
 
 export interface IDefaultHttpSchema {
   headers: Record<string, string>;
@@ -51,7 +50,7 @@ export default class HttpRequest<
 
   query: THttpSchema['query'] = null;
 
-  stream: Readable | null = null;
+  stream!: Readable;
 
   constructor(options: INanoexpressOptions) {
     this[reqConfig] = options;
@@ -59,145 +58,6 @@ export default class HttpRequest<
     this.registered = false;
 
     return this;
-  }
-
-  protected registerEvents(): this {
-    const emitter = this[reqEvents];
-
-    if (emitter && !this.registered) {
-      //
-      this.registered = true;
-    }
-
-    return this;
-  }
-
-  /**
-   * Registers event to response
-   * @param eventName Event name
-   * @param eventArgument Any argument
-   * @returns nanoexpress.HttpResponse
-   * @memberof nanoexpress.HttpResponse
-   * @example res.on('end', (eventArgument) => {...})
-   */
-  on(
-    eventName: string | symbol,
-    eventArgument: (eventArgument?: unknown) => void
-  ): this {
-    let emitter = this[reqEvents];
-
-    if (!emitter) {
-      this[reqEvents] = new EventEmitter();
-    }
-    emitter = this[reqEvents] as EventEmitter;
-    emitter.on(eventName, eventArgument);
-
-    debug('res.on(%s, handler)', eventName);
-
-    this.registerEvents();
-
-    return this;
-  }
-
-  /**
-   * Registers event to response to be fired once
-   * @param eventName Event name
-   * @param eventArgument Any argument
-   * @returns nanoexpress.HttpResponse
-   * @memberof nanoexpress.HttpResponse
-   * @example res.once('end', (eventArgument) => {...})
-   */
-  once(
-    eventName: string | symbol,
-    eventArgument: (eventArgument?: unknown) => void
-  ): this {
-    let emitter = this[reqEvents];
-
-    if (!emitter) {
-      this[reqEvents] = new EventEmitter();
-    }
-    emitter = this[reqEvents] as EventEmitter;
-    emitter.once(eventName, eventArgument);
-
-    debug('res.once(%s, handler)', eventName);
-
-    this.registerEvents();
-
-    return this;
-  }
-
-  /**
-   * Removes event from response
-   * @param eventName Event name
-   * @param eventArgument Any argument
-   * @returns nanoexpress.HttpResponse
-   * @memberof nanoexpress.HttpResponse
-   * @example res.off('end', (eventArgument) => {...})
-   */
-  off(
-    eventName: string | symbol,
-    eventArgument: (eventArgument?: unknown) => void
-  ): this {
-    let emitter = this[reqEvents];
-
-    if (!emitter) {
-      return this;
-    }
-    emitter = this[reqEvents] as EventEmitter;
-    emitter.off(eventName, eventArgument);
-
-    debug('res.off(%s, handler)', eventName);
-
-    this.registerEvents();
-
-    return this;
-  }
-
-  /**
-   * Removes listener from response
-   * @param eventName Event name
-   * @param eventArgument Any argument
-   * @returns nanoexpress.HttpResponse
-   * @memberof nanoexpress.HttpResponse
-   * @example res.removeListener('end', (eventArgument) => {...})
-   */
-  removeListener(
-    eventName: string | symbol,
-    eventArgument: (eventArgument?: unknown) => void
-  ): this {
-    let emitter = this[reqEvents];
-
-    if (!emitter) {
-      return this;
-    }
-    emitter = this[reqEvents] as EventEmitter;
-    emitter.removeListener(eventName, eventArgument);
-
-    debug('res.removeListener(%s, handler)', eventName);
-
-    this.registerEvents();
-
-    return this;
-  }
-
-  /**
-   * Emits event to response
-   * @param eventName Event name
-   * @param eventArgument Any argument
-   * @returns Emit response
-   * @memberof nanoexpress.HttpResponse
-   * @example res.emit('end', 1)
-   */
-  emit(eventName: string | symbol, eventArgument?: never): boolean {
-    let emitter = this[reqEvents];
-
-    if (!emitter) {
-      this[reqEvents] = new EventEmitter();
-    }
-    debug('res.emit(%s, argument)', eventName);
-
-    emitter = this[reqEvents] as EventEmitter;
-    return emitter.emit(eventName, eventArgument);
   }
 
   setRequest(req: uWS_HttpRequest, res: uWS_HttpResponse): this {
@@ -232,13 +92,32 @@ export default class HttpRequest<
     }
     this.query = queryParse(query);
 
-    // Imitiate some modes
-    this.stream = new Readable({ read(): void {} });
+    // @ts-ignore
+    if (this.method === 'POST' || this.method === 'PUT') {
+      // Imitiate some modes
+      this.stream = new Readable({ read(): void {} });
 
-    // Protected variables
-    this[reqEvents] = null;
-    this.registered = false;
+      // Protected variables
+      this[reqEvents] = null;
+      this.registered = false;
+    }
 
+    return this;
+  }
+
+  on(event: string, listener: (...args: any[]) => void): this {
+    const { stream } = this;
+    if (stream) {
+      stream.on(event, listener);
+    }
+    return this;
+  }
+
+  emit(event: string, ...args: any[]): this {
+    const { stream } = this;
+    if (stream) {
+      stream.emit(event, ...args);
+    }
     return this;
   }
 
@@ -254,32 +133,28 @@ export default class HttpRequest<
     return this[reqRequest].getParameter(index);
   }
 
-  push(data: Buffer | null): this {
+  pipe(destination: Writable): Writable | void | Promise<Error> {
     const { stream } = this;
 
-    if (data === null) {
-      this.emit('end');
-    } else {
-      this.emit('data', data as never);
+    if (stream.readableDidRead || stream.readableEnded) {
+      return invalid('Stream already used, cannot use one stream twice');
     }
 
     if (stream) {
-      stream.push(data);
+      return stream.pipe(destination);
     }
-    return this;
+    return invalid(
+      'Stream was not defined, something wrong, please check your code or method is not a POST or PUT'
+    );
   }
 
-  pipe(destination: Writable | HttpResponse): this {
+  async *[Symbol.asyncIterator](): any {
     const { stream } = this;
 
     if (stream) {
-      stream.pipe(destination as Writable);
+      for await (const chunk of stream) {
+        yield chunk;
+      }
     }
-
-    return this;
-  }
-
-  drain(): void {
-    this.stream = null;
   }
 }

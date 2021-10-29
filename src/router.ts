@@ -130,7 +130,7 @@ export default class Router {
 
   get<T extends IDefaultHttpSchema = IDefaultHttpSchema>(
     path: string | RegExp,
-    ...handlers: RouteHandler<'GET', T>[]
+    ...handlers: RouteHandler<'GET', Omit<T, 'body'>>[]
   ): this {
     return this.on(
       'GET',
@@ -169,7 +169,7 @@ export default class Router {
 
   options<T = IDefaultHttpSchema>(
     path: string | RegExp,
-    ...handlers: RouteHandler<'OPTIONS', T>[]
+    ...handlers: RouteHandler<'OPTIONS', Omit<T, 'body'>>[]
   ): this {
     return this.on(
       'OPTIONS',
@@ -182,7 +182,7 @@ export default class Router {
 
   del<T = IDefaultHttpSchema>(
     path: string | RegExp,
-    ...handlers: RouteHandler<'DEL', T>[]
+    ...handlers: RouteHandler<'DEL', Omit<T, 'body'>>[]
   ): this {
     return this.on(
       'DEL',
@@ -202,7 +202,7 @@ export default class Router {
    */
   delete<T = IDefaultHttpSchema>(
     path: string | RegExp,
-    ...handlers: RouteHandler<'DEL', T>[]
+    ...handlers: RouteHandler<'DEL', Omit<T, 'body'>>[]
   ): this {
     return this.del(path, ...handlers);
   }

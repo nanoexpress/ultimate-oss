@@ -5,7 +5,6 @@
   "watch": ["cjs", "esm", "examples"],
   "env": {
     "NODE_ENV": "development",
-    "DEBUG": "*",
     "DEBUG_COLORS": true
   },
   "args": [

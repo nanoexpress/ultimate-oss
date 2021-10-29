@@ -8,23 +8,17 @@ app.use(async (req) => {
     req.headers['content-type'].includes('application/json')
   ) {
     let body = '';
-    req.on('data', (chunk) => {
+    for await (const chunk of req) {
       body += chunk.toString();
-    });
-    await new Promise((resolve) =>
-      req.on('end', () => {
-        req.body = JSON.parse(body);
-        resolve();
-      })
-    );
+    }
+    req.body = JSON.parse(body);
   }
 });
 
 app.get('/', (req, res) => res.end('ok'));
 
 app.post('/', async (req, res) => {
-  console.log('ran post');
-  req.pipe(res);
+  return { status: 'success', body: req.body };
 });
 
 app.listen(4002);
