@@ -17,7 +17,6 @@
     [
       "@semantic-release/commit-analyzer",
       {
-        "preset": "airlight",
         "releaseRules": [
           { "type": "docs", "scope": "README", "release": "patch" },
           { "type": "chore", "release": "patch" },
@@ -25,7 +24,6 @@
         ]
       }
     ],
-    ["@semantic-release/release-notes-generator", { "preset": "airlight" }],
     [
       "@semantic-release/npm",
       {
