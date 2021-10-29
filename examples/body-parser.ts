@@ -16,7 +16,7 @@ app.use(async (req) => {
   }
 });
 
-app.get('/', (_, res) => res.end('ok'));
+app.get('/', (_, res) => res.end(JSON.stringify(_.body)));
 
 app.post<{ headers: { origin: string }; body: { foo: 'bar' } }>(
   '/',

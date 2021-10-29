@@ -2,6 +2,8 @@
 import { RecognizedString, WebSocketBehavior } from 'uWebSockets.js';
 import {
   MiddlewareHandler,
+  RequestSchema,
+  RequestSchemaWithBody,
   RouteHandler,
   UnpreparedRoute
 } from '../types/find-route';
@@ -9,7 +11,6 @@ import { HttpMethod, IWebsocketRoute } from '../types/nanoexpress';
 import App from './app';
 import { appInstance, routerInstances, wsInstances } from './constants';
 import { invalid, _gc } from './helpers';
-import { IDefaultHttpSchema } from './polyfills/http-request';
 import RouteEngine from './route-engine';
 
 export default class Router {
@@ -128,9 +129,9 @@ export default class Router {
     return this;
   }
 
-  get<T extends IDefaultHttpSchema = IDefaultHttpSchema>(
+  get<T = RequestSchema>(
     path: string | RegExp,
-    ...handlers: RouteHandler<'GET', Omit<T, 'body'>>[]
+    ...handlers: RouteHandler<'GET', T>[]
   ): this {
     return this.on(
       'GET',
@@ -141,7 +142,7 @@ export default class Router {
     );
   }
 
-  post<T = IDefaultHttpSchema>(
+  post<T = RequestSchemaWithBody>(
     path: string | RegExp,
     ...handlers: RouteHandler<'POST', T>[]
   ): this {
@@ -154,7 +155,7 @@ export default class Router {
     );
   }
 
-  put<T = IDefaultHttpSchema>(
+  put<T = RequestSchemaWithBody>(
     path: string | RegExp,
     ...handlers: RouteHandler<'PUT', T>[]
   ): this {
@@ -167,9 +168,9 @@ export default class Router {
     );
   }
 
-  options<T = IDefaultHttpSchema>(
+  options<T = RequestSchema>(
     path: string | RegExp,
-    ...handlers: RouteHandler<'OPTIONS', Omit<T, 'body'>>[]
+    ...handlers: RouteHandler<'OPTIONS', T>[]
   ): this {
     return this.on(
       'OPTIONS',
@@ -180,9 +181,9 @@ export default class Router {
     );
   }
 
-  del<T = IDefaultHttpSchema>(
+  del<T = RequestSchema>(
     path: string | RegExp,
-    ...handlers: RouteHandler<'DEL', Omit<T, 'body'>>[]
+    ...handlers: RouteHandler<'DEL', T>[]
   ): this {
     return this.on(
       'DEL',
@@ -200,9 +201,9 @@ export default class Router {
    * @alias Router.del
    * @returns Router
    */
-  delete<T = IDefaultHttpSchema>(
+  delete<T = RequestSchema>(
     path: string | RegExp,
-    ...handlers: RouteHandler<'DEL', Omit<T, 'body'>>[]
+    ...handlers: RouteHandler<'DEL', T>[]
   ): this {
     return this.del(path, ...handlers);
   }
@@ -212,7 +213,7 @@ export default class Router {
    * @param handlers List of middlewares and/or routes
    * @returns Router
    */
-  all<T = IDefaultHttpSchema>(
+  all<T = RequestSchemaWithBody>(
     path: string | RegExp,
     ...handlers: RouteHandler<'ANY', T>[]
   ): this {

@@ -7,7 +7,7 @@ import uWS, {
   us_listen_socket,
   WebSocketBehavior
 } from 'uWebSockets.js';
-import { HttpHandler } from '../types/find-route';
+import { HttpHandler, RequestSchema } from '../types/find-route';
 import {
   HttpMethod,
   INanoexpressOptions,
@@ -16,7 +16,6 @@ import {
 import _gc from './helpers/gc';
 import { debug, warn } from './helpers/loggy';
 import { HttpRequest, HttpResponse } from './polyfills';
-import { IDefaultHttpSchema } from './polyfills/http-request';
 import RouteEngine from './route-engine';
 import RouterTemplate from './router';
 
@@ -88,9 +87,7 @@ class App extends RouterTemplate {
     return this;
   }
 
-  setNotFoundHandler(
-    handler: HttpHandler<HttpMethod, IDefaultHttpSchema>
-  ): this {
+  setNotFoundHandler(handler: HttpHandler<HttpMethod, RequestSchema>): this {
     this.defaultRoute = handler;
 
     return this;

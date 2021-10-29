@@ -1,5 +1,6 @@
 import { IBlock } from '@nanoexpress/route-syntax-parser/types/interfaces';
 import { Key } from 'path-to-regexp';
+import { ParsedUrlQuery } from 'querystring';
 import { HttpRequest, HttpResponse } from '../src/polyfills';
 import { HttpMethod } from './nanoexpress';
 
@@ -8,6 +9,15 @@ export type RouteHandler<THttpMethod, THttpSchema> = (
   req: HttpRequest<THttpMethod, THttpSchema>,
   res: HttpResponse
 ) => HttpResponse | Promise<HttpResponse | Record<string, unknown> | string>;
+
+export interface RequestSchema {
+  headers: Record<string, string>;
+  params?: Record<string, string>;
+  query?: ParsedUrlQuery | null;
+}
+export interface RequestSchemaWithBody extends RequestSchema {
+  body?: any;
+}
 
 export type MiddlewareHandler = (
   req: HttpRequest<HttpMethod, any>,

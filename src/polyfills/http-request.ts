@@ -1,26 +1,19 @@
 /* eslint-disable max-lines, max-lines-per-function */
 import { EventEmitter } from 'events';
 import queryParse from 'fast-query-parse';
-import { ParsedUrlQuery } from 'querystring';
 import { Readable, Writable } from 'stream';
 import {
   HttpRequest as uWS_HttpRequest,
   HttpResponse as uWS_HttpResponse
 } from 'uWebSockets.js';
+import { RequestSchema, RequestSchemaWithBody } from '../../types/find-route';
 import { HttpMethod, INanoexpressOptions } from '../../types/nanoexpress';
 import { reqConfig, reqEvents, reqRawResponse, reqRequest } from '../constants';
 import { invalid } from '../helpers';
 
-export interface IDefaultHttpSchema {
-  headers: Record<string, string>;
-  params?: Record<string, string>;
-  body?: any;
-  query: ParsedUrlQuery | null;
-}
-
 export default class HttpRequest<
   THttpMethod = HttpMethod,
-  THttpSchema extends IDefaultHttpSchema = IDefaultHttpSchema
+  THttpSchema extends RequestSchemaWithBody = RequestSchema
 > {
   protected [reqConfig]: INanoexpressOptions;
 
@@ -78,7 +71,7 @@ export default class HttpRequest<
 
     this.headers = {};
     req.forEach((key, value) => {
-      (this.headers as IDefaultHttpSchema['headers'])[key] = value;
+      (this.headers as RequestSchema['headers'])[key] = value;
     });
 
     if (url.charAt(url.length - 1) !== '/') {
