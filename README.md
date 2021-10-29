@@ -3,20 +3,20 @@
 <img src="https://gblobscdn.gitbook.com/assets%2F-M1ejn7fVvN8DITsnKKs%2F-M24-WfIBJzIO_iGCiJ2%2F-M24-xNAI9CDmWJWk3YR%2Fpng-512-black.png?alt=media&token=387de1d2-2586-42d0-aa10-a8134f0eabf9" width="200" />
 </p>
 
-<h1 align="center">nanoexpress Pro Slim</h1>
+<h1 align="center">nanoexpress Ultimate</h1>
 
 <h3 align="center">nanoexpress for enterprise users & teams</h3>
-<h4 align="center">Enterprise level security, stability and quality</h4>
+<h4 align="center">Ultimate solution based on nanoexpress and best-practices</h4>
 
-[![Travis](https://img.shields.io/travis/nanoexpress/pro-slim.svg)](http://github.com/nanoexpress/pro-slim)
-[![Code Climate](https://codeclimate.com/github/nanoexpress/pro-slim/badges/gpa.svg)](https://codeclimate.com/github/nanoexpress/pro-slim)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nanoexpress/pro-slim/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/nanoexpress/pro-slim/?branch=master)
-[![GitHub issues](https://img.shields.io/github/issues/nanoexpress/pro-slim.svg)](http://github.com/nanoexpress/pro-slim/issues)
+[![Travis](https://img.shields.io/travis/nanoexpress/ultimate.svg)](http://github.com/nanoexpress/ultimate)
+[![Code Climate](https://codeclimate.com/github/nanoexpress/ultimate/badges/gpa.svg)](https://codeclimate.com/github/nanoexpress/ultimate)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nanoexpress/ultimate/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/nanoexpress/ultimate/?branch=master)
+[![GitHub issues](https://img.shields.io/github/issues/nanoexpress/ultimate.svg)](http://github.com/nanoexpress/ultimate/issues)
 
 ## Table of Contents
 
 - [Documentations](https://nanoexpress.js.org)
-- [Configurations](https://nanoexpress.js.org/server#pro-slim-version)
+- [Configurations](https://nanoexpress.js.org/server#ultimate-version)
 - [Middlewares](https://nanoexpress.js.org/middlewares)
 - [Routes and route expose](https://nanoexpress.js.org/routes)
 - [WebSocket](https://nanoexpress.js.org/websocket)
@@ -24,16 +24,11 @@
 - [Benchmarks](https://nanoexpress.js.org/benchmark)
 - [FAQ](https://nanoexpress.js.org/support/faq)
 
-## Why PRO Slim
+## Why Ultimate
 
-- nanoexpress v1.x and express-ws compatible API interface
-- Much more stable, error percent was decreased by 90%
-- Much cleaner API and codebase, but **pluggable** with **defines** and [middlewares](https://github.com/nanoexpress/middlewares)
-- A bit faster than PRO version
-
-## Support
-
-Thank you, all previous sponsors, backers and supporters
+- The best-in-class Solution
+- Much more stable, error percent was decreased by 99%
+- The fastest member in the **nanoexpress** family
 
 ### Sponsors
 

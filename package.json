@@ -1,7 +1,7 @@
 {
-  "name": "@nanoexpress/pro-slim",
-  "version": "3.0.0",
-  "description": "nanoexpress for enterprise users & teams",
+  "name": "@nanoexpress/ultimate",
+  "version": "1.0.0",
+  "description": "Ultimate solution based on nanoexpress and best-practices",
   "main": "cjs/nanoexpress.js",
   "module": "esm/nanoexpress.js",
   "typings": "typings/nanoexpress.d.ts",
@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nanoexpress/pro-slim.git"
+    "url": "git+https://github.com/nanoexpress/ultimate.git"
   },
   "keywords": [
     "nano",
@@ -31,9 +31,9 @@
   "author": "dalisoft",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/nanoexpress/pro-slim/issues"
+    "url": "https://github.com/nanoexpress/ultimate/issues"
   },
-  "homepage": "https://github.com/nanoexpress/pro-slim#readme",
+  "homepage": "https://github.com/nanoexpress/ultimate#readme",
   "dependencies": {
     "@nanoexpress/route-syntax-parser": "https://github.com/nanoexpress/route-syntax-parser/releases/download/v2.4.3/nanoexpress-route-syntax-parser-2.4.3.tgz",
     "debug": "^4.3.2",
@@ -41,7 +41,7 @@
     "fast-query-parse": "^2.0.0",
     "path-to-regexp": "^6.2.0",
     "supports-color": "^9.0.2",
-    "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v20.1.0.tar.gz"
+    "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v20.2.0.tar.gz"
   },
   "devDependencies": {
     "@commitlint/cli": "^13.2.1",
