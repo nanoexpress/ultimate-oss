@@ -5,18 +5,15 @@ const app = nanoexpress();
 app.use(async (req) => {
   if (
     req.method === 'POST' &&
-    req.headers['content-type'] === 'application/json'
+    req.headers['content-type'].includes('application/json')
   ) {
     let body = '';
-    req.stream.on('data', (chunk) => {
-      console.log('chunk??', chunk.toString());
+    req.on('data', (chunk) => {
       body += chunk.toString();
     });
     await new Promise((resolve) =>
-      req.stream.on('end', () => {
-        if (body) {
-          req.body = JSON.parse(body);
-        }
+      req.on('end', () => {
+        req.body = JSON.parse(body);
         resolve();
       })
     );
@@ -26,6 +23,7 @@ app.use(async (req) => {
 app.get('/', (req, res) => res.end('ok'));
 
 app.post('/', async (req, res) => {
+  console.log('ran post');
   req.pipe(res);
 });
 

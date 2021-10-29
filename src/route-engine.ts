@@ -4,14 +4,13 @@ import fastDecodeURI from 'fast-decode-uri-component';
 import { pathToRegexp } from 'path-to-regexp';
 import {
   HttpHandler,
-  HttpRequestExtended,
   PreparedRoute,
   UnpreparedRoute
 } from '../types/find-route';
 import { HttpMethod, INanoexpressOptions } from '../types/nanoexpress';
 import { debug, invalid, iterateBlocks, slashify, _gc } from './helpers';
-import { HttpResponse } from './polyfills';
-import legacyUtil from './utils/legacy';
+import { HttpRequest, HttpResponse } from './polyfills';
+import legacyUtil, { LegacyHttpHandler } from './utils/legacy';
 
 export default class RouteEngine {
   protected options: INanoexpressOptions;
@@ -91,12 +90,14 @@ export default class RouteEngine {
     route.async = route.handler.constructor.name === 'AsyncFunction';
     route.await = route.handler.toString().includes('await');
     route.legacy = route.handler.toString().includes('next(');
-    route.analyzeBlocks = analyze<HttpHandler<HttpMethod>>(route.handler);
+    route.analyzeBlocks = analyze<HttpHandler<HttpMethod, any>>(route.handler);
     const usedBlocks = iterateBlocks(route.analyzeBlocks);
 
     if (route.legacy) {
       if (config.enableExpressCompatibility) {
-        route.handler = legacyUtil(route.handler);
+        route.handler = legacyUtil(
+          route.handler as LegacyHttpHandler<HttpMethod>
+        );
         route.async = true;
         route.await = true;
       } else {
@@ -140,7 +141,7 @@ export default class RouteEngine {
   on(
     method: HttpMethod,
     path: string | RegExp | Array<string | RegExp>,
-    handler: HttpHandler<HttpMethod> | HttpHandler<HttpMethod>[],
+    handler: HttpHandler<HttpMethod, any> | HttpHandler<HttpMethod, any>[],
     baseUrl: string,
     originalUrl: string
   ): this {
@@ -175,7 +176,7 @@ export default class RouteEngine {
   off(
     method: HttpMethod,
     path: string,
-    handler: HttpHandler<HttpMethod>,
+    handler: HttpHandler<HttpMethod, any>,
     baseUrl: string,
     originalUrl: string
   ): this {
@@ -203,7 +204,7 @@ export default class RouteEngine {
   }
 
   async lookup(
-    req: HttpRequestExtended<HttpMethod>,
+    req: HttpRequest,
     res: HttpResponse
   ): Promise<HttpResponse | string | void> {
     const { routes, options } = this;
@@ -278,6 +279,7 @@ export default class RouteEngine {
             debug('routes lookup was done with async json result');
             return res.send(response as string | Record<string, unknown>);
           }
+
           debug('routes lookup was done without any match');
         } else {
           debug('routes lookup was not found without any match');

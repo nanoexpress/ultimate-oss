@@ -12,7 +12,7 @@ import {
   Gzip,
   ZlibOptions
 } from 'zlib';
-import { HttpRequest, INanoexpressOptions } from '../../types/nanoexpress';
+import { INanoexpressOptions } from '../../types/nanoexpress';
 import {
   request as resRequest,
   resAbortHandler,
@@ -23,6 +23,7 @@ import {
   response as resResponse
 } from '../constants';
 import { debug, getMime, httpCodes, invalid, warn } from '../helpers';
+import HttpRequest from './http-request';
 
 /**
  * HttpResponse class
@@ -497,7 +498,11 @@ class HttpResponse {
       };
       const onfinish = (): void => {
         if (calledData) {
-          stream.close();
+          if (typeof stream.close === 'function') {
+            stream.close();
+          } else {
+            stream.emit('close');
+          }
         }
         this.emit('finish');
       };

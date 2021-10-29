@@ -1,10 +1,10 @@
-import { HttpHandler, HttpRequestExtended } from '../../types/find-route';
+import { MiddlewareHandler } from '../../types/find-route';
 import { HttpMethod } from '../../types/nanoexpress';
 import { warn } from '../helpers/loggy';
-import HttpResponse from '../polyfills/http-response';
+import { HttpRequest, HttpResponse } from '../polyfills';
 
-type LegacyHttpHandler<T> = (
-  req: HttpRequestExtended<T>,
+export type LegacyHttpHandler<T> = (
+  req: HttpRequest<T>,
   res: HttpResponse,
   next: (err?: Error, done?: boolean) => void
 ) =>
@@ -15,12 +15,12 @@ type LegacyHttpHandler<T> = (
 
 export default (
   middleware: LegacyHttpHandler<HttpMethod>
-): HttpHandler<HttpMethod> => {
+): MiddlewareHandler => {
   warn(
     'legacy middlewares is deprecated and in future we will remove express.js middlewares support'
   );
   const httpHandler = function legacyMiddlewarePolyfillHandler(
-    req: HttpRequestExtended<HttpMethod>,
+    req: HttpRequest,
     res: HttpResponse
   ): Promise<HttpResponse> {
     return new Promise((resolve, reject) => {

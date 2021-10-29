@@ -1,23 +1,29 @@
 import { IBlock } from '@nanoexpress/route-syntax-parser/types/interfaces';
 import { Key } from 'path-to-regexp';
-import { HttpResponse } from '../src/polyfills';
-import { HttpMethod, HttpRequest } from './nanoexpress';
+import { HttpRequest, HttpResponse } from '../src/polyfills';
+import { HttpMethod } from './nanoexpress';
 
-export interface HttpRequestExtended<T> extends Omit<HttpRequest, 'method'> {
-  method: T;
-}
-
-export type HttpHandler<T> = (
-  req: HttpRequestExtended<T>,
+export type RouteHandler<THttpMethod, THttpSchema> = (
+  // @ts-ignore
+  req: HttpRequest<THttpMethod, THttpSchema>,
   res: HttpResponse
 ) => HttpResponse | Promise<HttpResponse | Record<string, unknown> | string>;
+
+export type MiddlewareHandler = (
+  req: HttpRequest<HttpMethod, any>,
+  res: HttpResponse
+) => HttpResponse | Promise<HttpResponse | void>;
+
+export type HttpHandler<THttpMethod, THttpSchema> =
+  | MiddlewareHandler
+  | RouteHandler<THttpMethod, THttpSchema>;
 
 export interface UnpreparedRoute {
   method: HttpMethod;
   path: string | RegExp;
   baseUrl: string;
   originalUrl: string;
-  handler: HttpHandler<HttpMethod>;
+  handler: HttpHandler<HttpMethod, any>;
 }
 
 export interface PreparedRoute extends Omit<UnpreparedRoute, 'path'> {

@@ -4,6 +4,17 @@ export const response: unique symbol = Symbol(
   'NanoexpressHttpResponseInstance'
 );
 
+// HttpRequest symbols
+
+export const reqConfig: unique symbol = Symbol('NanoexpressHttpRequestConfig');
+export const reqEvents: unique symbol = Symbol('NanoexpressHttpRequestEvents');
+export const reqRequest: unique symbol = Symbol(
+  'NanoexpressHttpRequestRawInstance'
+);
+export const reqRawResponse: unique symbol = Symbol(
+  'NanoexpressHttpResponseRawInstance'
+);
+
 // HttpResponse symbols
 export const resHeaders: unique symbol = Symbol(
   'NanoexpressHttpResponseHeaders'

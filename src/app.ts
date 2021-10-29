@@ -1,6 +1,4 @@
 /* eslint-disable max-lines, max-lines-per-function, complexity, max-depth */
-import queryParse from 'fast-query-parse';
-import { Readable, Writable } from 'stream';
 import uWS, {
   HttpRequest as uWS_HttpRequest,
   HttpResponse as uWS_HttpResponse,
@@ -9,16 +7,16 @@ import uWS, {
   us_listen_socket,
   WebSocketBehavior
 } from 'uWebSockets.js';
-import { HttpHandler, HttpRequestExtended } from '../types/find-route';
+import { HttpHandler } from '../types/find-route';
 import {
   HttpMethod,
-  HttpRequest,
   INanoexpressOptions,
   IWebsocketRoute
 } from '../types/nanoexpress';
 import _gc from './helpers/gc';
 import { debug, warn } from './helpers/loggy';
-import { HttpResponse } from './polyfills';
+import { HttpRequest, HttpResponse } from './polyfills';
+import { IDefaultHttpSchema } from './polyfills/http-request';
 import RouteEngine from './route-engine';
 import RouterTemplate from './router';
 
@@ -43,7 +41,9 @@ class App extends RouterTemplate {
 
   protected _ws: IWebsocketRoute[];
 
-  protected _pools: HttpResponse[];
+  protected _requestPools: HttpRequest[];
+
+  protected _responsePools: HttpResponse[];
 
   protected _poolsSize: number;
 
@@ -55,14 +55,10 @@ class App extends RouterTemplate {
 
   protected _instance: Record<string, us_listen_socket | null>;
 
-  protected defaultRoute: HttpHandler<HttpMethod> | null;
+  protected defaultRoute: HttpHandler<HttpMethod, any> | null;
 
   protected errorRoute:
-    | ((
-        err: Error,
-        req: HttpRequestExtended<HttpMethod>,
-        res: HttpResponse
-      ) => void)
+    | ((err: Error, req: HttpRequest, res: HttpResponse) => void)
     | null;
 
   constructor(options: INanoexpressOptions, app: TemplatedApp) {
@@ -75,7 +71,8 @@ class App extends RouterTemplate {
     this.errorRoute = null;
 
     this._ws = [];
-    this._pools = [];
+    this._requestPools = [];
+    this._responsePools = [];
     this._poolsSize = options.poolSize || 10;
 
     this.time = process.hrtime();
@@ -86,29 +83,23 @@ class App extends RouterTemplate {
     return this;
   }
 
-  setNotFoundHandler(handler: HttpHandler<HttpMethod>): this {
+  setNotFoundHandler(
+    handler: HttpHandler<HttpMethod, IDefaultHttpSchema>
+  ): this {
     this.defaultRoute = handler;
 
     return this;
   }
 
   setErrorHandler(
-    handler: (
-      err: Error,
-      req: HttpRequestExtended<HttpMethod>,
-      res: HttpResponse
-    ) => void
+    handler: (err: Error, req: HttpRequest, res: HttpResponse) => void
   ): this {
     this.errorRoute = handler;
 
     return this;
   }
 
-  handleError(
-    error: Error,
-    req: HttpRequestExtended<HttpMethod>,
-    res: HttpResponse
-  ): this {
+  handleError(error: Error, req: HttpRequest, res: HttpResponse): this {
     if (res && !res.aborted && !res.done && !res.streaming && this.errorRoute) {
       this.errorRoute(error, req, res);
     }
@@ -135,7 +126,8 @@ class App extends RouterTemplate {
       _app: app,
       _options: options,
       _ws,
-      _pools,
+      _requestPools,
+      _responsePools,
       _poolsSize,
       _engine,
       _ran
@@ -146,59 +138,23 @@ class App extends RouterTemplate {
         rawRes: uWS_HttpResponse,
         rawReq: uWS_HttpRequest
       ): Promise<uWS_HttpResponse | void> => {
-        let res: HttpResponse | undefined;
+        let req: HttpRequest;
+        let res: HttpResponse;
         let response;
-        const req = rawReq as HttpRequest;
-        const query = req.getQuery();
 
-        req.url = req.getUrl();
-        req.originalUrl = req.url;
-        req.path = req.originalUrl;
-        req.baseUrl = '';
-
-        req.method = req.getMethod().toUpperCase() as HttpMethod;
-
-        req.headers = {};
-        req.forEach((key, value) => {
-          req.headers[key] = value;
-        });
-
-        if (_pools.length > 0) {
-          res = _pools.shift() as HttpResponse;
+        if (_requestPools.length > 0) {
+          req = _requestPools.shift() as HttpRequest;
+          req.setRequest(rawReq, rawRes);
+        } else {
+          req = new HttpRequest(options);
+          req.setRequest(rawReq, rawRes);
+        }
+        if (_responsePools.length > 0) {
+          res = _responsePools.shift() as HttpResponse;
           res.setResponse(rawRes, req);
         } else {
           res = new HttpResponse(options);
           res.setResponse(rawRes, req);
-        }
-
-        if (req.method === 'POST' || req.method === 'PUT') {
-          req.stream = new Readable({
-            read(): void {}
-          });
-          req.pipe = (destination: Writable, opts): Writable =>
-            req.stream
-              .on('error', (err) => {
-                destination.destroy();
-                destination.emit('error', err);
-              })
-              .pipe(destination, opts);
-          res.exposeAborted();
-
-          let offset = 0;
-          const chunks = Buffer.allocUnsafe(+req.headers['content-length']);
-          rawRes.onData((arrayChunk: ArrayBuffer, isLast: boolean) => {
-            const chunk = Buffer.from(arrayChunk.slice(0));
-
-            req.stream.push(chunk);
-            chunks.fill(chunk, offset, offset + arrayChunk.byteLength);
-
-            offset += arrayChunk.byteLength;
-
-            if (isLast) {
-              req.buffer = chunks;
-              req.stream.push(null);
-            }
-          });
         }
 
         if (
@@ -214,16 +170,19 @@ class App extends RouterTemplate {
             res.redirect(`http://${req.getHeader('host')}${req.originalUrl}/`);
             return rawRes;
           }
-
-          req.url += '/';
-          req.path += '/';
-          req.originalUrl += '/';
         }
 
-        if (options.enableExpressCompatibility && query) {
-          req.originalUrl += `?${query}`;
+        if (req.method === 'POST' || req.method === 'PUT') {
+          res.exposeAborted();
+
+          rawRes.onData((arrayChunk: ArrayBuffer, isLast: boolean) => {
+            req.push(Buffer.from(arrayChunk.slice(0)));
+
+            if (isLast) {
+              req.push(null);
+            }
+          });
         }
-        req.query = queryParse(query);
 
         if (res.aborted || res.done || req.method === 'OPTIONS') {
           debug('early returned ranning %o', {
@@ -239,15 +198,22 @@ class App extends RouterTemplate {
           response = await _engine.lookup(req, res).catch((err) => {
             this.handleError(err, req, res as HttpResponse);
           });
-          if (_pools.length < _poolsSize) {
-            _pools.push(res);
+          if (_requestPools.length < _poolsSize) {
+            _requestPools.push(req);
+          }
+          if (_responsePools.length < _poolsSize) {
+            _responsePools.push(res);
           }
           return rawRes;
         }
 
         _engine.lookup(req, res);
-        if (_pools.length < _poolsSize) {
-          _pools.push(res);
+        if (_requestPools.length < _poolsSize) {
+          _requestPools.push(req);
+          req.drain();
+        }
+        if (_responsePools.length < _poolsSize) {
+          _responsePools.push(res);
         }
 
         if (

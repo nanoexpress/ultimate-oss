@@ -1,9 +1,15 @@
+/* eslint-disable max-lines, max-lines-per-function */
 import { RecognizedString, WebSocketBehavior } from 'uWebSockets.js';
-import { HttpHandler, UnpreparedRoute } from '../types/find-route';
+import {
+  MiddlewareHandler,
+  RouteHandler,
+  UnpreparedRoute
+} from '../types/find-route';
 import { HttpMethod, IWebsocketRoute } from '../types/nanoexpress';
 import App from './app';
 import { appInstance, routerInstances, wsInstances } from './constants';
 import { invalid, _gc } from './helpers';
+import { IDefaultHttpSchema } from './polyfills/http-request';
 import RouteEngine from './route-engine';
 
 export default class Router {
@@ -25,10 +31,14 @@ export default class Router {
     return this;
   }
 
-  on(
+  on<T>(
     method: HttpMethod,
     path: string | RegExp,
-    handlers: HttpHandler<HttpMethod> | HttpHandler<HttpMethod>[],
+    handlers:
+      | MiddlewareHandler
+      | MiddlewareHandler[]
+      | RouteHandler<HttpMethod, T>
+      | RouteHandler<HttpMethod, T>[],
     baseUrl: string,
     originalUrl: string
   ): this {
@@ -60,8 +70,8 @@ export default class Router {
   }
 
   use(
-    path: string | HttpHandler<HttpMethod> | Router,
-    ...middlewares: Array<HttpHandler<HttpMethod> | Router>
+    path: string | MiddlewareHandler | Router,
+    ...middlewares: Array<MiddlewareHandler | Router>
   ): this {
     if (typeof path === 'function' || path instanceof Router) {
       middlewares.unshift(path);
@@ -77,7 +87,7 @@ export default class Router {
         return this.use('*', ...path);
       }
     }
-    middlewares.forEach((handler: Router | HttpHandler<HttpMethod>) => {
+    middlewares.forEach((handler: Router | MiddlewareHandler) => {
       if (handler instanceof Router) {
         const _routers = handler[routerInstances];
         const _ws = handler[wsInstances];
@@ -118,51 +128,66 @@ export default class Router {
     return this;
   }
 
-  get(path: string | RegExp, ...handlers: HttpHandler<'GET'>[]): this {
+  get<T extends IDefaultHttpSchema = IDefaultHttpSchema>(
+    path: string | RegExp,
+    ...handlers: RouteHandler<'GET', T>[]
+  ): this {
     return this.on(
       'GET',
       path,
-      handlers as HttpHandler<HttpMethod>[],
+      handlers as RouteHandler<HttpMethod, T>[],
       this._basePath,
       ''
     );
   }
 
-  post(path: string | RegExp, ...handlers: HttpHandler<'POST'>[]): this {
+  post<T = IDefaultHttpSchema>(
+    path: string | RegExp,
+    ...handlers: RouteHandler<'POST', T>[]
+  ): this {
     return this.on(
       'POST',
       path,
-      handlers as HttpHandler<HttpMethod>[],
+      handlers as RouteHandler<HttpMethod, T>[],
       this._basePath,
       ''
     );
   }
 
-  put(path: string | RegExp, ...handlers: HttpHandler<'PUT'>[]): this {
+  put<T = IDefaultHttpSchema>(
+    path: string | RegExp,
+    ...handlers: RouteHandler<'PUT', T>[]
+  ): this {
     return this.on(
       'PUT',
       path,
-      handlers as HttpHandler<HttpMethod>[],
+      handlers as RouteHandler<HttpMethod, T>[],
       this._basePath,
       ''
     );
   }
 
-  options(path: string | RegExp, ...handlers: HttpHandler<'OPTIONS'>[]): this {
+  options<T = IDefaultHttpSchema>(
+    path: string | RegExp,
+    ...handlers: RouteHandler<'OPTIONS', T>[]
+  ): this {
     return this.on(
       'OPTIONS',
       path,
-      handlers as HttpHandler<HttpMethod>[],
+      handlers as RouteHandler<HttpMethod, T>[],
       this._basePath,
       ''
     );
   }
 
-  del(path: string | RegExp, ...handlers: HttpHandler<'DEL'>[]): this {
+  del<T = IDefaultHttpSchema>(
+    path: string | RegExp,
+    ...handlers: RouteHandler<'DEL', T>[]
+  ): this {
     return this.on(
       'DEL',
       path,
-      handlers as HttpHandler<HttpMethod>[],
+      handlers as RouteHandler<HttpMethod, T>[],
       this._basePath,
       ''
     );
@@ -175,7 +200,10 @@ export default class Router {
    * @alias Router.del
    * @returns Router
    */
-  delete(path: string | RegExp, ...handlers: HttpHandler<'DEL'>[]): this {
+  delete<T = IDefaultHttpSchema>(
+    path: string | RegExp,
+    ...handlers: RouteHandler<'DEL', T>[]
+  ): this {
     return this.del(path, ...handlers);
   }
 
@@ -184,11 +212,14 @@ export default class Router {
    * @param handlers List of middlewares and/or routes
    * @returns Router
    */
-  all(path: string | RegExp, ...handlers: HttpHandler<'ANY'>[]): this {
+  all<T = IDefaultHttpSchema>(
+    path: string | RegExp,
+    ...handlers: RouteHandler<'ANY', T>[]
+  ): this {
     return this.on(
       'ANY',
       path,
-      handlers as HttpHandler<HttpMethod>[],
+      handlers as RouteHandler<HttpMethod, T>[],
       this._basePath,
       ''
     );

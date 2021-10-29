@@ -1,8 +1,5 @@
-import { ParsedUrlQuery } from 'querystring';
-import { Readable, Writable } from 'stream';
 import {
   AppOptions,
-  HttpRequest as uWS_HttpRequest,
   RecognizedString,
   WebSocket,
   WebSocketBehavior
@@ -20,25 +17,6 @@ export interface INanoexpressOptions {
   json_replacer?: (this: any, key: string, value: any) => any;
 }
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'OPTIONS' | 'DEL' | 'ANY';
-
-export interface HttpRequest extends uWS_HttpRequest {
-  baseUrl: string;
-  url: string;
-  originalUrl: string;
-  path: string;
-  method: HttpMethod;
-  stream: Readable;
-  pipe: (
-    destination: Writable,
-    opts?: {
-      end?: boolean | undefined;
-    }
-  ) => Writable;
-  headers: Record<string, string>;
-  params?: Record<string, string>;
-  query: ParsedUrlQuery | null;
-  buffer?: Buffer;
-}
 
 export type WebSocketHandler = (ws: WebSocket) => void | WebSocketBehavior;
 
