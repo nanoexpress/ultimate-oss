@@ -11,7 +11,8 @@
     "test": "node --experimental-modules tests/index.js",
     "cleanup": "rm -rf cjs/*.js cjs/*.js.map esm/*.js esm/*.js.map typings/",
     "build": "npm run cleanup && rollup -c",
-    "prepublishOnly": "yarn lint && yarn build"
+    "prepare": "husky install && yarn build",
+    "prepublishOnly": "yarn build"
   },
   "engines": {
     "node": ">=14.18.1"
