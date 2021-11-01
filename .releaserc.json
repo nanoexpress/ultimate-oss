@@ -121,9 +121,10 @@
       }
     ],
     [
-      "@semantic-release/github",
+      "@semantic-release/git",
       {
-        "assets": "dist/*.tgz"
+        "assets": ["package.json", "esm/*.js", "cjs/*.js", "typings"],
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ]
   ]
