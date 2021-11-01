@@ -1,0 +1,1 @@
+{"version":3,"file":"nanoexpress.d.ts","sourceRoot":"","sources":["../src/nanoexpress.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,mBAAmB,EAAE,MAAM,sBAAsB,CAAC;AAC3D,OAAO,GAAG,MAAM,OAAO,CAAC;AACxB,OAAO,EAAE,eAAe,EAAE,MAAM,iBAAiB,CAAC;AAClD,OAAO,MAAM,MAAM,UAAU,CAAC;AAS9B,QAAA,MAAM,WAAW;eACN,mBAAmB,GAI3B,GAAG;;;;CAUL,CAAC;AAQF,eAAe,WAAW,CAAC"}
