@@ -15,7 +15,7 @@
     "prepublishOnly": "yarn build"
   },
   "engines": {
-    "node": ">=14.18.1"
+    "node": ">=14.18.1 <=16.13.0"
   },
   "repository": {
     "type": "git",
@@ -43,13 +43,13 @@
     "fast-query-parse": "^2.0.0",
     "path-to-regexp": "^6.2.0",
     "supports-color": "^9.0.2",
+    "@types/debug": "^4.1.7",
     "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v20.2.0.tar.gz"
   },
   "devDependencies": {
     "@commitlint/cli": "^13.2.1",
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-node-resolve": "^13.0.6",
-    "@types/debug": "^4.1.7",
     "@types/node": "^16.11.6",
     "baretest": "^2.x",
     "commitlint-config-airlight": "^3.0.0",
@@ -66,8 +66,5 @@
     "smartlint": "^5.0.0",
     "typedoc": "^0.22.7",
     "typescript": "^4.4.4"
-  },
-  "resolutions": {
-    "tslib": "2.3.1"
   }
 }
