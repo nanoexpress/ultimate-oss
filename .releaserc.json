@@ -30,11 +30,11 @@
           },
           {
             "type": "test",
-            "release": "patch"
+            "release": false
           },
           {
             "type": "style",
-            "release": "patch"
+            "release": false
           },
           {
             "type": "perf",
@@ -42,14 +42,15 @@
           },
           {
             "type": "ci",
-            "release": "patch"
+            "release": false
           },
           {
             "type": "build",
-            "release": "patch"
+            "release": false
           },
           {
             "type": "chore",
+            "scope": "deps",
             "release": "patch"
           },
           {
