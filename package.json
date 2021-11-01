@@ -38,18 +38,19 @@
   "homepage": "https://github.com/nanoexpress/ultimate#readme",
   "dependencies": {
     "@nanoexpress/route-syntax-parser": "https://github.com/nanoexpress/route-syntax-parser/releases/download/v2.4.3/nanoexpress-route-syntax-parser-2.4.3.tgz",
+    "@types/debug": "^4.1.7",
     "debug": "^4.3.2",
     "fast-decode-uri-component": "^1.0.1",
     "fast-query-parse": "^2.0.0",
     "path-to-regexp": "^6.2.0",
     "supports-color": "^9.0.2",
-    "@types/debug": "^4.1.7",
     "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v20.2.0.tar.gz"
   },
   "devDependencies": {
     "@commitlint/cli": "^13.2.1",
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-node-resolve": "^13.0.6",
+    "@semantic-release/git": "^10.0.1",
     "@types/node": "^16.11.6",
     "baretest": "^2.x",
     "commitlint-config-airlight": "^3.0.0",
