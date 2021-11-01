@@ -122,13 +122,13 @@
         "tarballDir": "dist"
       }
     ],
-    "@semantic-release/github",
     [
       "@semantic-release/git",
       {
         "assets": ["package.json", "esm", "cjs", "typings"],
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
-    ]
+    ],
+    "@semantic-release/github"
   ]
 }
