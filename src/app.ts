@@ -15,6 +15,7 @@ import {
 } from '../types/nanoexpress';
 import _gc from './helpers/gc';
 import { debug, warn } from './helpers/loggy';
+import { unregister } from './hooks/manager';
 import { HttpRequest, HttpResponse } from './polyfills';
 import RouteEngine from './route-engine';
 import RouterTemplate from './router';
@@ -66,7 +67,9 @@ class App extends RouterTemplate {
     this._app = app;
     this._engine = new RouteEngine(options);
 
-    this.defaultRoute = null;
+    this.defaultRoute = (_, res): HttpResponse => {
+      return res.status(404).send({ status: 'error', code: 404 });
+    };
     this.errorRoute = (err, _, res): HttpResponse => {
       return res.status(500).send({
         status: 'error',
@@ -201,6 +204,7 @@ class App extends RouterTemplate {
           response = await _engine.lookup(req, res).catch((err) => {
             this.handleError(err, req, res as HttpResponse);
           });
+          unregister();
           if (_requestPools.length < _poolsSize) {
             _requestPools.push(req);
           }
@@ -210,7 +214,10 @@ class App extends RouterTemplate {
           return rawRes;
         }
 
-        _engine.lookup(req, res);
+        await _engine.lookup(req, res).catch((err) => {
+          this.handleError(err, req, res as HttpResponse);
+        });
+        unregister();
         if (_requestPools.length < _poolsSize) {
           _requestPools.push(req);
         }

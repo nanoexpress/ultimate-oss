@@ -26,6 +26,39 @@ const debug = debugLog('nanoexpress');
 debugLog('nanoexpress:error');
 const warn = debugLog('nanoexpress:warn');
 
+const lastDeps = [];
+const callbacks = [];
+let hookIndex = 0;
+const register = (runValue = false, returnValue = false) => (callback, dependencies) => {
+    if (!dependencies ||
+        !lastDeps[hookIndex] ||
+        !lastDeps[hookIndex].every((dep, depIndex) => dep === dependencies[depIndex])) {
+        callbacks[hookIndex] = {
+            handler: runValue ? callback() : callback,
+            dependencies,
+            isEffect: runValue && !returnValue,
+            mounted: runValue
+        };
+        lastDeps[hookIndex] = dependencies;
+    }
+    const _callback = callbacks[hookIndex].handler;
+    hookIndex += 1;
+    if (returnValue) {
+        return _callback;
+    }
+};
+const unregister = () => {
+    callbacks.forEach((callback) => {
+        if (callback.isEffect &&
+            callback.mounted &&
+            typeof callback.handler === 'function') {
+            callback.handler();
+            callback.mounted = false;
+        }
+    });
+    hookIndex = 0;
+};
+
 const request = Symbol('NanoexpressHttpRequestInstance');
 const response = Symbol('NanoexpressHttpResponseInstance');
 const reqConfig = Symbol('NanoexpressHttpRequestConfig');
@@ -256,6 +289,7 @@ var slashify = (path) => path !== '*' &&
 class HttpRequest {
     constructor(options) {
         this.query = null;
+        this.id = 0;
         this[reqConfig] = options;
         this.registered = false;
         return this;
@@ -289,6 +323,7 @@ class HttpRequest {
             this[reqEvents] = null;
             this.registered = false;
         }
+        this.id = Math.round(Math.random() * 1e5);
         return this;
     }
     on(event, listener) {
@@ -337,6 +372,7 @@ class HttpRequest {
 class HttpResponse {
     constructor(config) {
         this._headersSet = false;
+        this.id = 0;
         this[resConfig] = config;
         this.done = false;
         this.aborted = false;
@@ -443,6 +479,7 @@ class HttpResponse {
         this[resAbortHandler].length = 0;
         this[resHeaders] = null;
         this.statusCode = 200;
+        this.id = Math.round(Math.random() * 1e5);
         return this;
     }
     end(body, closeConnection) {
@@ -1097,7 +1134,9 @@ class App extends Router {
         this._options = options;
         this._app = app;
         this._engine = new RouteEngine(options);
-        this.defaultRoute = null;
+        this.defaultRoute = (_, res) => {
+            return res.status(404).send({ status: 'error', code: 404 });
+        };
         this.errorRoute = (err, _, res) => {
             return res.status(500).send({
                 status: 'error',
@@ -1199,6 +1238,7 @@ class App extends Router {
                     response = await _engine.lookup(req, res).catch((err) => {
                         this.handleError(err, req, res);
                     });
+                    unregister();
                     if (_requestPools.length < _poolsSize) {
                         _requestPools.push(req);
                     }
@@ -1207,7 +1247,10 @@ class App extends Router {
                     }
                     return rawRes;
                 }
-                _engine.lookup(req, res);
+                await _engine.lookup(req, res).catch((err) => {
+                    this.handleError(err, req, res);
+                });
+                unregister();
                 if (_requestPools.length < _poolsSize) {
                     _requestPools.push(req);
                 }
@@ -1399,6 +1442,18 @@ function exposeWebsocket(handler, options = {}) {
     };
 }
 
+const useCallback = register(false, true);
+const useEffect = register(true);
+const useMemo = register(true, true);
+const useState = (initialValue) => {
+    let value = useMemo(() => initialValue, []);
+    const setValue = (newValue) => {
+        value = newValue;
+    };
+    return [value, setValue];
+};
+const useRef = (ref = null, dependencies) => useMemo(() => ({ current: ref }), dependencies);
+
 const nanoexpress = (options = {
     ignoreTrailingSlash: true,
     enableExpressCompatibility: false
@@ -1416,5 +1471,5 @@ nanoexpress.Router = Router;
 nanoexpress.App = App;
 nanoexpress.exposeWebsocket = exposeWebsocket;
 
-export { nanoexpress as default };
+export { nanoexpress as default, useCallback, useEffect, useMemo, useRef, useState };
 //# sourceMappingURL=nanoexpress.js.map

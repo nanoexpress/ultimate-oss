@@ -22,6 +22,7 @@ declare class HttpResponse {
     serialize?: (data: Record<string, unknown> | string | number | boolean) => string;
     compiledResponse?: string;
     statusCode: number;
+    id: number;
     constructor(config: INanoexpressOptions);
     protected registerEvents(): this;
     on(eventName: string | symbol, eventArgument: (eventArgument?: unknown) => void): this;

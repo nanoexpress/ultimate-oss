@@ -2,6 +2,7 @@ import uWS from 'uWebSockets.js';
 import { INanoexpressOptions } from '../types/nanoexpress';
 import App from './app';
 import { exposeWebsocket } from './exposes/index';
+import { useCallback, useEffect, useMemo, useRef, useState } from './hooks';
 import Router from './router';
 
 /**
@@ -34,4 +35,11 @@ nanoexpress.App = App;
 // Add exposes
 nanoexpress.exposeWebsocket = exposeWebsocket;
 
-export default nanoexpress;
+export {
+  nanoexpress as default,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+};

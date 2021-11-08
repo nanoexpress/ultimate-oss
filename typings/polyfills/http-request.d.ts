@@ -21,6 +21,7 @@ export default class HttpRequest<THttpMethod = HttpMethod, THttpSchema extends R
     body?: THttpSchema['body'];
     query: THttpSchema['query'];
     stream: Readable;
+    id: number;
     constructor(options: INanoexpressOptions);
     setRequest(req: uWS_HttpRequest, res: uWS_HttpResponse): this;
     on(event: string, listener: (...args: any[]) => void): this;

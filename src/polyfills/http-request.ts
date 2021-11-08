@@ -45,6 +45,8 @@ export default class HttpRequest<
 
   stream!: Readable;
 
+  id = 0;
+
   constructor(options: INanoexpressOptions) {
     this[reqConfig] = options;
 
@@ -94,6 +96,9 @@ export default class HttpRequest<
       this[reqEvents] = null;
       this.registered = false;
     }
+
+    // eslint-disable-next-line security-node/detect-insecure-randomness
+    this.id = Math.round(Math.random() * 1e5);
 
     return this;
   }

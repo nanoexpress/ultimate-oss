@@ -67,6 +67,8 @@ class HttpResponse {
 
   public statusCode: number;
 
+  id = 0;
+
   constructor(config: INanoexpressOptions) {
     this[resConfig] = config;
     this.done = false;
@@ -268,6 +270,9 @@ class HttpResponse {
 
     this[resHeaders] = null;
     this.statusCode = 200;
+
+    // eslint-disable-next-line security-node/detect-insecure-randomness
+    this.id = Math.round(Math.random() * 1e5);
 
     return this;
   }
