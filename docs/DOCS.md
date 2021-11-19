@@ -17,7 +17,7 @@
 - [Docker](https://nanoexpress.js.org/docker-linux) `[E]`
 - [Known bugs](#known-bugs)
 - [IDE Support](#ide-support)
-- [Benchmarks](./docs/BENCHMARK.md) `[I]`
+- [Benchmarks](./BENCHMARK.md) `[I]`
 
 ## Introduction
 
