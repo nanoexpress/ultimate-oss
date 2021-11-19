@@ -9,10 +9,9 @@
 
 ## Table of Contents
 
-- [Documentations](./docs/DOCS.md)
-- [Middlewares](./docs/MIDDLEWARES.md)
-- [Benchmarks](./docs/BENCHMARK.md)
-- [Docker](https://nanoexpress.js.org/docker-linux)
+- [Documentations](./docs/DOCS.md) `[I]`
+- [Telegram Channel](https://t.me/nanoexpress) `[E]`
+- [Telegram Group](https://t.me/nanoexpress_discussion) `[E]`
 
 ## Why Ultimate
 
@@ -22,13 +21,13 @@
 
 ### Sponsors
 
-See [here](https://nanoexpress.js.org/support/sponsors)
+See [here](https://nanoexpress.js.org/support/sponsors) `[E]`
 
 ### Questions?
 
 Ask from author by becoming Patron and asking from Patreon
 
-> OLD Sponsors (Gold+) has right to contact directly via Telegram
+> OLD Sponsors (Gold+) has right to contact directly to developer via Telegram
 
 ## License
 

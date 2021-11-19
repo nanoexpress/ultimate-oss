@@ -14,8 +14,10 @@
 - [Router](#router)
 - [Request](#request)
 - [Response](#response)
+- [Docker](https://nanoexpress.js.org/docker-linux) `[E]`
 - [Known bugs](#known-bugs)
 - [IDE Support](#ide-support)
+- [Benchmarks](./docs/BENCHMARK.md) `[I]`
 
 ## Introduction
 
@@ -32,9 +34,9 @@ and makes your development easier & cost-effective. It's fastest yet in **nanoex
 
 ## Recommendations
 
-- Enabling `node --enable-source-maps` flag [1](https://stackoverflow.com/a/63125290/2538318)
-- Enabling `node --expose-gc` flag [2](https://stackoverflow.com/a/30654451/2538318)
-- Adding env `EXPERIMENTAL_FASTCALL=1` [3](https://github.com/uNetworking/uWebSockets.js/issues/267)
+- Enabling `node --enable-source-maps` flag [1](https://stackoverflow.com/a/63125290/2538318) `[E]`
+- Enabling `node --expose-gc` flag [2](https://stackoverflow.com/a/30654451/2538318) `[E]`
+- Adding env `EXPERIMENTAL_FASTCALL=1` [3](https://github.com/uNetworking/uWebSockets.js/issues/267) `[E]`
 - Using **Ubuntu** (20.04+) image on **Docker** or on **host-machine** if possible
 
 ## Requirements
@@ -173,9 +175,9 @@ await app.listen(8000);
 
 ## Middlewares
 
-See [static serve](https://github.com/nanoexpress/middlewares/tree/master/packages/static) middleware specially built for **nanoexpress** family
+See [static serve](https://github.com/nanoexpress/middlewares/tree/master/packages/static) `[E]` middleware specially built for **nanoexpress** family
 
-or go [here](./MIDDLEWARES.md) for more middlewares
+or go [here](./MIDDLEWARES.md) `[I]` for more middlewares
 
 ---
 
@@ -281,7 +283,7 @@ app.post('/user', async (req) => {
 });
 ```
 
-And [Upload](https://github.com/nanoexpress/middlewares/tree/master/packages/formidable) example
+And [Upload](https://github.com/nanoexpress/middlewares/tree/master/packages/formidable) `[E]` example
 
 ---
 
@@ -323,7 +325,7 @@ app.get('/video.mp4', async (req, res) => {
 
 ## Known bugs
 
-- [HTTP Pipeline not working properly](https://github.com/nanoexpress/nanoexpress/issues/39)
+- [HTTP Pipeline not working properly](https://github.com/nanoexpress/nanoexpress/issues/39) `[E]`
 - If "Invalid access of discarded ..." happens, report ASAP to library author to get fix
 
 ---
