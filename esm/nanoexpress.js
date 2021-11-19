@@ -372,6 +372,7 @@ class HttpRequest {
 class HttpResponse {
     constructor(config) {
         this._headersSet = false;
+        this.mode = 'queue';
         this.id = 0;
         this[resConfig] = config;
         this.done = false;
@@ -385,6 +386,7 @@ class HttpResponse {
         this[request] = null;
         this[response] = null;
         this[resHeaders] = null;
+        this.mode = config.responseMode;
         this.statusCode = 200;
     }
     registerEvents() {
@@ -483,16 +485,28 @@ class HttpResponse {
         return this;
     }
     end(body, closeConnection) {
-        const { statusCode, done, streaming, _headersSet, [resHeaders]: _headers } = this;
+        const { mode } = this;
+        const res = this[response];
+        if (res && mode === 'cork') {
+            res.cork(() => {
+                this._end(body, closeConnection);
+            });
+        }
+        return this._end(body, closeConnection);
+    }
+    _end(body, closeConnection) {
+        const { mode, statusCode, done, streaming, _headersSet, [resHeaders]: _headers } = this;
         const res = this[response];
         if (!done && res && !streaming) {
             debug('res.end(body) called with status %d and has headers', statusCode, _headersSet);
             res.writeStatus(httpCodes[statusCode]);
-            if (_headersSet) {
-                for (const header in _headers) {
-                    const value = _headers[header];
-                    if (value) {
-                        res.writeHeader(header, value);
+            if (mode !== 'immediate') {
+                if (_headersSet) {
+                    for (const header in _headers) {
+                        const value = _headers[header];
+                        if (value) {
+                            res.writeHeader(header, value);
+                        }
                     }
                 }
             }
@@ -559,10 +573,25 @@ class HttpResponse {
         return this.stream(stream, size, compressed);
     }
     stream(stream, size, compressed = false) {
+        const { mode, [request]: req, [response]: res } = this;
+        if (req && (!size || Number.isNaN(size)) && req.headers['content-length']) {
+            size = +req.headers['content-length'];
+        }
+        else if ((!size || Number.isNaN(size)) && stream.path) {
+            ({ size } = statSync(stream.path));
+        }
+        if (res && mode === 'cork') {
+            res.cork(() => {
+                this._stream(stream, size, compressed);
+            });
+        }
+        return this._stream(stream, size, compressed);
+    }
+    _stream(stream, size, compressed = false) {
         if (!this.done && this[response] && this[response] !== null) {
             const res = this[response];
-            const req = this[request];
             const config = this[resConfig];
+            const { mode, statusCode, _headersSet, [resHeaders]: _headers } = this;
             this.exposeAborted();
             let calledData = !config.enableExpressCompatibility;
             if (compressed) {
@@ -570,13 +599,6 @@ class HttpResponse {
                 if (compressedStream) {
                     stream = compressedStream;
                 }
-            }
-            else if ((!size || Number.isNaN(size)) && stream.path) {
-                ({ size } = statSync(stream.path));
-            }
-            else if ((!size || Number.isNaN(size)) &&
-                req.headers['content-length']) {
-                size = +req.headers['content-length'];
             }
             const onclose = () => {
                 if (calledData) {
@@ -601,6 +623,17 @@ class HttpResponse {
                 }
                 this.emit('finish');
             };
+            res.writeStatus(httpCodes[statusCode]);
+            if (mode !== 'immediate') {
+                if (_headersSet) {
+                    for (const header in _headers) {
+                        const value = _headers[header];
+                        if (value) {
+                            res.writeHeader(header, value);
+                        }
+                    }
+                }
+            }
             if (compressed || !size || Number.isNaN(size)) {
                 debug('res.stream:compressed(stream, %d, %j)', size, compressed);
                 stream
@@ -768,10 +801,15 @@ class HttpResponse {
         return this.getHeader(key) !== null;
     }
     setHeader(key, value) {
+        const { mode, [response]: res } = this;
+        debug("res.setHeader('%s', '%s')", key, value);
+        if (res && mode === 'immediate') {
+            res.writeHeader(key, value);
+            return this;
+        }
         if (!this[resHeaders]) {
             this[resHeaders] = {};
         }
-        debug("res.setHeader('%s', '%s')", key, value);
         this._headersSet = true;
         const headers = this[resHeaders];
         headers[key] = value;
@@ -781,6 +819,12 @@ class HttpResponse {
         return this.setHeader(key, value);
     }
     setHeaders(headers) {
+        const { mode, [response]: res } = this;
+        if (res && mode === 'immediate') {
+            warn('res.setHeaders(headers) cannot be set due of immediate mode');
+            return this;
+        }
+        debug('res.setHeaders(headers)');
         this._headersSet = true;
         if (this[resHeaders]) {
             Object.assign(this[resHeaders], headers);
@@ -791,6 +835,12 @@ class HttpResponse {
         return this;
     }
     removeHeader(key) {
+        const { mode, [response]: res } = this;
+        if (res && mode === 'immediate') {
+            warn("res.removeHeader('%s') cannot be set due of immediate mode", key);
+            return this;
+        }
+        debug("res.removeHeader('%s')", key);
         const headers = this[resHeaders];
         if (headers && headers[key]) {
             headers[key] = null;
@@ -1456,7 +1506,8 @@ const useRef = (ref = null, dependencies) => useMemo(() => ({ current: ref }), d
 
 const nanoexpress = (options = {
     ignoreTrailingSlash: true,
-    enableExpressCompatibility: false
+    enableExpressCompatibility: false,
+    responseMode: 'cork'
 }) => {
     let app;
     if (options.https && options.isSSL !== false) {

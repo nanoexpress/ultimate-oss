@@ -19,6 +19,7 @@ declare class HttpResponse {
     streaming: boolean;
     protected _headersSet: boolean;
     protected registered: boolean;
+    protected mode: 'immediate' | 'queue' | 'cork';
     serialize?: (data: Record<string, unknown> | string | number | boolean) => string;
     compiledResponse?: string;
     statusCode: number;
@@ -32,6 +33,7 @@ declare class HttpResponse {
     emit(eventName: string | symbol, eventArgument?: never): boolean;
     setResponse(res: uWS.HttpResponse, req: HttpRequest): this;
     end(body?: uWS.RecognizedString, closeConnection?: boolean): this;
+    protected _end(body?: uWS.RecognizedString, closeConnection?: boolean): this;
     status(code: number): this;
     writeHead(code: number | Record<string, RecognizedString>, headers?: Record<string, RecognizedString>): this;
     redirect(code: number | string, path?: string): this;
@@ -39,6 +41,7 @@ declare class HttpResponse {
     send(data: Record<string, unknown> | string | number | boolean, closeConnection?: boolean): this;
     pipe(stream: ReadStream, size?: number, compressed?: boolean): this;
     stream(stream: ReadStream, size?: number, compressed?: boolean): this;
+    protected _stream(stream: ReadStream, size?: number, compressed?: boolean): this;
     compressStream(stream: ReadStream, options?: BrotliOptions | ZlibOptions, priority?: string[]): BrotliCompress | Gzip | Deflate | null;
     sendFile(path: string, lastModified?: boolean, compressed?: boolean): this;
     write(chunk: uWS.RecognizedString | ArrayBuffer): this;
@@ -46,9 +49,9 @@ declare class HttpResponse {
     onAborted(handler: () => void): this;
     getHeader(key: string): RecognizedString | null;
     hasHeader(key: string): boolean;
-    setHeader(key: string, value: string | number | boolean): this;
-    set(key: string, value: string | number | boolean): this;
-    setHeaders(headers: Record<string, RecognizedString>): this;
+    setHeader(key: string, value: uWS.RecognizedString): this;
+    set(key: string, value: uWS.RecognizedString): this;
+    setHeaders(headers: Record<string, uWS.RecognizedString>): this;
     removeHeader(key: string): this;
     type(contentType: string): this;
 }
