@@ -22,7 +22,7 @@ import RouterTemplate from './router';
 
 class App extends RouterTemplate {
   get https(): boolean {
-    return this._options.https !== undefined && this._options.isSSL !== false;
+    return this._options.https !== undefined;
   }
 
   get _console(): Console {

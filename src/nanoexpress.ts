@@ -21,10 +21,10 @@ const nanoexpress = (
 ): App => {
   let app;
 
-  if (options.https && options.isSSL !== false) {
+  if (options.https) {
     app = uWS.SSLApp(options.https);
   } else {
-    app = uWS.App();
+    app = uWS.App(options.http);
   }
 
   return new App(options, app);

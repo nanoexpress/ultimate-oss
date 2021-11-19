@@ -6,7 +6,7 @@ import {
 } from 'uWebSockets.js';
 
 export interface INanoexpressOptions {
-  isSSL?: boolean;
+  http?: AppOptions;
   https?: AppOptions & { separateServer?: number | boolean };
   ignoreTrailingSlash: boolean;
   enableExpressCompatibility: boolean;
