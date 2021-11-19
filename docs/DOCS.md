@@ -267,6 +267,18 @@ app.post('/user', async (req) => {
 });
 ```
 
+### Request Stream example
+
+```js
+app.use(bodyParser());
+
+app.post('/user', async (req, res) => {
+  req.pipe(res);
+});
+```
+
+and now try request with body as some text content
+
 ### Cookies example
 
 ```js
@@ -308,6 +320,17 @@ app.get('/user/:id/login', async (req, res) => {
   const result = await db.getUser(id);
 
   return res.redirect(`/user/${id}/`);
+});
+```
+
+### Response Stream example
+
+```js
+app.get('/user/:id/login', async (req, res) => {
+  const file = fs.createReadStream('some_video.mp4');
+
+  file.pipe(res);
+  // or res.stream(file)
 });
 ```
 
