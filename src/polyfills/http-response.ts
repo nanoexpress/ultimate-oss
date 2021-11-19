@@ -59,6 +59,8 @@ class HttpResponse {
 
   protected registered: boolean;
 
+  protected mode: 'immediate' | 'queue' | 'cork' = 'queue';
+
   public serialize?: (
     data: Record<string, unknown> | string | number | boolean
   ) => string;
@@ -83,6 +85,8 @@ class HttpResponse {
     this[resRequest] = null;
     this[resResponse] = null;
     this[resHeaders] = null;
+
+    this.mode = config.responseMode;
 
     this.statusCode = 200;
   }
@@ -287,7 +291,29 @@ class HttpResponse {
    * @example res.end('text');
    */
   end(body?: uWS.RecognizedString, closeConnection?: boolean): this {
+    const { mode } = this;
+    const res = this[resResponse];
+
+    if (res && mode === 'cork') {
+      res.cork(() => {
+        this._end(body, closeConnection);
+      });
+    }
+    return this._end(body, closeConnection);
+  }
+
+  /**
+   * @private
+   * Ends this response by copying the contents of body.
+   * @param body Body content
+   * @param closeConnection Gives boolean to connection statement
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
+   * @example res._end('text');
+   */
+  protected _end(body?: uWS.RecognizedString, closeConnection?: boolean): this {
     const {
+      mode,
       statusCode,
       done,
       streaming,
@@ -304,12 +330,14 @@ class HttpResponse {
       );
 
       res.writeStatus(httpCodes[statusCode]);
-      // headers
-      if (_headersSet) {
-        for (const header in _headers) {
-          const value = _headers[header];
-          if (value) {
-            res.writeHeader(header, value);
+      if (mode !== 'immediate') {
+        // headers
+        if (_headersSet) {
+          for (const header in _headers) {
+            const value = _headers[header];
+            if (value) {
+              res.writeHeader(header, value);
+            }
           }
         }
       }
@@ -465,10 +493,42 @@ class HttpResponse {
    * @example res.stream(readableStream)
    */
   stream(stream: ReadStream, size?: number, compressed = false): this {
+    const { mode, [resRequest]: req, [resResponse]: res } = this;
+
+    if (req && (!size || Number.isNaN(size)) && req.headers['content-length']) {
+      size = +req.headers['content-length'];
+    } else if ((!size || Number.isNaN(size)) && stream.path) {
+      ({ size } = statSync(stream.path));
+    }
+
+    if (res && mode === 'cork') {
+      res.cork(() => {
+        this._stream(stream, size, compressed);
+      });
+    }
+
+    return this._stream(stream, size, compressed);
+  }
+
+  /**
+   * @private
+   * Streams input stream to response output
+   * @param stream Input stream
+   * @param size Stream size
+   * @param compressed Compressed status
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
+   * @example res._stream(readableStream)
+   */
+  protected _stream(
+    stream: ReadStream,
+    size?: number,
+    compressed = false
+  ): this {
     if (!this.done && this[resResponse] && this[resResponse] !== null) {
       const res = this[resResponse] as uWS.HttpResponse;
-      const req = this[resRequest] as HttpRequest;
       const config = this[resConfig];
+      const { mode, statusCode, _headersSet, [resHeaders]: _headers } = this;
 
       this.exposeAborted();
       let calledData = !config.enableExpressCompatibility;
@@ -479,13 +539,6 @@ class HttpResponse {
         if (compressedStream) {
           stream = compressedStream as unknown as ReadStream;
         }
-      } else if ((!size || Number.isNaN(size)) && stream.path) {
-        ({ size } = statSync(stream.path));
-      } else if (
-        (!size || Number.isNaN(size)) &&
-        req.headers['content-length']
-      ) {
-        size = +req.headers['content-length'];
       }
 
       const onclose = (): void => {
@@ -511,6 +564,20 @@ class HttpResponse {
         }
         this.emit('finish');
       };
+
+      res.writeStatus(httpCodes[statusCode]);
+      if (mode !== 'immediate') {
+        // headers
+        if (_headersSet) {
+          for (const header in _headers) {
+            const value = _headers[header];
+            if (value) {
+              res.writeHeader(header, value);
+            }
+          }
+        }
+      }
+
       if (compressed || !size || Number.isNaN(size)) {
         debug('res.stream:compressed(stream, %d, %j)', size, compressed);
         stream
@@ -779,12 +846,20 @@ class HttpResponse {
    * @memberof nanoexpress.HttpResponse
    * @example res.setHeader('content-type', 'application/json');
    */
-  setHeader(key: string, value: string | number | boolean): this {
+  setHeader(key: string, value: uWS.RecognizedString): this {
+    const { mode, [resResponse]: res } = this;
+
+    debug("res.setHeader('%s', '%s')", key, value);
+
+    if (res && mode === 'immediate') {
+      res.writeHeader(key, value);
+      return this;
+    }
+
     if (!this[resHeaders]) {
       this[resHeaders] = {};
     }
 
-    debug("res.setHeader('%s', '%s')", key, value);
     this._headersSet = true;
     const headers = this[resHeaders] as Record<string, typeof value>;
     headers[key] = value;
@@ -801,7 +876,7 @@ class HttpResponse {
    * @example res.set('content-type', 'application/json');
    * @alias res.setHeader('content-type', 'application/json');
    */
-  set(key: string, value: string | number | boolean): this {
+  set(key: string, value: uWS.RecognizedString): this {
     return this.setHeader(key, value);
   }
 
@@ -812,8 +887,17 @@ class HttpResponse {
    * @memberof nanoexpress.HttpResponse
    * @example res.setHeaders({'content-type':'application/json'});
    */
-  setHeaders(headers: Record<string, RecognizedString>): this {
+  setHeaders(headers: Record<string, uWS.RecognizedString>): this {
+    const { mode, [resResponse]: res } = this;
+
+    if (res && mode === 'immediate') {
+      warn('res.setHeaders(headers) cannot be set due of immediate mode');
+      return this;
+    }
+
+    debug('res.setHeaders(headers)');
     this._headersSet = true;
+
     if (this[resHeaders]) {
       Object.assign(this[resHeaders], headers);
     } else {
@@ -831,6 +915,15 @@ class HttpResponse {
    * @example res.removeHeader('cookie');
    */
   removeHeader(key: string): this {
+    const { mode, [resResponse]: res } = this;
+
+    if (res && mode === 'immediate') {
+      warn("res.removeHeader('%s') cannot be set due of immediate mode", key);
+      return this;
+    }
+
+    debug("res.removeHeader('%s')", key);
+
     const headers = this[resHeaders];
     if (headers && headers[key]) {
       headers[key] = null;

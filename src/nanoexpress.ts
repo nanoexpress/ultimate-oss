@@ -15,7 +15,8 @@ import Router from './router';
 const nanoexpress = (
   options: INanoexpressOptions = {
     ignoreTrailingSlash: true,
-    enableExpressCompatibility: false
+    enableExpressCompatibility: false,
+    responseMode: 'cork'
   }
 ): App => {
   let app;
