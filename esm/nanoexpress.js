@@ -1204,7 +1204,7 @@ class App extends Router {
         return this;
     }
     get https() {
-        return this._options.https !== undefined && this._options.isSSL !== false;
+        return this._options.https !== undefined;
     }
     get _console() {
         return this._options.console || console;
@@ -1510,11 +1510,11 @@ const nanoexpress = (options = {
     responseMode: 'cork'
 }) => {
     let app;
-    if (options.https && options.isSSL !== false) {
+    if (options.https) {
         app = uWS.SSLApp(options.https);
     }
     else {
-        app = uWS.App();
+        app = uWS.App(options.http);
     }
     return new App(options, app);
 };
