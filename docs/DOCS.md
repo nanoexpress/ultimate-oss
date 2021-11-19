@@ -2,12 +2,12 @@
 
 ## Table of Contents
 
-- [Introduction](#Introduction)
-- [Options](#Options)
-- [Comparison](#Comparison)
-- [Usage](#Usage)
-- [Hooks](#Hooks)
-- [IDE Support](#IDE%20Support)
+- [Introduction](#introduction)
+- [Options](#options)
+- [Comparison](#comparison)
+- [Usage](#usage)
+- [Hooks](#hooks)
+- [IDE Support](#ide-support)
 
 ## Introduction
 
