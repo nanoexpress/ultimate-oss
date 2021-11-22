@@ -504,6 +504,7 @@ class HttpResponse {
             res.cork(() => {
                 this._end(body, closeConnection);
             });
+            return this;
         }
         return this._end(body, closeConnection);
     }
@@ -597,6 +598,7 @@ class HttpResponse {
             res.cork(() => {
                 this._stream(stream, size, compressed);
             });
+            return this;
         }
         return this._stream(stream, size, compressed);
     }
