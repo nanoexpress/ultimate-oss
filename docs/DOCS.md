@@ -36,7 +36,6 @@ and makes your development easier & cost-effective. It's fastest yet in **nanoex
 
 - Enabling `node --enable-source-maps` flag [1](https://stackoverflow.com/a/63125290/2538318) `[E]`
 - Enabling `node --expose-gc` flag [2](https://stackoverflow.com/a/30654451/2538318) `[E]`
-- Adding env `EXPERIMENTAL_FASTCALL=1` [3](https://github.com/uNetworking/uWebSockets.js/issues/267) `[E]`
 - Using **Ubuntu** (20.04+) image on **Docker** or on **host-machine** if possible
 
 ## Requirements
@@ -100,7 +99,7 @@ and makes your development easier & cost-effective. It's fastest yet in **nanoex
 | Hooks         | -          | -           | Available            |
 | TS+JSDoc      | Better     | Good        | Better + Tools       |
 | Price         | Free       | Free        | Free for Open-Source |
-| License       | MIT        | Apache-2.0  | Custom               |
+| License       | MIT        | Apache-2.0  | GPL-3.0              |
 
 ---
 
