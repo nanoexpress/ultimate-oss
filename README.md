@@ -31,4 +31,4 @@ Ask from author by becoming Patron and asking from Patreon
 
 ## License
 
-This project is licensed under [GPL-3.0](https://nanoexpress.js.org/license) license and if you want use this on commercial projects with closed sources, you should contact to me via [here](https://t.me/dalisoft) for getting license
+This project is licensed under [GPL-3.0](https://nanoexpress.js.org/license) license and if you want use this on commercial projects with closed sources, you should contact to me via [here](https://t.me/nanoexpress) for getting license
