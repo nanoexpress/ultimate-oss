@@ -5428,9 +5428,9 @@ typescript@^4.4.3, typescript@^4.5.4:
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.5.4.tgz#a17d3a0263bf5c8723b9c52f43c5084edf13c2e8"
   integrity sha512-VgYs2A2QIRuGphtzFV7aQJduJ2gyfTljngLzjpfW9FoYZF6xuw1W0vW9ghCKLfcWrCFxK81CSGRAvS1pn4fIUg==
 
-"uWebSockets.js@https://github.com/uNetworking/uWebSockets.js/archive/v20.2.0.tar.gz":
-  version "20.2.0"
-  resolved "https://github.com/uNetworking/uWebSockets.js/archive/v20.2.0.tar.gz#ca7578f12ace22d2b650bd52bdb648d76c54a53d"
+"uWebSockets.js@https://github.com/uNetworking/uWebSockets.js/archive/v20.6.0.tar.gz":
+  version "20.6.0"
+  resolved "https://github.com/uNetworking/uWebSockets.js/archive/v20.6.0.tar.gz#9bd623eef840734761995cd78c8c6e0eee0d71f1"
 
 uc.micro@^1.0.1, uc.micro@^1.0.5:
   version "1.0.6"

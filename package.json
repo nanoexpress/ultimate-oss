@@ -44,7 +44,7 @@
     "fast-query-parse": "^2.0.0",
     "path-to-regexp": "^6.2.0",
     "supports-color": "^9.2.1",
-    "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v20.2.0.tar.gz"
+    "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v20.6.0.tar.gz"
   },
   "devDependencies": {
     "@commitlint/cli": "^15.0.0",
