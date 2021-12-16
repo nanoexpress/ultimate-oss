@@ -67,40 +67,40 @@ and makes your development easier & cost-effective. It's fastest yet in **nanoex
 
 ### Between nanoexpress versions
 
-| Feature           | nanoexpress | pro-slim   | ultimate        |
-| ----------------- | ----------- | ---------- | --------------- |
-| Performance       | Best        | Best       | Better          |
-| Stability         | Good        | Best       | Better          |
-| Express API       | Good        | Good       | Better          |
-| Caching           | -           | -          | Best            |
-| Memory optimizer  | -           | -          | Better          |
-| Garbage Collector | -           | Better     | Better          |
-| Dev Debugger      | -           | -          | Available       |
-| Hooks             | -           | -          | Available       |
-| Batching          | -           | -          | Available       |
-| Customizable      | Good        | -          | Better          |
-| Route Finder      | `v8.x`      | -          | Better          |
-| IDE Support       | Good        | Best       | Better          |
-| TypeScript        | Good        | Good       | Better + Tools  |
-| JSDoc comments    | -           | Best       | Better          |
-| Target user       | Anyone      | Commercial | Enterprise      |
-| Price             | Free        | 5-50$/m    | 50$+/m per user |
-| License           | Apache-2.0  | GPL-3.0    | Custom          |
+| Feature           | nanoexpress | pro-slim             | ultimate             |
+| ----------------- | ----------- | -------------------- | -------------------- |
+| Performance       | Best        | Best                 | Better               |
+| Stability         | Good        | Best                 | Better               |
+| Express API       | Good        | Good                 | Better               |
+| Caching           | -           | -                    | Best                 |
+| Memory optimizer  | -           | -                    | Better               |
+| Garbage Collector | -           | Better               | Better               |
+| Dev Debugger      | -           | -                    | Available            |
+| Hooks             | -           | -                    | Available            |
+| Batching          | -           | -                    | Available            |
+| Customizable      | Good        | -                    | Better               |
+| Route Finder      | `v8.x`      | -                    | Better               |
+| IDE Support       | Good        | Best                 | Better               |
+| TypeScript        | Good        | Good                 | Better + Tools       |
+| JSDoc comments    | -           | Best                 | Better               |
+| Target user       | Anyone      | Commercial           | Enterprise           |
+| Price             | Free        | Free for Open-Source | Free for Open-Source |
+| License           | Apache-2.0  | GPL-3.0              | GPL-3.0              |
 
 ### Between frameworks
 
-| Feature       | express    | nanoexpress | ultimate        |
-| ------------- | ---------- | ----------- | --------------- |
-| Middlewares   | Better     | Good        | Best            |
-| Async routes  | -          | Good        | Better          |
-| Validation    | Middleware | Middleware  | Middleware      |
-| Serialization | Middleware | Middleware  | Middleware      |
-| Swagger       | Middleware | Middleware  | Middleware      |
-| Performance   | `1x`       | `6x`        | `8x`            |
-| Hooks         | -          | -           | Available       |
-| TS+JSDoc      | Better     | Good        | Better + Tools  |
-| Price         | Free       | Free        | 50$+/m per user |
-| License       | MIT        | Apache-2.0  | Custom          |
+| Feature       | express    | nanoexpress | ultimate             |
+| ------------- | ---------- | ----------- | -------------------- |
+| Middlewares   | Better     | Good        | Best                 |
+| Async routes  | -          | Good        | Better               |
+| Validation    | Middleware | Middleware  | Middleware           |
+| Serialization | Middleware | Middleware  | Middleware           |
+| Swagger       | Middleware | Middleware  | Middleware           |
+| Performance   | `1x`       | `6x`        | `8x`                 |
+| Hooks         | -          | -           | Available            |
+| TS+JSDoc      | Better     | Good        | Better + Tools       |
+| Price         | Free       | Free        | Free for Open-Source |
+| License       | MIT        | Apache-2.0  | Custom               |
 
 ---
 
