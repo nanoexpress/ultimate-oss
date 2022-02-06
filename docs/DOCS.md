@@ -3,6 +3,7 @@
 ## Table of Contents
 
 - [Introduction](#introduction)
+- [Installation](#installation)
 - [Recommendations](#recommendations)
 - [Requirements](#requirements)
 - [Options](#options)
@@ -21,7 +22,8 @@
 
 ## Introduction
 
-The Ultimate version is specially made for sponsors and includes a lot re-writes than old codebase, makes your code much stable. Includes new things such as
+The Ultimate version is specially made for sponsors and includes a lot re-writes than old codebase,
+makes your code much stable. Includes new things such as
 
 - Router finder & matcher
 - Hooks
@@ -29,6 +31,22 @@ The Ultimate version is specially made for sponsors and includes a lot re-writes
 - **express** API compatibility polyfill
 
 and makes your development easier & cost-effective. It's fastest yet in **nanoexpress** family
+
+---
+
+## Installation
+
+### npm
+
+```shell
+npm install nanoexpress/ultimate
+# or
+npm install nanoexpress/ultimate#v1.2.7
+# or
+npm install https://github.com/nanoexpress/ultimate/archive/refs/heads/master.zip
+# or
+npm install https://github.com/nanoexpress/ultimate/archive/refs/tags/v1.2.7.zip
+```
 
 ---
 
@@ -48,17 +66,17 @@ and makes your development easier & cost-effective. It's fastest yet in **nanoex
 
 > Use either `https` or `http`, not both of them
 
-| Name                         | Default   | Description                                                                        |
-| ---------------------------- | --------- | ---------------------------------------------------------------------------------- |
-| `https`                      | -         | Makes run server with built-in HTTPS server with own configuration                 |
-| `http`                       | -         | Makes run server with built-in HTTP server with own configuration                  |
-| `ignoreTrailingSlash`        | `true`    | Makes routes `/` slashesh insensitive when enabled                                 |
-| `enableExpressCompatibility` | `false`   | Enables some functions internally to give compatibility to **express** middlewares |
-| `poolSize`                   | `10`      | Internally uses caching of instances to improve performance and optimize memory    |
-| `console`                    | `console` | Console instance, can be replaced logger                                           |
-| `json_spaces`                | -         | Option used for json encoding and making it prettifier                             |
-| `json_replacer`              | -         | Option used for json and can be replaced from default `JSON.stringify` behavior    |
-| `responseMode`               | `queue`   | Makes response batched (cork), immediate or queued                                 |
+| Name                         | Default   | Description                                                          |
+| ---------------------------- | --------- | -------------------------------------------------------------------- |
+| `https`                      | -         | Runs server with built-in HTTPS server with own configuration        |
+| `http`                       | -         | Runs server with built-in HTTP server with own configuration         |
+| `ignoreTrailingSlash`        | `true`    | Makes routes `/` slashesh insensitive when enabled                   |
+| `enableExpressCompatibility` | `false`   | Enables compatibility to **express** middlewares                     |
+| `poolSize`                   | `10`      | Uses caching of instances to improve performance and optimize memory |
+| `console`                    | `console` | Console instance, can be replaced logger                             |
+| `json_spaces`                | -         | JSON encoding and making it prettifier                               |
+| `json_replacer`              | -         | JSON and can be replaced from default `JSON.stringify` behavior      |
+| `responseMode`               | `queue`   | Makes response batched (cork), immediate or queued                   |
 
 ---
 
@@ -108,7 +126,7 @@ and makes your development easier & cost-effective. It's fastest yet in **nanoex
 ### ESM / TypeScript
 
 ```ts
-import nanoexpress from 'nanoexpress/esm';
+import nanoexpress from '@nanoexpress/ultimate/esm';
 
 const app = nanoexpress();
 
@@ -122,7 +140,7 @@ await app.listen(8000);
 ### CJS
 
 ```js
-const nanoexpress = require('nanoexpress');
+const nanoexpress = require('@nanoexpress/ultimate');
 
 const app = nanoexpress();
 
@@ -136,7 +154,7 @@ app.listen(8000);
 ### Hook example
 
 ```ts
-import nanoexpress, { useEffect } from 'nanoexpress/esm';
+import nanoexpress, { useEffect } from '@nanoexpress/ultimate/esm';
 
 const app = nanoexpress();
 
@@ -174,7 +192,8 @@ await app.listen(8000);
 
 ## Middlewares
 
-See [static serve](https://github.com/nanoexpress/middlewares/tree/master/packages/static) `[E]` middleware specially built for **nanoexpress** family
+See [static serve](https://github.com/nanoexpress/middlewares/tree/master/packages/static) `[E]` middleware specially
+built for **nanoexpress** family
 
 or go [here](./MIDDLEWARES.md) `[I]` for more middlewares
 
@@ -189,12 +208,13 @@ These handlers own default values, so you should not worry about setting them at
 
 ## Router
 
-The router class is almost same as **express** and does like **express** middleware layer stacking, finding & matching happens inside **router finder** logic
+The router class is almost same as **express** and does like **express** middleware layer stacking, finding & matching
+happens inside **router finder** logic
 
 To beleive me see some example yourself
 
 ```js
-import nanoexpress from 'nanoexpress';
+import nanoexpress from '@nanoexpress/ultimate';
 
 const app = nanoexpress();
 const router = nanoexpress.Router();
@@ -354,4 +374,5 @@ app.get('/video.mp4', async (req, res) => {
 
 ## IDE Support
 
-IDE Support was provided by TypeScript typings and JSDoc comments with source-mapping for improved debugging, you have do not worry about this
+IDE Support was provided by TypeScript typings and JSDoc comments with source-mapping for improved debugging, you have
+do not worry about this
