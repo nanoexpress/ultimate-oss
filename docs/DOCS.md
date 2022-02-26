@@ -22,7 +22,7 @@
 
 ## Introduction
 
-The Ultimate version is specially made for sponsors and includes a lot re-writes than old codebase,
+The Ultimate version is specially made for sponsors and includes a lot of re-writes than old codebase,
 makes your code much stable. Includes new things such as
 
 - Router finder & matcher
@@ -70,11 +70,11 @@ npm install https://github.com/nanoexpress/ultimate/archive/refs/tags/v1.2.7.zip
 | ---------------------------- | --------- | -------------------------------------------------------------------- |
 | `https`                      | -         | Runs server with built-in HTTPS server with own configuration        |
 | `http`                       | -         | Runs server with built-in HTTP server with own configuration         |
-| `ignoreTrailingSlash`        | `true`    | Makes routes `/` slashesh insensitive when enabled                   |
+| `ignoreTrailingSlash`        | `true`    | Makes routes `/` slashes insensitive when enabled                    |
 | `enableExpressCompatibility` | `false`   | Enables compatibility to **express** middlewares                     |
 | `poolSize`                   | `10`      | Uses caching of instances to improve performance and optimize memory |
 | `console`                    | `console` | Console instance, can be replaced logger                             |
-| `json_spaces`                | -         | JSON encoding and making it prettifier                               |
+| `json_spaces`                | -         | JSON encoding and making it prettifies                               |
 | `json_replacer`              | -         | JSON and can be replaced from default `JSON.stringify` behavior      |
 | `responseMode`               | `queue`   | Makes response batched (cork), immediate or queued                   |
 
@@ -180,13 +180,13 @@ await app.listen(8000);
 
 ## Hooks
 
-| Name          | Description                    | Example                                                          |
-| ------------- | ------------------------------ | ---------------------------------------------------------------- |
-| `useEffect`   | Logic implementation hook      | `useEffect(() => console.log('router called'), [req.id])`        |
-| `useMemo`     | Memoizing computational logics | `const result = useMemo(() => compute_something(1_000_000), [])` |
-| `useCallback` | Handler memoizing              | `const runLogic = useCallback(() => do_logic(), [])`             |
-| `useRef`      | Reference memoizing            | `const ref = useRef(null)`                                       |
-| `useState`    | State management               | `const [state, setState] = useState(0)`                          |
+| Name          | Description                     | Example                                                          |
+| ------------- | ------------------------------- | ---------------------------------------------------------------- |
+| `useEffect`   | Logic implementation hook       | `useEffect(() => console.log('router called'), [req.id])`        |
+| `useMemo`     | Memorizing computational logics | `const result = useMemo(() => compute_something(1_000_000), [])` |
+| `useCallback` | Handler memorizing              | `const runLogic = useCallback(() => do_logic(), [])`             |
+| `useRef`      | Reference memorizing            | `const ref = useRef(null)`                                       |
+| `useState`    | State management                | `const [state, setState] = useState(0)`                          |
 
 ---
 
@@ -355,7 +355,7 @@ app.get('/user/:id/login', async (req, res) => {
 
 ### sendFile
 
-File should be on the same path where JS file is or you can try **Absolute path** for **stream/sendFile**
+File should be on the same path where JS file is, or you can try **Absolute path** for **stream/sendFile**
 
 ```js
 app.get('/video.mp4', async (req, res) => {
@@ -374,5 +374,5 @@ app.get('/video.mp4', async (req, res) => {
 
 ## IDE Support
 
-IDE Support was provided by TypeScript typings and JSDoc comments with source-mapping for improved debugging, you have
-do not worry about this
+IDE Support was provided by TypeScript typings and JSDoc comments with source-mapping for improved debugging,
+you should not worry about this
