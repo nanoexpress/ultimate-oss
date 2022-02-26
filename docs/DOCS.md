@@ -180,13 +180,13 @@ await app.listen(8000);
 
 ## Hooks
 
-| Name          | Description                   | Example                                                          |
-| ------------- | ----------------------------- | ---------------------------------------------------------------- |
-| `useEffect`   | Logic implementation hook     | `useEffect(() => console.log('router called'), [req.id])`        |
-| `useMemo`     | Memoizing computitonal logics | `const result = useMemo(() => compute_something(1_000_000), [])` |
-| `useCallback` | Handler memoizing             | `const runLogic = useCallback(() => do_logic(), [])`             |
-| `useRef`      | Reference memoizing           | `const ref = useRef(null)`                                       |
-| `useState`    | State management              | `const [state, setState] = useState(0)`                          |
+| Name          | Description                    | Example                                                          |
+| ------------- | ------------------------------ | ---------------------------------------------------------------- |
+| `useEffect`   | Logic implementation hook      | `useEffect(() => console.log('router called'), [req.id])`        |
+| `useMemo`     | Memoizing computational logics | `const result = useMemo(() => compute_something(1_000_000), [])` |
+| `useCallback` | Handler memoizing              | `const runLogic = useCallback(() => do_logic(), [])`             |
+| `useRef`      | Reference memoizing            | `const ref = useRef(null)`                                       |
+| `useState`    | State management               | `const [state, setState] = useState(0)`                          |
 
 ---
 
@@ -211,7 +211,7 @@ These handlers own default values, so you should not worry about setting them at
 The router class is almost same as **express** and does like **express** middleware layer stacking, finding & matching
 happens inside **router finder** logic
 
-To beleive me see some example yourself
+To believe me see some example yourself
 
 ```js
 import nanoexpress from '@nanoexpress/ultimate';
