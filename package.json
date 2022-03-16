@@ -59,7 +59,7 @@
     "husky": "^7.0.4",
     "lint-staged": "^12.3.5",
     "lint-staged-config-airlight": "^3.0.1",
-    "prettier": "^2.5.1",
+    "prettier": "^2.6.0",
     "prettier-config-airlight": "^1.0.1",
     "rollup": "^2.70.1",
     "rollup-plugin-typescript2": "^0.31.2",
