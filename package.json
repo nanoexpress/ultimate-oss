@@ -64,7 +64,7 @@
     "rollup": "^2.70.1",
     "rollup-plugin-typescript2": "^0.31.2",
     "smartlint": "^5.0.2",
-    "typedoc": "^0.22.13",
+    "typedoc": "^0.22.14",
     "typescript": "^4.6.3"
   },
   "resolutions": {
