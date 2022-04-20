@@ -13,7 +13,5 @@ export const useState = <T>(initialValue: T): [T, (value: T) => void] => {
 
   return [value, setValue];
 };
-export const useRef = <T>(
-  ref: T | null = null,
-  dependencies: Dependencies
-): T => useMemo(() => ({ current: ref }), dependencies);
+export const useRef = <T>(ref: T | null, dependencies: Dependencies): T =>
+  useMemo(() => ({ current: ref ?? null }), dependencies);
