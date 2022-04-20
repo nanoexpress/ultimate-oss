@@ -1,4 +1,5 @@
 /* eslint-disable max-lines, max-lines-per-function, complexity, max-depth */
+import { resAbortHandler } from './constants';
 import uWS, {
   HttpRequest as uWS_HttpRequest,
   HttpResponse as uWS_HttpResponse,
@@ -19,6 +20,7 @@ import { unregister } from './hooks/manager';
 import { HttpRequest, HttpResponse } from './polyfills';
 import RouteEngine from './route-engine';
 import RouterTemplate from './router';
+import noop from './helpers/noop';
 
 class App extends RouterTemplate {
   get https(): boolean {
@@ -204,7 +206,11 @@ class App extends RouterTemplate {
           response = await _engine.lookup(req, res).catch((err) => {
             this.handleError(err, req, res as HttpResponse);
           });
-          unregister();
+          if (res[resAbortHandler]) {
+            res.onAborted(unregister);
+          } else {
+            unregister();
+          }
           if (_requestPools.length < _poolsSize) {
             _requestPools.push(req);
           }
@@ -217,7 +223,11 @@ class App extends RouterTemplate {
         await _engine.lookup(req, res).catch((err) => {
           this.handleError(err, req, res as HttpResponse);
         });
-        unregister();
+        if (res[resAbortHandler]) {
+          res.onAborted(unregister);
+        } else {
+          unregister();
+        }
         if (_requestPools.length < _poolsSize) {
           _requestPools.push(req);
         }
@@ -260,8 +270,8 @@ class App extends RouterTemplate {
   listenSocket(
     port: number,
     host = 'localhost',
-    is_ssl: boolean,
-    handler: () => void
+    is_ssl = false,
+    handler: () => void = noop
   ): Promise<us_listen_socket> {
     const { _options: options } = this;
 
@@ -326,7 +336,7 @@ class App extends RouterTemplate {
     host: string,
     port: number,
     is_ssl = false,
-    handler: () => void
+    handler: () => void = noop
   ): Promise<us_listen_socket> {
     const { _console, _options: options, _app: app } = this;
     const sslString = is_ssl ? 'HTTPS ' : is_ssl === false ? 'HTTP ' : '';

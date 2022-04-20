@@ -26,6 +26,7 @@
     "max-depth": ["warn", 3],
     "max-lines": ["warn", 160],
     "max-lines-per-function": ["warn", 36],
-    "import/prefer-default-export": "warn"
+    "import/prefer-default-export": "warn",
+    "security-node/detect-unhandled-event-errors": "off"
   }
 }

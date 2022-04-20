@@ -7,13 +7,14 @@
     "NODE_ENV": "development",
     "DEBUG_COLORS": true
   },
-  "args": [
+  "execArgs": [
     "--enable-source-maps",
     "--trace-deprecation",
     "--trace-uncaught",
     "--trace-warnings",
     "--experimental-json-modules",
     "--experimental-wasm-modules",
-    "--es-module-specifier-resolution=node"
+    "--es-module-specifier-resolution=node",
+    "--inspect"
   ]
 }

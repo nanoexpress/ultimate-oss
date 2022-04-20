@@ -304,6 +304,73 @@ class HttpResponse {
   }
 
   /**
+   * Initializes Server-Side Events from your stream
+   * @param body Writable stream or PassThrough
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
+   * @example res.sse(sseStream);
+   */
+  sse(body: ReadStream): this {
+    const { mode } = this;
+    const res = this[resResponse];
+
+    this.exposeAborted();
+
+    if (res && mode === 'cork') {
+      res.cork(() => {
+        this._sse(body);
+      });
+      return this;
+    }
+    return this._sse(body);
+  }
+
+  protected _sse(body: ReadStream): this {
+    const {
+      mode,
+      statusCode,
+      done,
+      streaming,
+      _headersSet,
+      [resHeaders]: _headers
+    } = this;
+    const res = this[resResponse];
+
+    if (!done && res && !streaming && !done) {
+      debug(
+        'res.sse(body) called with status %d and has headers',
+        statusCode,
+        _headersSet
+      );
+
+      res.writeStatus(httpCodes[statusCode]);
+      if (mode !== 'immediate') {
+        // headers
+        if (_headersSet) {
+          for (const header in _headers) {
+            const value = _headers[header];
+            if (value) {
+              res.writeHeader(header, value);
+            }
+          }
+        }
+      }
+      res.writeHeader('Content-Type', 'text/event-stream; charset=utf-8');
+      res.writeHeader('Connection', 'keep-alive');
+      res.writeHeader('Cache-Control', 'no-cache, no-store, no-transform');
+
+      body.on('data', (data) => {
+        if (!this.aborted) {
+          res.write(data);
+        }
+      });
+      this.streaming = true;
+      this[resResponse] = null;
+    }
+    return this;
+  }
+
+  /**
    * @private
    * Ends this response by copying the contents of body.
    * @param body Body content
@@ -796,6 +863,7 @@ class HttpResponse {
       res.onAborted(() => {
         this.aborted = true;
         warn('res.onAborted is called');
+
         this[resAbortHandler].forEach((callback) => callback());
       });
       this[resAbortHandlerExpose] = true;
@@ -805,9 +873,7 @@ class HttpResponse {
   }
 
   onAborted(handler: () => void): this {
-    if (this[resAbortHandlerExpose]) {
-      this[resAbortHandler].push(handler);
-    }
+    this[resAbortHandler].push(handler);
 
     return this;
   }
