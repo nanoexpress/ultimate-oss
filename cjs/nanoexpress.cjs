@@ -1568,7 +1568,7 @@ const useState = (initialValue) => {
     };
     return [value, setValue];
 };
-const useRef = (ref = null, dependencies) => useMemo(() => ({ current: ref }), dependencies);
+const useRef = (ref, dependencies) => useMemo(() => ({ current: ref ?? null }), dependencies);
 
 const nanoexpress = (options = {
     ignoreTrailingSlash: true,
