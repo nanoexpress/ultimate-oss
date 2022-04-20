@@ -33,6 +33,8 @@ declare class HttpResponse {
     emit(eventName: string | symbol, eventArgument?: never): boolean;
     setResponse(res: uWS.HttpResponse, req: HttpRequest): this;
     end(body?: uWS.RecognizedString, closeConnection?: boolean): this;
+    sse(body: ReadStream): this;
+    protected _sse(body: ReadStream): this;
     protected _end(body?: uWS.RecognizedString, closeConnection?: boolean): this;
     status(code: number): this;
     writeHead(code: number | Record<string, RecognizedString>, headers?: Record<string, RecognizedString>): this;

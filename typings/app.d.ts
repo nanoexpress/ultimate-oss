@@ -29,10 +29,10 @@ declare class App extends RouterTemplate {
     ws(path: RecognizedString, options: WebSocketBehavior): this;
     publish(topic: RecognizedString, message: RecognizedString, isBinary?: boolean, compress?: boolean): boolean;
     run(): this;
-    listenSocket(port: number, host: string | undefined, is_ssl: boolean, handler: () => void): Promise<us_listen_socket>;
+    listenSocket(port: number, host?: string, is_ssl?: boolean, handler?: () => void): Promise<us_listen_socket>;
     listen(...args: Array<number | string | boolean | (() => void)>): Promise<us_listen_socket>;
     close(port: number, host?: string): boolean;
-    protected _appApplyListen(host: string, port: number, is_ssl: boolean | undefined, handler: () => void): Promise<us_listen_socket>;
+    protected _appApplyListen(host: string, port: number, is_ssl?: boolean, handler?: () => void): Promise<us_listen_socket>;
     _close(token: us_listen_socket | null, id: string): boolean;
     disable(tag: string): this;
     set(key: keyof INanoexpressOptions, value: string | number): this;

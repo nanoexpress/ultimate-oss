@@ -5,6 +5,7 @@ import invalid from './invalid';
 import iterateBlocks from './iterate-blocks';
 import { getMime, mimes } from './mime';
 import slashify from './slashify';
+import noop from './noop';
 
 export * from './loggy';
 export {
@@ -15,5 +16,6 @@ export {
   iterateBlocks,
   mimes,
   getMime,
-  slashify
+  slashify,
+  noop
 };

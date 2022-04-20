@@ -10,6 +10,21 @@ import analyze from '@nanoexpress/route-syntax-parser';
 import fastDecodeURI from 'fast-decode-uri-component';
 import { pathToRegexp } from 'path-to-regexp';
 
+const request = Symbol('NanoexpressHttpRequestInstance');
+const response = Symbol('NanoexpressHttpResponseInstance');
+const reqConfig = Symbol('NanoexpressHttpRequestConfig');
+const reqEvents = Symbol('NanoexpressHttpRequestEvents');
+const reqRequest = Symbol('NanoexpressHttpRequestRawInstance');
+const reqRawResponse = Symbol('NanoexpressHttpResponseRawInstance');
+const resHeaders = Symbol('NanoexpressHttpResponseHeaders');
+const resConfig = Symbol('NanoexpressHttpResponseConfig');
+const resEvents = Symbol('NanoexpressHttpResponseEvents');
+const resAbortHandler = Symbol('NanoexpressHttpResponseAbortHandler');
+const resAbortHandlerExpose = Symbol('NanoexpressHttpResponseAbortHandlerExpose');
+const appInstance = Symbol('NanoexpressAppInstance');
+const routerInstances = Symbol('NanoexpressRouterInstances');
+const wsInstances = Symbol('NanoexpressWebSocketInstances');
+
 function _gc() {
     try {
         if (global.gc) {
@@ -58,21 +73,6 @@ const unregister = () => {
     });
     hookIndex = 0;
 };
-
-const request = Symbol('NanoexpressHttpRequestInstance');
-const response = Symbol('NanoexpressHttpResponseInstance');
-const reqConfig = Symbol('NanoexpressHttpRequestConfig');
-const reqEvents = Symbol('NanoexpressHttpRequestEvents');
-const reqRequest = Symbol('NanoexpressHttpRequestRawInstance');
-const reqRawResponse = Symbol('NanoexpressHttpResponseRawInstance');
-const resHeaders = Symbol('NanoexpressHttpResponseHeaders');
-const resConfig = Symbol('NanoexpressHttpResponseConfig');
-const resEvents = Symbol('NanoexpressHttpResponseEvents');
-const resAbortHandler = Symbol('NanoexpressHttpResponseAbortHandler');
-const resAbortHandlerExpose = Symbol('NanoexpressHttpResponseAbortHandlerExpose');
-const appInstance = Symbol('NanoexpressAppInstance');
-const routerInstances = Symbol('NanoexpressRouterInstances');
-const wsInstances = Symbol('NanoexpressWebSocketInstances');
 
 const codesBetween = Array.from({ length: 500 })
     .fill(0)
@@ -286,6 +286,8 @@ var slashify = (path) => path !== '*' &&
     ? `${path}/`
     : path;
 
+var noop = () => { };
+
 class HttpRequest {
     constructor(options) {
         this.query = null;
@@ -494,6 +496,47 @@ class HttpResponse {
             return this;
         }
         return this._end(body, closeConnection);
+    }
+    sse(body) {
+        const { mode } = this;
+        const res = this[response];
+        this.exposeAborted();
+        if (res && mode === 'cork') {
+            res.cork(() => {
+                this._sse(body);
+            });
+            return this;
+        }
+        return this._sse(body);
+    }
+    _sse(body) {
+        const { mode, statusCode, done, streaming, _headersSet, [resHeaders]: _headers } = this;
+        const res = this[response];
+        if (!done && res && !streaming && !done) {
+            debug('res.sse(body) called with status %d and has headers', statusCode, _headersSet);
+            res.writeStatus(httpCodes[statusCode]);
+            if (mode !== 'immediate') {
+                if (_headersSet) {
+                    for (const header in _headers) {
+                        const value = _headers[header];
+                        if (value) {
+                            res.writeHeader(header, value);
+                        }
+                    }
+                }
+            }
+            res.writeHeader('Content-Type', 'text/event-stream; charset=utf-8');
+            res.writeHeader('Connection', 'keep-alive');
+            res.writeHeader('Cache-Control', 'no-cache, no-store, no-transform');
+            body.on('data', (data) => {
+                if (!this.aborted) {
+                    res.write(data);
+                }
+            });
+            this.streaming = true;
+            this[response] = null;
+        }
+        return this;
     }
     _end(body, closeConnection) {
         const { mode, statusCode, done, streaming, _headersSet, [resHeaders]: _headers } = this;
@@ -785,9 +828,7 @@ class HttpResponse {
         return this;
     }
     onAborted(handler) {
-        if (this[resAbortHandlerExpose]) {
-            this[resAbortHandler].push(handler);
-        }
+        this[resAbortHandler].push(handler);
         return this;
     }
     getHeader(key) {
@@ -1290,7 +1331,12 @@ class App extends Router {
                     response = await _engine.lookup(req, res).catch((err) => {
                         this.handleError(err, req, res);
                     });
-                    unregister();
+                    if (res[resAbortHandler]) {
+                        res.onAborted(unregister);
+                    }
+                    else {
+                        unregister();
+                    }
                     if (_requestPools.length < _poolsSize) {
                         _requestPools.push(req);
                     }
@@ -1302,7 +1348,12 @@ class App extends Router {
                 await _engine.lookup(req, res).catch((err) => {
                     this.handleError(err, req, res);
                 });
-                unregister();
+                if (res[resAbortHandler]) {
+                    res.onAborted(unregister);
+                }
+                else {
+                    unregister();
+                }
                 if (_requestPools.length < _poolsSize) {
                     _requestPools.push(req);
                 }
@@ -1332,7 +1383,7 @@ class App extends Router {
         }
         return this;
     }
-    listenSocket(port, host = 'localhost', is_ssl, handler) {
+    listenSocket(port, host = 'localhost', is_ssl = false, handler = noop) {
         const { _options: options } = this;
         if ((port === 80 || port === 443) &&
             this.https &&
@@ -1380,7 +1431,7 @@ class App extends Router {
         this.time[1] = 0;
         return this._close(token, id);
     }
-    _appApplyListen(host, port, is_ssl = false, handler) {
+    _appApplyListen(host, port, is_ssl = false, handler = noop) {
         const { _console, _options: options, _app: app } = this;
         const sslString = is_ssl ? 'HTTPS ' : is_ssl === false ? 'HTTP ' : '';
         return new Promise((resolve, reject) => {
@@ -1515,8 +1566,11 @@ const nanoexpress = (options = {
     if (options.https) {
         app = uWS.SSLApp(options.https);
     }
-    else {
+    else if (options.http) {
         app = uWS.App(options.http);
+    }
+    else {
+        app = uWS.App();
     }
     return new App(options, app);
 };
