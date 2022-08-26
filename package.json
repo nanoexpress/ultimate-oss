@@ -55,7 +55,7 @@
     "@types/node": "^17.0.31",
     "baretest": "^2.x",
     "commitlint-config-airlight": "^4.0.0",
-    "eslint": "^8.14.0",
+    "eslint": "^8.22.0",
     "eslint-config-airlight-node": "^3.0.3",
     "husky": "^7.0.4",
     "lint-staged": "^12.4.1",
