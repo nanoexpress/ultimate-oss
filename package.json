@@ -50,7 +50,7 @@
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",
     "@rollup/plugin-commonjs": "^22.0.2",
-    "@rollup/plugin-node-resolve": "^14.0.1",
+    "@rollup/plugin-node-resolve": "^14.1.0",
     "@semantic-release/git": "^10.0.1",
     "@types/node": "^18.7.16",
     "baretest": "^2.x",
