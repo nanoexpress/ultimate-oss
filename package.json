@@ -57,7 +57,7 @@
     "commitlint-config-airlight": "^5.0.2",
     "eslint": "^8.27.0",
     "eslint-config-airlight-node": "^3.0.3",
-    "husky": "^8.0.1",
+    "husky": "^8.0.2",
     "lint-staged": "^13.0.3",
     "lint-staged-config-airlight": "^3.0.4",
     "prettier": "^2.7.1",
