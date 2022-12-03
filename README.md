@@ -58,6 +58,12 @@ being Gold+ sponsors for short period of time
 - Much more stable, error percent was decreased by 99%
 - The fastest member in the **nanoexpress** family
 
+### Users
+
+This project for free users always as-is and support and/or
+any feature/bug-fix request will be done based on author
+time and status, so please be patient or any PR's are welcome
+
 ### Sponsors
 
 See [here](https://nanoexpress.js.org/sponsors) `[E]`
