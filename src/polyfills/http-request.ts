@@ -17,11 +17,11 @@ export default class HttpRequest<
 > {
   protected [reqConfig]: INanoexpressOptions;
 
-  protected [reqEvents]: EventEmitter | null;
+  protected [reqEvents]!: EventEmitter | null;
 
-  protected [reqRequest]: uWS_HttpRequest;
+  protected [reqRequest]!: uWS_HttpRequest;
 
-  protected [reqRawResponse]: uWS_HttpResponse;
+  protected [reqRawResponse]!: uWS_HttpResponse;
 
   protected registered: boolean;
 

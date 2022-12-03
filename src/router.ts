@@ -14,7 +14,7 @@ import { invalid, _gc } from './helpers';
 import RouteEngine from './route-engine';
 
 export default class Router {
-  protected [appInstance]: App | Router;
+  protected [appInstance]!: App | Router;
 
   protected _engine?: RouteEngine;
 

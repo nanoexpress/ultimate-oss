@@ -45,30 +45,27 @@
     "fast-query-parse": "^2.0.3",
     "path-to-regexp": "^6.2.1",
     "supports-color": "^9.2.3",
-    "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v20.10.0.tar.gz"
+    "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v20.15.0.tar.gz"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.2.0",
-    "@rollup/plugin-commonjs": "^22.0.2",
-    "@rollup/plugin-node-resolve": "^14.1.0",
+    "@commitlint/cli": "^17.3.0",
+    "@rollup/plugin-commonjs": "^23.0.3",
+    "@rollup/plugin-node-resolve": "^15.0.1",
     "@semantic-release/git": "^10.0.1",
     "@types/node": "^18.11.10",
     "baretest": "^2.x",
     "commitlint-config-airlight": "^5.0.2",
-    "eslint": "^8.28.0",
-    "eslint-config-airlight-node": "^3.0.3",
+    "eslint": "^8.29.0",
+    "eslint-config-airlight-node": "^3.0.5",
     "husky": "^8.0.2",
     "lint-staged": "^13.0.4",
     "lint-staged-config-airlight": "^3.0.4",
     "prettier": "^2.8.0",
     "prettier-config-airlight": "^1.0.5",
-    "rollup": "^2.79.1",
+    "rollup": "^3.5.1",
     "rollup-plugin-typescript2": "^0.34.1",
-    "smartlint": "^5.0.3",
+    "smartlint": "^5.0.6",
     "typedoc": "^0.23.21",
-    "typescript": "^4.6.4"
-  },
-  "resolutions": {
-    "markdown-it": "^12.3.2"
+    "typescript": "^4.9.3"
   }
 }
