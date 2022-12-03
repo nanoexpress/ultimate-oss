@@ -1,4 +1,4 @@
-export declare type Dependencies = Array<string | number | boolean>;
+export type Dependencies = Array<string | number | boolean>;
 declare const register: (runValue?: boolean, returnValue?: boolean) => (callback: (...args: any[]) => any, dependencies: Dependencies) => (() => any) | any;
 declare const unregister: () => void;
 export { register, unregister };

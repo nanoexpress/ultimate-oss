@@ -1222,6 +1222,15 @@ class Router {
 }
 
 class App extends Router {
+    get https() {
+        return this._options.https !== undefined;
+    }
+    get _console() {
+        return this._options.console || console;
+    }
+    get raw() {
+        return this._app;
+    }
     constructor(options, app) {
         super();
         this._options = options;
@@ -1245,15 +1254,6 @@ class App extends Router {
         this._ran = false;
         this._instance = {};
         return this;
-    }
-    get https() {
-        return this._options.https !== undefined;
-    }
-    get _console() {
-        return this._options.console || console;
-    }
-    get raw() {
-        return this._app;
     }
     setNotFoundHandler(handler) {
         this.defaultRoute = handler;

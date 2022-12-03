@@ -167,7 +167,7 @@ declare const mimes: {
     zip: string;
     default: string;
 };
-declare type valueof<T> = T[keyof T];
+type valueof<T> = T[keyof T];
 declare const getMime: (path: string) => valueof<typeof mimes> | undefined;
 export { getMime, mimes };
 //# sourceMappingURL=mime.d.ts.map

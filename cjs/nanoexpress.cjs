@@ -14,15 +14,6 @@ var analyze = require('@nanoexpress/route-syntax-parser');
 var fastDecodeURI = require('fast-decode-uri-component');
 var pathToRegexp = require('path-to-regexp');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var uWS__default = /*#__PURE__*/_interopDefaultLegacy(uWS);
-var debugLog__default = /*#__PURE__*/_interopDefaultLegacy(debugLog);
-var queryParse__default = /*#__PURE__*/_interopDefaultLegacy(queryParse);
-var EventsEmitter__default = /*#__PURE__*/_interopDefaultLegacy(EventsEmitter);
-var analyze__default = /*#__PURE__*/_interopDefaultLegacy(analyze);
-var fastDecodeURI__default = /*#__PURE__*/_interopDefaultLegacy(fastDecodeURI);
-
 const request = Symbol('NanoexpressHttpRequestInstance');
 const response = Symbol('NanoexpressHttpResponseInstance');
 const reqConfig = Symbol('NanoexpressHttpRequestConfig');
@@ -50,9 +41,9 @@ function _gc() {
     }
 }
 
-const debug = debugLog__default["default"]('nanoexpress');
-debugLog__default["default"]('nanoexpress:error');
-const warn = debugLog__default["default"]('nanoexpress:warn');
+const debug = debugLog('nanoexpress');
+debugLog('nanoexpress:error');
+const warn = debugLog('nanoexpress:warn');
 
 const lastDeps = [];
 const callbacks = [];
@@ -332,7 +323,7 @@ class HttpRequest {
         if (options.enableExpressCompatibility && query) {
             this.originalUrl += `?${query}`;
         }
-        this.query = queryParse__default["default"](query);
+        this.query = queryParse(query);
         if (this.method === 'POST' || this.method === 'PUT') {
             this.stream = new stream.Readable({ read() { } });
             this[reqEvents] = null;
@@ -959,7 +950,7 @@ class RouteEngine {
                 route.path = slashify(route.path);
                 route.originalUrl = slashify(route.originalUrl);
             }
-            route.path = fastDecodeURI__default["default"](route.path);
+            route.path = fastDecodeURI(route.path);
             if (route.baseUrl === '*') {
                 route.all = true;
             }
@@ -987,7 +978,7 @@ class RouteEngine {
         route.async = route.handler.constructor.name === 'AsyncFunction';
         route.await = route.handler.toString().includes('await');
         route.legacy = route.handler.toString().includes('next(');
-        route.analyzeBlocks = analyze__default["default"](route.handler);
+        route.analyzeBlocks = analyze(route.handler);
         const usedBlocks = iterateBlocks(route.analyzeBlocks);
         if (route.legacy) {
             if (config.enableExpressCompatibility) {
@@ -1235,6 +1226,15 @@ class Router {
 }
 
 class App extends Router {
+    get https() {
+        return this._options.https !== undefined;
+    }
+    get _console() {
+        return this._options.console || console;
+    }
+    get raw() {
+        return this._app;
+    }
     constructor(options, app) {
         super();
         this._options = options;
@@ -1258,15 +1258,6 @@ class App extends Router {
         this._ran = false;
         this._instance = {};
         return this;
-    }
-    get https() {
-        return this._options.https !== undefined;
-    }
-    get _console() {
-        return this._options.console || console;
-    }
-    get raw() {
-        return this._app;
     }
     setNotFoundHandler(handler) {
         this.defaultRoute = handler;
@@ -1488,7 +1479,7 @@ class App extends Router {
         const { _console } = this;
         if (token) {
             const _debugContext = 'debug' in _console ? _console : console;
-            uWS__default["default"].us_listen_socket_close(token);
+            uWS.us_listen_socket_close(token);
             this._instance[id] = null;
             _debugContext.debug('[Server]: stopped successfully');
             _gc();
@@ -1522,7 +1513,7 @@ function exposeWebsocket(handler, options = {}) {
             const secWsKey = req.getHeader('sec-websocket-key');
             const secWsProtocol = req.getHeader('sec-websocket-protocol');
             const secWsExtensions = req.getHeader('sec-websocket-extensions');
-            const events = new EventsEmitter__default["default"]();
+            const events = new EventsEmitter();
             res.on = events.on.bind(events);
             res.once = events.once.bind(events);
             res.off = events.off.bind(events);
@@ -1577,13 +1568,13 @@ const nanoexpress = (options = {
 }) => {
     let app;
     if (options.https) {
-        app = uWS__default["default"].SSLApp(options.https);
+        app = uWS.SSLApp(options.https);
     }
     else if (options.http) {
-        app = uWS__default["default"].App(options.http);
+        app = uWS.App(options.http);
     }
     else {
-        app = uWS__default["default"].App();
+        app = uWS.App();
     }
     return new App(options, app);
 };
@@ -1591,7 +1582,7 @@ nanoexpress.Router = Router;
 nanoexpress.App = App;
 nanoexpress.exposeWebsocket = exposeWebsocket;
 
-exports["default"] = nanoexpress;
+exports.default = nanoexpress;
 exports.useCallback = useCallback;
 exports.useEffect = useEffect;
 exports.useMemo = useMemo;

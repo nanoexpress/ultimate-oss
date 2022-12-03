@@ -1,4 +1,6 @@
 /// <reference types="node" />
+/// <reference types="node" />
+/// <reference types="node" />
 import { EventEmitter } from 'events';
 import { ReadStream } from 'fs';
 import uWS, { RecognizedString } from 'uWebSockets.js';

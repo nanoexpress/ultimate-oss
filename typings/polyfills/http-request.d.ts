@@ -1,4 +1,5 @@
 /// <reference types="node" />
+/// <reference types="node" />
 import { EventEmitter } from 'events';
 import { Readable, Writable } from 'stream';
 import { HttpRequest as uWS_HttpRequest, HttpResponse as uWS_HttpResponse } from 'uWebSockets.js';
