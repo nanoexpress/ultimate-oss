@@ -65,7 +65,7 @@
     "rollup": "^3.7.0",
     "rollup-plugin-typescript2": "^0.34.1",
     "smartlint": "^5.0.6",
-    "typedoc": "^0.23.21",
+    "typedoc": "^0.23.22",
     "typescript": "^4.9.3"
   }
 }
