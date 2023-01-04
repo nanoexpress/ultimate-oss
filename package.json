@@ -54,7 +54,7 @@
     "@semantic-release/git": "^10.0.1",
     "@types/node": "^18.11.18",
     "baretest": "^2.x",
-    "commitlint-config-airlight": "^5.0.2",
+    "commitlint-config-airlight": "^5.0.3",
     "eslint": "^8.31.0",
     "eslint-config-airlight-node": "^3.0.6",
     "husky": "^8.0.3",
