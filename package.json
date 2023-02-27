@@ -56,7 +56,7 @@
     "baretest": "^2.x",
     "commitlint-config-airlight": "^6.0.0",
     "eslint": "^8.35.0",
-    "eslint-config-airlight-node": "^3.0.6",
+    "eslint-config-airlight-node": "^4.0.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.1.2",
     "lint-staged-config-airlight": "^4.0.0",
