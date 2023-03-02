@@ -7,10 +7,6 @@
     "extraFileExtensions": [".cjs", ".d.ts"]
   },
   "rules": {
-    "node/no-unsupported-features/es-syntax": [
-      "error",
-      { "ignores": ["modules"] }
-    ],
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/naming-convention": "off",
@@ -27,6 +23,7 @@
     "max-lines": ["warn", 160],
     "max-lines-per-function": ["warn", 36],
     "import/prefer-default-export": "warn",
-    "security-node/detect-unhandled-event-errors": "off"
+    "security-node/detect-unhandled-event-errors": "off",
+    "n/no-missing-import": "off"
   }
 }

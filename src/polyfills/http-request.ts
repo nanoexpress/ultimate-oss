@@ -97,7 +97,6 @@ export default class HttpRequest<
       this.registered = false;
     }
 
-    // eslint-disable-next-line security-node/detect-insecure-randomness
     this.id = Math.round(Math.random() * 1e5);
 
     return this;

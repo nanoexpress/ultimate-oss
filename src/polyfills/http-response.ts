@@ -275,7 +275,6 @@ class HttpResponse {
     this[resHeaders] = null;
     this.statusCode = 200;
 
-    // eslint-disable-next-line security-node/detect-insecure-randomness
     this.id = Math.round(Math.random() * 1e5);
 
     return this;
