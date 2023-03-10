@@ -23,7 +23,6 @@
     "max-lines": ["warn", 160],
     "max-lines-per-function": ["warn", 36],
     "import/prefer-default-export": "warn",
-    "security-node/detect-unhandled-event-errors": "off",
-    "n/no-missing-import": "off"
+    "security-node/detect-unhandled-event-errors": "off"
   }
 }
