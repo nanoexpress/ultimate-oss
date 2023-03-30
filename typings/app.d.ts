@@ -26,7 +26,7 @@ declare class App extends RouterTemplate {
     setNotFoundHandler(handler: HttpHandler<HttpMethod, RequestSchema>): this;
     setErrorHandler(handler: (err: Error, req: HttpRequest, res: HttpResponse) => void): this;
     handleError(error: Error, req: HttpRequest, res: HttpResponse): this;
-    ws(path: RecognizedString, options: WebSocketBehavior): this;
+    ws<T>(path: RecognizedString, options: WebSocketBehavior<T>): this;
     publish(topic: RecognizedString, message: RecognizedString, isBinary?: boolean, compress?: boolean): boolean;
     run(): this;
     listenSocket(port: number, host?: string, is_ssl?: boolean, handler?: () => void): Promise<us_listen_socket>;

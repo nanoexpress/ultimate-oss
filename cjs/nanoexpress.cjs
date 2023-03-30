@@ -1504,7 +1504,7 @@ function exposeWebsocket(handler, options = {}) {
     if (typeof options.open === 'function') {
         return options;
     }
-    return {
+    const behavior = {
         ...options,
         open(ws) {
             ws.emit('connection', ws);
@@ -1547,6 +1547,7 @@ function exposeWebsocket(handler, options = {}) {
             ws.emit('close', code, message);
         }
     };
+    return behavior;
 }
 
 const useCallback = register(false, true);

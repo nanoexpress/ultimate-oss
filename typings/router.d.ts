@@ -8,7 +8,7 @@ export default class Router {
     protected [appInstance]: App | Router;
     protected _engine?: RouteEngine;
     [routerInstances]: UnpreparedRoute[];
-    [wsInstances]: IWebsocketRoute[];
+    [wsInstances]: IWebsocketRoute<any>[];
     _basePath: string;
     constructor();
     on<T>(method: HttpMethod, path: string | RegExp, handlers: MiddlewareHandler | MiddlewareHandler[] | RouteHandler<HttpMethod, T> | RouteHandler<HttpMethod, T>[], baseUrl: string, originalUrl: string): this;
@@ -20,7 +20,7 @@ export default class Router {
     del<T = RequestSchema>(path: string | RegExp, ...handlers: RouteHandler<'DEL', T>[]): this;
     delete<T = RequestSchema>(path: string | RegExp, ...handlers: RouteHandler<'DEL', T>[]): this;
     all<T = RequestSchemaWithBody>(path: string | RegExp, ...handlers: RouteHandler<'ANY', T>[]): this;
-    ws(path: RecognizedString, options?: WebSocketBehavior): this;
+    ws<UserData>(path: RecognizedString, options?: WebSocketBehavior<UserData>): this;
     publish(topic: RecognizedString, message: RecognizedString, isBinary?: boolean, compress?: boolean): boolean;
 }
 //# sourceMappingURL=router.d.ts.map
