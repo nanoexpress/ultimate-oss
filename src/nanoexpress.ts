@@ -46,5 +46,3 @@ export {
   useRef,
   useState
 };
-
-console.log('test');
