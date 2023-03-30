@@ -16,7 +16,7 @@
     "prepublishOnly": "yarn build"
   },
   "engines": {
-    "node": ">=14.18.1"
+    "node": ">=16.19.1"
   },
   "repository": {
     "type": "git",
@@ -48,24 +48,24 @@
     "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v20.20.0.tar.gz"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.4.4",
+    "@commitlint/cli": "^17.5.1",
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@semantic-release/git": "^10.0.1",
-    "@types/node": "^18.15.0",
+    "@types/node": "^18.15.11",
     "baretest": "^2.x",
     "commitlint-config-airlight": "^6.0.0",
-    "eslint": "^8.35.0",
+    "eslint": "^8.37.0",
     "eslint-config-airlight-node": "^4.0.1",
     "husky": "^8.0.3",
-    "lint-staged": "^13.1.2",
+    "lint-staged": "^13.2.0",
     "lint-staged-config-airlight": "^4.0.1",
-    "prettier": "^2.8.4",
+    "prettier": "^2.8.7",
     "prettier-config-airlight": "^2.0.1",
-    "rollup": "^3.19.0",
+    "rollup": "^3.20.2",
     "rollup-plugin-typescript2": "^0.34.1",
     "smartlint": "^6.0.1",
-    "typedoc": "^0.23.26",
-    "typescript": "^4.9.5"
+    "typedoc": "^0.23.28",
+    "typescript": "^5.0.2"
   }
 }

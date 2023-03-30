@@ -20,7 +20,7 @@ export default class Router {
 
   [routerInstances]: UnpreparedRoute[];
 
-  [wsInstances]: IWebsocketRoute[];
+  [wsInstances]: IWebsocketRoute<any>[];
 
   _basePath: string;
 
@@ -226,7 +226,10 @@ export default class Router {
     );
   }
 
-  ws(path: RecognizedString, options?: WebSocketBehavior): this {
+  ws<UserData>(
+    path: RecognizedString,
+    options?: WebSocketBehavior<UserData>
+  ): this {
     const normalisedPath =
       this._basePath === '*'
         ? '*'
@@ -237,7 +240,7 @@ export default class Router {
     this[wsInstances].push({
       path: normalisedPath,
       options
-    } as IWebsocketRoute);
+    } as IWebsocketRoute<UserData>);
 
     return this;
   }

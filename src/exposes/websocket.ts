@@ -3,17 +3,55 @@ import {
   HttpRequest,
   HttpResponse,
   us_socket_context_t,
-  WebSocketBehavior
+  WebSocketBehavior,
+  WebSocket
 } from 'uWebSockets.js';
-export default function exposeWebsocket(
+
+interface IWebSocket<UserData> extends WebSocket<UserData> {
+  on(
+    eventName:
+      | 'connection'
+      | 'error'
+      | 'upgrade'
+      | 'willUpgrade'
+      | 'upgraded'
+      | 'message'
+      | 'drain'
+      | 'close',
+    // rome-ignore lint/suspicious/noExplicitAny: <explanation>
+    listener: (...args: any[]) => void
+  ): void;
+  emit(eventName: 'message', message: ArrayBuffer, isBinary: boolean): void;
+  emit(eventName: 'connection', ws: IWebSocket<UserData>): void;
+  emit(eventName: 'drain', drained: number): void;
+  emit(eventName: 'close', code: number, message: ArrayBuffer): void;
+}
+
+type WebSocketOptions<UserData> = Omit<
+  WebSocketBehavior<UserData>,
+  'open' | 'message' | 'drain' | 'close'
+>;
+
+interface IWebSocketBehavior<UserData> extends WebSocketOptions<UserData> {
+  open: (ws: IWebSocket<UserData>) => void;
+  message: (
+    ws: IWebSocket<UserData>,
+    message: ArrayBuffer,
+    isBinary: boolean
+  ) => void;
+  drain: (ws: IWebSocket<UserData>) => void;
+  close: (ws: IWebSocket<UserData>, code: number, message: ArrayBuffer) => void;
+}
+
+export default function exposeWebsocket<UserData>(
   handler: (req: HttpRequest, res: HttpResponse) => void | Promise<void>,
-  options = {}
-): WebSocketBehavior {
-  if (typeof (options as WebSocketBehavior).open === 'function') {
+  options: WebSocketBehavior<UserData> | WebSocketOptions<UserData> = {}
+): IWebSocketBehavior<UserData> | WebSocketBehavior<UserData> {
+  if (typeof (options as WebSocketBehavior<UserData>).open === 'function') {
     return options;
   }
 
-  return {
+  const behavior: IWebSocketBehavior<UserData> = {
     ...options,
     open(ws): void {
       ws.emit('connection', ws);
@@ -70,4 +108,6 @@ export default function exposeWebsocket(
       ws.emit('close', code, message);
     }
   };
+
+  return behavior;
 }

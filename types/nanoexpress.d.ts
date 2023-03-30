@@ -19,9 +19,11 @@ export interface INanoexpressOptions {
 }
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'OPTIONS' | 'DEL' | 'ANY';
 
-export type WebSocketHandler = (ws: WebSocket) => void | WebSocketBehavior;
+export type WebSocketHandler<T> = (
+  ws: WebSocket<T>
+) => void | WebSocketBehavior<T>;
 
-export interface IWebsocketRoute {
+export interface IWebsocketRoute<UserData = unknown> {
   path: RecognizedString;
-  options: WebSocketBehavior;
+  options: WebSocketBehavior<UserData>;
 }

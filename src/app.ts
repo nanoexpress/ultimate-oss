@@ -114,7 +114,7 @@ class App extends RouterTemplate {
     return this;
   }
 
-  ws(path: RecognizedString, options: WebSocketBehavior): this {
+  ws<T>(path: RecognizedString, options: WebSocketBehavior<T>): this {
     this._app.ws(path, options);
 
     return this;
