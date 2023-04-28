@@ -52,7 +52,7 @@
     "@rollup/plugin-commonjs": "^24.1.0",
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@semantic-release/git": "^10.0.1",
-    "@types/node": "^18.16.1",
+    "@types/node": "^18.16.2",
     "baretest": "^2.x",
     "commitlint-config-airlight": "^6.0.0",
     "eslint": "^8.39.0",
