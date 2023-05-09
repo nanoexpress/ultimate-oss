@@ -1310,7 +1310,7 @@ class App extends Router {
                     if (options.enableExpressCompatibility) {
                         debug('res.redirect called instead of fast quick-fix on route ending without "/" for express.js middlewares compatibility');
                         res.redirect(`http://${req.headers.host}${req.originalUrl}/`);
-                        return rawRes;
+                        return;
                     }
                 }
                 if (req.method === 'POST' || req.method === 'PUT') {
@@ -1347,7 +1347,7 @@ class App extends Router {
                     if (_responsePools.length < _poolsSize) {
                         _responsePools.push(res);
                     }
-                    return rawRes;
+                    return;
                 }
                 await _engine.lookup(req, res).catch((err) => {
                     this.handleError(err, req, res);
@@ -1375,7 +1375,7 @@ class App extends Router {
                         res.send(notFound);
                     }
                 }
-                return rawRes;
+                return;
             };
             app.any('/*', handler);
             _ws.forEach(({ path, options: wsOptions }) => {
