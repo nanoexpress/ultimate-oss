@@ -145,7 +145,7 @@ class App extends RouterTemplate {
       const handler = async (
         rawRes: uWS_HttpResponse,
         rawReq: uWS_HttpRequest
-      ): Promise<uWS_HttpResponse | void> => {
+      ): Promise<void> => {
         let req: HttpRequest;
         let res: HttpResponse;
         let response;
@@ -176,7 +176,7 @@ class App extends RouterTemplate {
               'res.redirect called instead of fast quick-fix on route ending without "/" for express.js middlewares compatibility'
             );
             res.redirect(`http://${req.headers.host}${req.originalUrl}/`);
-            return rawRes;
+            return;
           }
         }
 
@@ -217,7 +217,7 @@ class App extends RouterTemplate {
           if (_responsePools.length < _poolsSize) {
             _responsePools.push(res);
           }
-          return rawRes;
+          return;
         }
 
         await _engine.lookup(req, res).catch((err) => {
@@ -249,7 +249,7 @@ class App extends RouterTemplate {
             res.send(notFound as string | Record<string, unknown>);
           }
         }
-        return rawRes;
+        return;
       };
 
       app.any('/*', handler);
