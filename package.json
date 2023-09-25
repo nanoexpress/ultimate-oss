@@ -39,7 +39,7 @@
   "homepage": "https://github.com/nanoexpress/ultimate#readme",
   "dependencies": {
     "@nanoexpress/route-syntax-parser": "https://github.com/nanoexpress/route-syntax-parser/releases/download/v2.4.4/nanoexpress-route-syntax-parser-2.4.4.tgz",
-    "@types/debug": "^4.1.8",
+    "@types/debug": "^4.1.9",
     "debug": "^4.3.4",
     "fast-decode-uri-component": "^1.0.1",
     "fast-query-parse": "^2.0.4",
