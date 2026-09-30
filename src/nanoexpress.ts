@@ -1,5 +1,5 @@
 import uWS from 'uWebSockets.js';
-import { INanoexpressOptions } from '../types/nanoexpress';
+import type { INanoexpressOptions } from '../types/nanoexpress';
 import App from './app';
 import { exposeWebsocket } from './exposes';
 import { useCallback, useEffect, useMemo, useRef, useState } from './hooks';
@@ -8,8 +8,9 @@ import Router from './router';
 /**
  * Instance initializer for nanoexpress
  * @param options Instance options
- * @param options.enableExpressCompatibility Sets polyfill status
  * @param options.ignoreTrailingSlash Normalizes trailing slash on routes
+ * @param options.enableExpressCompatibility Sets polyfill status
+ * @param options.responseMode Response mode to write to HTTP Request
  * @returns
  */
 const nanoexpress = (
@@ -19,7 +20,7 @@ const nanoexpress = (
     responseMode: 'cork'
   }
 ): App => {
-  let app;
+  let app: App | undefined;
 
   if (options.https) {
     app = uWS.SSLApp(options.https);

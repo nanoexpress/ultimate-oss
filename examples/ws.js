@@ -11,7 +11,7 @@ app.ws(
       await new Promise((resolve) => setTimeout(() => resolve(), 1000));
     }
   },
-  async (req, ws) => {
+  async (_req, ws) => {
     console.log('Connected');
 
     ws.on('message', (msg) => {

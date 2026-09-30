@@ -1,15 +1,20 @@
-/* eslint-disable max-lines, max-lines-per-function */
-import { EventEmitter } from 'events';
-import queryParse from 'fast-query-parse';
-import { Readable, Writable } from 'stream';
-import {
+// eslint-disable-next-line @eslint-community/eslint-comments/disable-enable-pair
+/* eslint-disable max-lines-per-function */
+
+import type {
   HttpRequest as uWS_HttpRequest,
   HttpResponse as uWS_HttpResponse
 } from 'uWebSockets.js';
-import { RequestSchema, RequestSchemaWithBody } from '../../types/find-route';
-import { HttpMethod, INanoexpressOptions } from '../../types/nanoexpress';
+import type { EventEmitter } from 'node:events';
+import { Readable, type Writable } from 'node:stream';
+import queryParse from 'fast-query-parse';
+import type {
+  RequestSchema,
+  RequestSchemaWithBody
+} from '../../types/find-route';
+import type { HttpMethod, INanoexpressOptions } from '../../types/nanoexpress';
 import { reqConfig, reqEvents, reqRawResponse, reqRequest } from '../constants';
-import { invalid } from '../helpers';
+import { invalid } from '../helpers/index';
 
 export default class HttpRequest<
   THttpMethod = HttpMethod,
@@ -51,8 +56,6 @@ export default class HttpRequest<
     this[reqConfig] = options;
 
     this.registered = false;
-
-    return this;
   }
 
   setRequest(req: uWS_HttpRequest, res: uWS_HttpResponse): this {
@@ -87,10 +90,17 @@ export default class HttpRequest<
     }
     this.query = queryParse(query);
 
-    // @ts-ignore
-    if (this.method === 'POST' || this.method === 'PUT') {
+    if (
+      this.method === 'POST' ||
+      this.method === 'PUT' ||
+      this.method === 'PATCH'
+    ) {
       // Imitiate some modes
-      this.stream = new Readable({ read(): void {} });
+      this.stream = new Readable({
+        read(): void {
+          //
+        }
+      });
 
       // Protected variables
       this[reqEvents] = null;
@@ -102,17 +112,17 @@ export default class HttpRequest<
     return this;
   }
 
-  on(event: string, listener: (...args: any[]) => void): this {
-    const { stream } = this;
-    if (stream) {
+  on(event: string, listener: (...args: unknown[]) => void): this {
+    const { stream, method } = this;
+    if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
       stream.on(event, listener);
     }
     return this;
   }
 
-  emit(event: string, ...args: any[]): this {
-    const { stream } = this;
-    if (stream) {
+  emit(event: string, ...args: unknown[]): this {
+    const { stream, method } = this;
+    if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
       stream.emit(event, ...args);
     }
     return this;
@@ -130,25 +140,27 @@ export default class HttpRequest<
     return this[reqRequest].getParameter(index);
   }
 
-  pipe(destination: Writable): Writable | void | Promise<Error> {
-    const { stream } = this;
+  pipe(destination: Writable): Writable | undefined | Promise<Error> {
+    const { stream, method } = this;
 
     if (stream.readableDidRead || stream.readableEnded) {
-      return invalid('Stream already used, cannot use one stream twice');
+      invalid('Stream already used, cannot use one stream twice');
+      return;
     }
 
-    if (stream) {
+    if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
       return stream.pipe(destination);
     }
-    return invalid(
+    invalid(
       'Stream was not defined, something wrong, please check your code or method is not a POST or PUT'
     );
+    return;
   }
 
-  async *[Symbol.asyncIterator](): any {
-    const { stream } = this;
+  async *[Symbol.asyncIterator](): unknown {
+    const { stream, method } = this;
 
-    if (stream) {
+    if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
       for await (const chunk of stream) {
         yield chunk;
       }

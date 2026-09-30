@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 import nanoexpress from '../esm/nanoexpress.js';
 
 const app = nanoexpress();

@@ -1,26 +1,28 @@
-/* eslint-disable max-lines, max-lines-per-function, complexity, max-depth */
-import { resAbortHandler } from './constants';
+// eslint-disable-next-line @eslint-community/eslint-comments/disable-enable-pair
+/* eslint-disable max-lines, max-lines-per-function, complexity */
+
 import uWS, {
-  HttpRequest as uWS_HttpRequest,
-  HttpResponse as uWS_HttpResponse,
-  RecognizedString,
-  TemplatedApp,
-  us_listen_socket,
-  WebSocketBehavior
+  type RecognizedString,
+  type TemplatedApp,
+  type us_listen_socket,
+  type HttpRequest as uWS_HttpRequest,
+  type HttpResponse as uWS_HttpResponse,
+  type WebSocketBehavior
 } from 'uWebSockets.js';
-import { HttpHandler, RequestSchema } from '../types/find-route';
-import {
+import type { HttpHandler, RequestSchema } from '../types/find-route';
+import type {
   HttpMethod,
   INanoexpressOptions,
   IWebsocketRoute
 } from '../types/nanoexpress';
+import { resAbortHandler } from './constants';
 import _gc from './helpers/gc';
 import { debug, warn } from './helpers/loggy';
+import noop from './helpers/noop';
 import { unregister } from './hooks/manager';
-import { HttpRequest, HttpResponse } from './polyfills';
+import { HttpRequest, HttpResponse } from './polyfills/index';
 import RouteEngine from './route-engine';
 import RouterTemplate from './router';
-import noop from './helpers/noop';
 
 class App extends RouterTemplate {
   get https(): boolean {
@@ -57,7 +59,7 @@ class App extends RouterTemplate {
 
   protected _instance: Record<string, us_listen_socket | null>;
 
-  protected defaultRoute: HttpHandler<HttpMethod, any> | null;
+  protected defaultRoute: HttpHandler<HttpMethod, RequestSchema> | null;
 
   protected errorRoute:
     | ((err: Error, req: HttpRequest, res: HttpResponse) => void)
@@ -69,11 +71,13 @@ class App extends RouterTemplate {
     this._app = app;
     this._engine = new RouteEngine(options);
 
-    this.defaultRoute = (_, res): HttpResponse => {
-      return res.status(404).send({ status: 'error', code: 404 });
+    this.defaultRoute = (_: HttpRequest, res: HttpResponse): HttpResponse => {
+      res.statusCode = 404;
+      return res.send({ status: 'error', code: 404 });
     };
     this.errorRoute = (err, _, res): HttpResponse => {
-      return res.status(500).send({
+      res.statusCode = 500;
+      return res.send({
         status: 'error',
         message: err.message
       });
@@ -89,7 +93,6 @@ class App extends RouterTemplate {
     this._ran = false;
 
     this._instance = {};
-    return this;
   }
 
   setNotFoundHandler(handler: HttpHandler<HttpMethod, RequestSchema>): this {
@@ -107,7 +110,7 @@ class App extends RouterTemplate {
   }
 
   handleError(error: Error, req: HttpRequest, res: HttpResponse): this {
-    if (res && !res.aborted && !res.done && !res.streaming && this.errorRoute) {
+    if (!res.aborted && !res.done && !res.streaming && this.errorRoute) {
       this.errorRoute(error, req, res);
     }
 
@@ -146,9 +149,9 @@ class App extends RouterTemplate {
         rawRes: uWS_HttpResponse,
         rawReq: uWS_HttpRequest
       ): Promise<void> => {
-        let req: HttpRequest;
-        let res: HttpResponse;
-        let response;
+        let req: HttpRequest | undefined;
+        let res: HttpResponse | undefined;
+        let response: HttpResponse | string | undefined;
 
         if (_requestPools.length > 0) {
           req = _requestPools.shift() as HttpRequest;
@@ -203,10 +206,13 @@ class App extends RouterTemplate {
 
         if (_engine.async && _engine.await) {
           res.exposeAborted();
-          response = await _engine.lookup(req, res).catch((err) => {
-            this.handleError(err, req, res as HttpResponse);
-          });
-          if (res[resAbortHandler]) {
+          response = await _engine
+            .lookup(req, res)
+            .catch((err: unknown): undefined => {
+              this.handleError(err as never, req, res);
+              return;
+            });
+          if (res[resAbortHandler].length > 0) {
             res.onAborted(unregister);
           } else {
             unregister();
@@ -220,10 +226,10 @@ class App extends RouterTemplate {
           return;
         }
 
-        await _engine.lookup(req, res).catch((err) => {
-          this.handleError(err, req, res as HttpResponse);
+        await _engine.lookup(req, res).catch((err: unknown) => {
+          this.handleError(err as never, req, res);
         });
-        if (res[resAbortHandler]) {
+        if (res[resAbortHandler].length > 0) {
           res.onAborted(unregister);
         } else {
           unregister();
@@ -236,8 +242,6 @@ class App extends RouterTemplate {
         }
 
         if (
-          res &&
-          !res.done &&
           !res.streaming &&
           response === undefined &&
           this.defaultRoute !== null
@@ -301,7 +305,9 @@ class App extends RouterTemplate {
     let port = 8000;
     let host = 'localhost';
     let ssl = false;
-    let handler: () => void = () => {};
+    let handler: () => void = (): void => {
+      // empty
+    };
 
     args.forEach((listenArg): void => {
       if (typeof +listenArg === 'number' && !Number.isNaN(+listenArg)) {
@@ -334,23 +340,22 @@ class App extends RouterTemplate {
 
   protected _appApplyListen(
     host: string,
-    port: number,
+    port?: number,
     is_ssl = false,
     handler: () => void = noop
   ): Promise<us_listen_socket> {
     const { _console, _options: options, _app: app } = this;
-    const sslString = is_ssl ? 'HTTPS ' : is_ssl === false ? 'HTTP ' : '';
+    const sslString = is_ssl ? 'HTTPS ' : 'HTTP ';
 
     return new Promise((resolve, reject): void => {
       if (port === undefined) {
         const _errorContext = 'error' in _console ? _console : console;
 
         _errorContext.error('[Server]: PORT is required');
-        return undefined;
       }
       const id = `${host}:${port}`;
 
-      const onListenHandler = (token: us_listen_socket): void => {
+      const onListenHandler = (token: us_listen_socket | undefined): void => {
         if (token) {
           const _debugContext = 'debug' in _console ? _console : console;
           const end = process.hrtime(this.time);
@@ -358,27 +363,25 @@ class App extends RouterTemplate {
           this._instance[id] = token;
           _debugContext.debug(
             `[${sslString}Server]: started successfully at [${id}] in [${(
-              (Number(end[0]) * 1000 + Number(end[1])) /
-              1000000
+              (Number(end[0]) * 1000 + Number(end[1])) / 1000000
             ).toFixed(2)}ms] on PID[${process.pid}]`
           );
           _gc();
           handler();
-          return resolve(token);
+          resolve(token);
+          return;
         }
         const _errorContext = 'error' in _console ? _console : console;
 
         const err = new Error(
           this.https &&
-          (!options.https ||
-            !options.https.cert_file_name ||
-            !options.https.key_file_name)
+            (!options.https?.cert_file_name || !options.https.key_file_name)
             ? `[${sslString}Server]: SSL certificate was not defined or loaded`
             : `[${sslString}Server]: failed to host at [${id}]`
         );
         _errorContext.error(err.message);
         _gc();
-        return reject(err);
+        reject(err);
       };
 
       if (host && host !== 'localhost') {
@@ -425,7 +428,7 @@ class App extends RouterTemplate {
    * @deprecated Please use configuration at initialization such as `nanoexpress({json_spaces:2})` insteadof `app.set('json_spaces', 2)`
    */
   set(key: keyof INanoexpressOptions, value: string | number): this {
-    // @ts-ignore
+    // @ts-expect-error
     this._options[key] = value;
     return this;
   }

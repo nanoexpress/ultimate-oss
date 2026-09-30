@@ -1,10 +1,10 @@
-import { pathToRegexp } from 'path-to-regexp';
 import uWS from 'uWebSockets.js';
+import { pathToRegexp } from 'path-to-regexp';
 import nanoexpress from '../esm/nanoexpress.js';
 import express from './swagger/node_modules/express/index.js';
 
 const app = nanoexpress();
-app.setNotFoundHandler((req, res) => {
+app.setNotFoundHandler((_req, res) => {
   res.status(404);
   res.send({ status: 'error' });
 });
@@ -18,7 +18,7 @@ app
   .get('/user/:id', (req, response) => {
     response.end(req.params.id);
   })
-  .post('/user', (request, response) => {
+  .post('/user', (_request, response) => {
     response.end('');
   })
   .get('/test/simple/:id', async (req) => ({
@@ -35,7 +35,7 @@ app2
   .get('/user/:id', (request, response) => {
     response.end(request.params.id);
   })
-  .post('/user', (request, response) => {
+  .post('/user', (_request, response) => {
     response.end('');
   })
   .get('/test/simple/:id', async (request) => ({

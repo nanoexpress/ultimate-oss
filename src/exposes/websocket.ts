@@ -1,11 +1,11 @@
-import EventsEmitter from 'events';
-import {
+import type {
   HttpRequest,
   HttpResponse,
   us_socket_context_t,
-  WebSocketBehavior,
-  WebSocket
+  WebSocket,
+  WebSocketBehavior
 } from 'uWebSockets.js';
+import EventsEmitter from 'node:events';
 
 interface IWebSocket<UserData> extends WebSocket<UserData> {
   on(

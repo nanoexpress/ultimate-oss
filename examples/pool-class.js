@@ -1,8 +1,7 @@
-'use strict';
 exports.__esModule = true;
 /* eslint-disable max-classes-per-file */
 var uWebSockets_js_1 = require('uWebSockets.js');
-var HttpResponse = /** @class */ (function () {
+var HttpResponse = /** @class */ (() => {
   function HttpResponse() {
     this.res = null;
     this.done = false;
@@ -15,8 +14,9 @@ var HttpResponse = /** @class */ (function () {
     return this;
   };
   HttpResponse.prototype.end = function (body) {
+    var res;
     if (!this.done && this.res) {
-      var res = this.res.end(body);
+      res = this.res.end(body);
       this.done = true;
       return res;
     }
@@ -24,27 +24,25 @@ var HttpResponse = /** @class */ (function () {
   };
   return HttpResponse;
 })();
-var httpResponsesPool = (function () {
+var httpResponsesPool = (() => {
   var _pools = [];
   return {
-    create: function () {
+    create: () => {
       if (_pools.length > 0) {
         return _pools.shift();
       }
       return new HttpResponse();
     },
-    free: function (pool) {
+    free: (pool) => {
       _pools.push(pool);
     }
   };
 })();
-var app = uWebSockets_js_1['default'].App();
-app.get('/', function (res) {
+var app = uWebSockets_js_1.default.App();
+app.get('/', (res) => {
   var _res = httpResponsesPool.create();
   _res.setResponse(res);
   res.end('');
   httpResponsesPool.free(_res);
 });
-app.listen(4000, function () {
-  return console.log('listening at 4000');
-});
+app.listen(4000, () => console.log('listening at 4000'));

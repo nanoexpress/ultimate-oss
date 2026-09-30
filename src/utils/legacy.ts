@@ -1,7 +1,7 @@
-import { MiddlewareHandler } from '../../types/find-route';
-import { HttpMethod } from '../../types/nanoexpress';
+import type { MiddlewareHandler } from '../../types/find-route';
+import type { HttpMethod } from '../../types/nanoexpress';
 import { warn } from '../helpers/loggy';
-import { HttpRequest, HttpResponse } from '../polyfills';
+import type { HttpRequest, HttpResponse } from '../polyfills/index';
 
 export type LegacyHttpHandler<T> = (
   req: HttpRequest<T>,
@@ -22,17 +22,17 @@ export default (
   const httpHandler = function legacyMiddlewarePolyfillHandler(
     req: HttpRequest,
     res: HttpResponse
-  ): Promise<HttpResponse> {
-    return new Promise((resolve, reject) => {
+  ): Promise<undefined> {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    return new Promise((resolve, reject) =>
       middleware(req, res, (err) => {
         if (err) {
           reject(err);
         } else {
-          // @ts-ignore
-          resolve();
+          resolve(undefined);
         }
-      });
-    });
+      })
+    );
   };
   const displayName = middleware.name;
   httpHandler.raw = middleware;

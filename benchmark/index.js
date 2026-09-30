@@ -1,5 +1,5 @@
-import { fork } from 'child_process';
-import path from 'path';
+import { fork } from 'node:child_process';
+import path from 'node:path';
 
 const nanoexpress = fork(
   path.resolve('benchmark', 'servers', 'nanoexpress.js')

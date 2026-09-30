@@ -19,8 +19,7 @@ const register =
   ): (() => any) | any => {
     if (
       !dependencies ||
-      !lastDeps[hookIndex] ||
-      !lastDeps[hookIndex].every(
+      !lastDeps[hookIndex]?.every(
         (dep, depIndex) => dep === dependencies[depIndex]
       )
     ) {

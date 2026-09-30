@@ -160,7 +160,7 @@ const app = nanoexpress();
 
 app.get('/', async (req) => {
   useEffect(() => {
-    // this effect was initilized once for all connections
+    // this effect was initialized once for all connections
     // about memoize & caching don't worry
   }, []);
 

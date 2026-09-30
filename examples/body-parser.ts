@@ -1,4 +1,4 @@
-import { Writable } from 'stream';
+import type { Writable } from 'node:stream';
 import nanoexpress from '../src/nanoexpress';
 
 const app = nanoexpress();

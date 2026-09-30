@@ -1,4 +1,4 @@
-import {
+import type {
   BlockMode,
   IBlock
 } from '@nanoexpress/route-syntax-parser/types/interfaces';
