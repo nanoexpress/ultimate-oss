@@ -8,7 +8,7 @@ const app = nanoexpress({
   enableExpressCompatibility: true
 });
 
-app.setErrorHandler(function notFoundHandler(error, _req, res) {
+app.setErrorHandler(function notFoundHandler(error, req, res) {
   return res.send({ error: error.stack_trace });
 });
 
@@ -30,11 +30,11 @@ const app2 = express();
 app2.use('/api-docs', swagger.serve);
 app2.get('/api-docs', swagger.documentation);
 
-app2.get('/', async function root(_req, res) {
+app2.get('/', async function root(req, res) {
   res.send({ status: 'ok' });
 });
 
-app2.all((_req, res) => {
+app2.all((req, res) => {
   res.send({ status: 404 });
 });
 

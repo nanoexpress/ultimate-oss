@@ -4,7 +4,7 @@ const uWS = require('uWebSockets.js');
 const level1 = () => {
   const route = new nanoexpress.Router();
 
-  route.get('/', (_req, res) => {
+  route.get('/', (req, res) => {
     res.end('level 1 route');
   });
 
@@ -14,7 +14,7 @@ const level1 = () => {
 const level2 = () => {
   const route = new nanoexpress.Router();
 
-  route.get('/', (_req, res) => {
+  route.get('/', (req, res) => {
     res.end('level 2 route');
   });
 
@@ -28,7 +28,7 @@ l1.use('/l2', level2());
 
 app.use('/l1', l1);
 
-app.get('/', (_req, res) => {
+app.get('/', (req, res) => {
   res.end('index');
 });
 
@@ -41,7 +41,7 @@ app.listen(8000);
 // uWS
 const app2 = uWS.App();
 
-const _keys = [];
+const keys = [];
 app2.get('/', async (response) => {
   response.end('index');
 });
