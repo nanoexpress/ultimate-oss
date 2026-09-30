@@ -1,8 +1,7 @@
-/// <reference types="node" />
-import { RecognizedString, TemplatedApp, us_listen_socket, WebSocketBehavior } from 'uWebSockets.js';
-import { HttpHandler, RequestSchema } from '../types/find-route';
-import { HttpMethod, INanoexpressOptions, IWebsocketRoute } from '../types/nanoexpress';
-import { HttpRequest, HttpResponse } from './polyfills';
+import { type RecognizedString, type TemplatedApp, type us_listen_socket, type WebSocketBehavior } from 'uWebSockets.js';
+import type { HttpHandler, RequestSchema } from '../types/find-route';
+import type { HttpMethod, INanoexpressOptions, IWebsocketRoute } from '../types/nanoexpress';
+import { HttpRequest, HttpResponse } from './polyfills/index';
 import RouteEngine from './route-engine';
 import RouterTemplate from './router';
 declare class App extends RouterTemplate {
@@ -20,7 +19,7 @@ declare class App extends RouterTemplate {
     protected _separateServed: boolean;
     protected _ran: boolean;
     protected _instance: Record<string, us_listen_socket | null>;
-    protected defaultRoute: HttpHandler<HttpMethod, any> | null;
+    protected defaultRoute: HttpHandler<HttpMethod, RequestSchema> | null;
     protected errorRoute: ((err: Error, req: HttpRequest, res: HttpResponse) => void) | null;
     constructor(options: INanoexpressOptions, app: TemplatedApp);
     setNotFoundHandler(handler: HttpHandler<HttpMethod, RequestSchema>): this;
@@ -32,7 +31,7 @@ declare class App extends RouterTemplate {
     listenSocket(port: number, host?: string, is_ssl?: boolean, handler?: () => void): Promise<us_listen_socket>;
     listen(...args: Array<number | string | boolean | (() => void)>): Promise<us_listen_socket>;
     close(port: number, host?: string): boolean;
-    protected _appApplyListen(host: string, port: number, is_ssl?: boolean, handler?: () => void): Promise<us_listen_socket>;
+    protected _appApplyListen(host: string, port?: number, is_ssl?: boolean, handler?: () => void): Promise<us_listen_socket>;
     _close(token: us_listen_socket | null, id: string): boolean;
     disable(tag: string): this;
     set(key: keyof INanoexpressOptions, value: string | number): this;

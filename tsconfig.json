@@ -1,10 +1,11 @@
 {
-  "include": ["exposes", "src", "types", "eslint.config.js"],
+  "include": ["exposes", "src", "types"],
   "exclude": ["node_modules", "examples", "tests"],
   "compilerOptions": {
     "target": "es2020",
     "module": "esnext",
     "lib": ["es2020"],
+    "types": ["node"],
     "allowJs": false,
     "incremental": false,
     "checkJs": false,
@@ -12,6 +13,7 @@
     "declaration": true,
     "declarationMap": true,
     "declarationDir": "typings",
+    "rootDir": "src",
     // "outFile": "./",
     "outDir": "cjs",
     // "rootDir": ".",
@@ -36,8 +38,8 @@
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
 
-    "moduleResolution": "node",
-    "baseUrl": "src",
+    "moduleResolution": "bundler",
+
     // "paths": {},
     // "rootDirs": [],
     "typeRoots": ["./node_modules/@types", "types"],

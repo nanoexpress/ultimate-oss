@@ -8,13 +8,14 @@
   "typings": "typings/nanoexpress.d.ts",
   "scripts": {
     "lint": "biome check . && rumdl check .",
-    "test": "node --experimental-modules tests/index.js",
+    "test": "node tests/index.js",
     "cleanup": "rm -rf cjs/*.js cjs/*.js.map esm/*.js esm/*.js.map typings/",
-    "build": "npm run cleanup && rollup -c",
-    "dev": "npm run cleanup && rollup -c -w",
+    "build": "bun run cleanup && bun build ./src/nanoexpress.ts --outdir esm --entry-naming \"[name].js\" --format esm --target node --packages=external --sourcemap=linked && tsc --emitDeclarationOnly --noEmit false --noCheck",
+    "dev": "bun run cleanup && bun build ./src/nanoexpress.ts --outdir esm --entry-naming \"[name].js\" --format esm --target node --packages=external --sourcemap=linked --watch",
     "prepare": "lefthook install",
-    "prepublishOnly": "yarn build",
-    "format": "biome check --write . && rumdl fmt ."
+    "prepublishOnly": "bun run lint && bun run test && bun run build",
+    "format": "biome check --write . && rumdl fmt .",
+    "typecheck": "tsc --noEmit"
   },
   "engines": {
     "node": ">=18.19.1"
@@ -40,25 +41,23 @@
   "homepage": "https://github.com/nanoexpress/ultimate#readme",
   "dependencies": {
     "@nanoexpress/route-syntax-parser": "https://github.com/nanoexpress/route-syntax-parser/releases/download/v2.4.4/nanoexpress-route-syntax-parser-2.4.4.tgz",
-    "debug": "^4.3.5",
+    "debug": "^4.4.3",
     "fast-decode-uri-component": "^1.0.1",
-    "fast-query-parse": "^3.0.0",
-    "path-to-regexp": "^6.2.2",
-    "supports-color": "^9.4.0",
-    "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v20.24.0.tar.gz"
+    "fast-query-parse": "^3.1.0",
+    "path-to-regexp": "^6.3.0",
+    "supports-color": "^11.0.0",
+    "uWebSockets.js": "uNetworking/uWebSockets.js#v20.70.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^21.2.3",
-    "@types/debug": "^4.1.12",
-    "@types/node": "^20.14.9",
+    "@types/debug": "^4.1.13",
+    "@types/node": "^26.6.3",
     "lefthook": "^2.1.15",
-    "rollup": "^4.18.0",
-    "rollup-plugin-typescript2": "^0.36.0",
     "rumdl": "^0.2.78",
-    "typedoc": "^0.26.3",
-    "typescript": "^5.5.2"
+    "typedoc": "^0.28.20",
+    "typescript": "^7.0.2"
   },
   "packageManager": "bun@1.4.2"
 }
