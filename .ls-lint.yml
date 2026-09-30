@@ -4,12 +4,12 @@ ls:
     .ts: kebab-case
     .tsx: kebab-case
     .js: kebab-case
-    .es.js: kebab-case | pointcase
-    .cjs.js: kebab-case | pointcase
+    .es.js: kebab-case
+    .cjs.js: kebab-case
     .d.ts: kebab-case
     .html: kebab-case
     .scss: kebab-case
-    .spec.ts: kebab-case | pointcase
+    .spec.ts: kebab-case
 
 ignore:
   - .git

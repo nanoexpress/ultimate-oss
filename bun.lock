@@ -17,6 +17,7 @@
         "@biomejs/biome": "^2.5.15",
         "@commitlint/cli": "^19.3.0",
         "@commitlint/config-conventional": "^21.2.3",
+        "@ls-lint/ls-lint": "^2.3.1",
         "@types/debug": "^4.1.13",
         "@types/node": "^26.6.3",
         "lefthook": "^2.1.15",
@@ -85,6 +86,8 @@
     "@commitlint/types": ["@commitlint/types@19.8.1", "", { "dependencies": { "@types/conventional-commits-parser": "^5.0.0", "chalk": "^5.3.0" } }, "sha512-/yCrWGCoA1SVKOks25EGadP9Pnj0oAIHGpl2wH2M2Y46dPM2ueb8wyCVOD7O3WCTkaJ0IkKvzhl1JY7+uCT2Dw=="],
 
     "@conventional-changelog/template": ["@conventional-changelog/template@1.4.0", "", {}, "sha512-aalGyl7dbB5PArRebDIX43ZvBlXrYm9uWzGJ26t+4SzJVPsOuvfILGGbw5X4yX7i50YEmJ8zvbiWnqH/AAnZqg=="],
+
+    "@ls-lint/ls-lint": ["@ls-lint/ls-lint@2.3.1", "", { "os": [ "linux", "win32", "darwin", ], "cpu": [ "x64", "arm64", "s390x", ], "bin": { "ls-lint": "bin/cli.js" } }, "sha512-vPe6IDByQnQRTxcAYjTxrmga/tSIui50VBFTB5KIJWY3OOFmxE2VtymjeSEfQfiMbhZV/ZPAqYy2lt8pZFQ0Rw=="],
 
     "@nanoexpress/route-syntax-parser": ["@nanoexpress/route-syntax-parser@https://github.com/nanoexpress/route-syntax-parser/releases/download/v2.4.4/nanoexpress-route-syntax-parser-2.4.4.tgz", { "dependencies": { "semantic-release": "^19.0.2" } }, "sha512-kHZv29me4XdbeFjGtfNAGOPsKCqbzaVZTdueqMWNQeMvEmPZXnNuRfB5119ZOgvhwVJorFaMo1PsQD0l8oDQkw=="],
 
