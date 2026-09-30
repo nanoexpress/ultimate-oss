@@ -7,7 +7,7 @@
   "module": "esm/nanoexpress.js",
   "typings": "typings/nanoexpress.d.ts",
   "scripts": {
-    "lint": "ls-lint && biome check . && rumdl check .",
+    "lint": "ls-lint && biome check . && oxlint . && rumdl check .",
     "test": "node tests/index.js",
     "cleanup": "rm -rf cjs/*.js cjs/*.js.map esm/*.js esm/*.js.map typings/",
     "build": "bun run cleanup && bun build ./src/nanoexpress.ts --outdir esm --entry-naming \"[name].js\" --format esm --target node --packages=external --sourcemap=linked && tsc --emitDeclarationOnly --noEmit false --noCheck",
@@ -56,6 +56,7 @@
     "@types/debug": "^4.1.13",
     "@types/node": "^26.6.3",
     "lefthook": "^2.1.15",
+    "oxlint": "^1.86.0",
     "rumdl": "^0.2.78",
     "typescript": "^7.0.2"
   },
