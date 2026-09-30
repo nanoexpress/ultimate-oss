@@ -7,13 +7,14 @@
   "module": "esm/nanoexpress.js",
   "typings": "typings/nanoexpress.d.ts",
   "scripts": {
-    "lint": "smartlint",
+    "lint": "biome check . && rumdl check .",
     "test": "node --experimental-modules tests/index.js",
     "cleanup": "rm -rf cjs/*.js cjs/*.js.map esm/*.js esm/*.js.map typings/",
     "build": "npm run cleanup && rollup -c",
     "dev": "npm run cleanup && rollup -c -w",
-    "prepare": "husky",
-    "prepublishOnly": "yarn build"
+    "prepare": "lefthook install",
+    "prepublishOnly": "yarn build",
+    "format": "biome check --write . && rumdl fmt ."
   },
   "engines": {
     "node": ">=18.19.1"
@@ -47,19 +48,15 @@
     "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/v20.24.0.tar.gz"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
     "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^21.2.3",
     "@types/debug": "^4.1.12",
     "@types/node": "^20.14.9",
-    "baretest": "^2.x",
-    "commitlint-config-airlight": "^6.0.4",
-    "eslint": "^9.5.0",
-    "eslint-config-airlight-node": "^5.2.0",
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.7",
-    "prettier": "^3.3.2",
-    "prettier-config-airlight": "^6.0.2",
+    "lefthook": "^2.1.15",
     "rollup": "^4.18.0",
     "rollup-plugin-typescript2": "^0.36.0",
+    "rumdl": "^0.2.78",
     "typedoc": "^0.26.3",
     "typescript": "^5.5.2"
   },
