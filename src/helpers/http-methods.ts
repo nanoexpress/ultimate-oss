@@ -1,4 +1,4 @@
-import { HttpMethod } from '../../types/nanoexpress';
+import type { HttpMethod } from '../../types/nanoexpress';
 
 export default [
   'get',

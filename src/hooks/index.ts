@@ -1,4 +1,4 @@
-import { Dependencies, register } from './manager';
+import { type Dependencies, register } from './manager';
 
 export const useCallback = register(false, true);
 

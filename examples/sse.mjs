@@ -1,14 +1,13 @@
-import { randomUUID } from 'crypto';
-import { PassThrough } from 'stream';
+import { PassThrough } from 'node:stream';
 import nanoexpress, { useEffect } from '../esm/nanoexpress.js';
 
 const app = nanoexpress();
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   return res.send({ health: 'ok' });
 });
 
-app.get('/sse', (req, res) => {
+app.get('/sse', (_req, res) => {
   const sse = new PassThrough();
 
   useEffect(() => {

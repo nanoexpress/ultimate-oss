@@ -1,6 +1,6 @@
+import { ParsedUrlQuery } from 'node:querystring';
 import { IBlock } from '@nanoexpress/route-syntax-parser/types/interfaces';
 import { Key } from 'path-to-regexp';
-import { ParsedUrlQuery } from 'querystring';
 import { HttpRequest, HttpResponse } from '../src/polyfills';
 import { HttpMethod } from './nanoexpress';
 
@@ -16,13 +16,13 @@ export interface RequestSchema {
   query?: ParsedUrlQuery | null;
 }
 export interface RequestSchemaWithBody extends RequestSchema {
-  body?: any;
+  body?: unknown;
 }
 
 export type MiddlewareHandler = (
-  req: HttpRequest<HttpMethod, any>,
+  req: HttpRequest<HttpMethod, never>,
   res: HttpResponse
-) => HttpResponse | Promise<HttpResponse | void>;
+) => HttpResponse | Promise<HttpResponse | undefined>;
 
 export type HttpHandler<THttpMethod, THttpSchema> =
   | MiddlewareHandler
@@ -33,7 +33,7 @@ export interface UnpreparedRoute {
   path: string | RegExp;
   baseUrl: string;
   originalUrl: string;
-  handler: HttpHandler<HttpMethod, any>;
+  handler: HttpHandler<HttpMethod, never>;
 }
 
 export interface PreparedRoute extends Omit<UnpreparedRoute, 'path'> {

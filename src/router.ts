@@ -1,17 +1,18 @@
+// eslint-disable-next-line @eslint-community/eslint-comments/disable-enable-pair
 /* eslint-disable max-lines, max-lines-per-function */
-import { RecognizedString, WebSocketBehavior } from 'uWebSockets.js';
-import {
+import type { RecognizedString, WebSocketBehavior } from 'uWebSockets.js';
+import type {
   MiddlewareHandler,
   RequestSchema,
   RequestSchemaWithBody,
   RouteHandler,
   UnpreparedRoute
 } from '../types/find-route';
-import { HttpMethod, IWebsocketRoute } from '../types/nanoexpress';
-import App from './app';
+import type { HttpMethod, IWebsocketRoute } from '../types/nanoexpress';
+import type App from './app';
 import { appInstance, routerInstances, wsInstances } from './constants';
-import { invalid, _gc } from './helpers';
-import RouteEngine from './route-engine';
+import { _gc, invalid } from './helpers';
+import type RouteEngine from './route-engine';
 
 export default class Router {
   protected [appInstance]!: App | Router;
@@ -28,8 +29,6 @@ export default class Router {
     this[routerInstances] = [];
     this[wsInstances] = [];
     this._basePath = '';
-
-    return this;
   }
 
   on<T>(
@@ -82,7 +81,7 @@ export default class Router {
       if (
         path.every(
           (routePath) =>
-            typeof routePath === 'function' || path instanceof Router
+            typeof routePath === 'function' || routePath instanceof Router
         )
       ) {
         return this.use('*', ...path);
@@ -94,7 +93,7 @@ export default class Router {
         const _ws = handler[wsInstances];
 
         handler[appInstance] = this;
-        handler._basePath = path as string;
+        handler._basePath = path;
 
         _routers.forEach(
           ({ method, path: routePath, handler: routeHandler, baseUrl }) => {
@@ -102,8 +101,8 @@ export default class Router {
               method,
               routePath as string,
               routeHandler,
-              path as string,
-              (path as string) + baseUrl + (routePath as string)
+              path,
+              path + baseUrl + (routePath as string)
             );
           }
         );
@@ -114,13 +113,7 @@ export default class Router {
       } else if (Array.isArray(handler)) {
         this.use(path, ...handler);
       } else {
-        this.on(
-          'ANY',
-          '*',
-          handler,
-          path as string,
-          this._basePath + (path as string)
-        );
+        this.on('ANY', '*', handler, path, this._basePath + path);
       }
     });
 
@@ -234,8 +227,8 @@ export default class Router {
       this._basePath === '*'
         ? '*'
         : path === '/'
-        ? this._basePath
-        : `${this._basePath}${path}`;
+          ? this._basePath
+          : `${this._basePath}${path}`;
 
     this[wsInstances].push({
       path: normalisedPath,

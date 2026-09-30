@@ -1,16 +1,17 @@
-/* eslint-disable max-lines, max-lines-per-function, complexity, max-depth */
+// eslint-disable-next-line @eslint-community/eslint-comments/disable-enable-pair
+/* eslint-disable max-lines, max-lines-per-function, complexity */
 import analyze from '@nanoexpress/route-syntax-parser';
 import fastDecodeURI from 'fast-decode-uri-component';
 import { pathToRegexp } from 'path-to-regexp';
-import {
+import type {
   HttpHandler,
   PreparedRoute,
   UnpreparedRoute
 } from '../types/find-route';
-import { HttpMethod, INanoexpressOptions } from '../types/nanoexpress';
-import { debug, invalid, iterateBlocks, slashify, _gc } from './helpers';
-import { HttpRequest, HttpResponse } from './polyfills';
-import legacyUtil, { LegacyHttpHandler } from './utils/legacy';
+import type { HttpMethod, INanoexpressOptions } from '../types/nanoexpress';
+import { _gc, debug, invalid, iterateBlocks, slashify } from './helpers/index';
+import type { HttpRequest, HttpResponse } from './polyfills/index';
+import legacyUtil from './utils/legacy';
 
 export default class RouteEngine {
   protected options: INanoexpressOptions;
@@ -64,19 +65,16 @@ export default class RouteEngine {
 
       if (route.baseUrl === '*') {
         route.all = true;
-      } else if (route.path.indexOf(':') !== -1) {
+      } else if (route.path.includes(':')) {
         route.fetch_params = true;
         route.param_keys = [];
         route.path = pathToRegexp(route.path, route.param_keys);
         route.regex = true;
-      } else if (route.path.indexOf('/*') !== -1) {
-        route.baseUrl = route.path.substr(0, route.path.indexOf('/*') + 1);
-        route.path = route.path.substr(route.baseUrl.length);
+      } else if (route.path.includes('/*')) {
+        route.baseUrl = route.path.substring(0, route.path.indexOf('/*') + 1);
+        route.path = route.path.substring(route.baseUrl.length);
         route.all = true;
-      } else if (
-        route.baseUrl.length > 1 &&
-        route.baseUrl.indexOf('/*') !== -1
-      ) {
+      } else if (route.baseUrl.length > 1 && route.baseUrl.includes('/*')) {
         route.baseUrl = route.baseUrl.substring(0, route.baseUrl.indexOf('/*'));
         route.originalUrl = route.originalUrl.substring(
           0,
@@ -90,14 +88,14 @@ export default class RouteEngine {
     route.async = route.handler.constructor.name === 'AsyncFunction';
     route.await = route.handler.toString().includes('await');
     route.legacy = route.handler.toString().includes('next(');
-    route.analyzeBlocks = analyze<HttpHandler<HttpMethod, any>>(route.handler);
+    route.analyzeBlocks = analyze<HttpHandler<HttpMethod, never>>(
+      route.handler
+    );
     const usedBlocks = iterateBlocks(route.analyzeBlocks);
 
     if (route.legacy) {
       if (config.enableExpressCompatibility) {
-        route.handler = legacyUtil(
-          route.handler as LegacyHttpHandler<HttpMethod>
-        );
+        route.handler = legacyUtil(route.handler as never);
         route.async = true;
         route.await = true;
       } else {
@@ -139,9 +137,11 @@ export default class RouteEngine {
   }
 
   on(
-    method: HttpMethod,
+    method: HttpMethod | HttpMethod[],
     path: string | RegExp | Array<string | RegExp>,
-    handler: HttpHandler<HttpMethod, any> | HttpHandler<HttpMethod, any>[],
+    handler:
+      | HttpHandler<HttpMethod, unknown>
+      | HttpHandler<HttpMethod, unknown>[],
     baseUrl: string,
     originalUrl: string
   ): this {
@@ -176,12 +176,13 @@ export default class RouteEngine {
   off(
     method: HttpMethod,
     path: string,
-    handler: HttpHandler<HttpMethod, any>,
+    handler: HttpHandler<HttpMethod, unknown>,
     baseUrl: string,
     originalUrl: string
   ): this {
     const parsed = this.parse({ method, path, baseUrl, originalUrl, handler });
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!handler) {
       this.routes = this.routes.filter(
         (route) =>
@@ -206,9 +207,9 @@ export default class RouteEngine {
   async lookup(
     req: HttpRequest,
     res: HttpResponse
-  ): Promise<HttpResponse | string | void> {
+  ): Promise<HttpResponse | string | undefined> {
     const { routes, options } = this;
-    let response;
+    let response: HttpResponse | string | undefined;
 
     for (let i = 0, len = routes.length; i < len; i += 1) {
       const route = routes[i];
@@ -227,7 +228,7 @@ export default class RouteEngine {
             route.path && route.path !== '*'
               ? req.path.includes(route.path as string)
               : route.originalUrl === '*' ||
-                req.originalUrl.substr(route.originalUrl.length).length > 1;
+                req.originalUrl.substring(route.originalUrl.length).length > 1;
         } else if (route.regex && (route.path as RegExp).test(req.path)) {
           found = true;
         } else if (route.path === req.path && route.baseUrl === req.baseUrl) {
@@ -261,8 +262,8 @@ export default class RouteEngine {
             req.path.indexOf(route.baseUrl) === 0
           ) {
             req.baseUrl = route.baseUrl;
-            req.path = req.originalUrl.substr(req.baseUrl.length);
-            req.url = req.originalUrl.substr(req.baseUrl.length);
+            req.path = req.originalUrl.substring(req.baseUrl.length);
+            req.url = req.originalUrl.substring(req.baseUrl.length);
           }
 
           if (route.async || route.legacy) {
@@ -271,11 +272,10 @@ export default class RouteEngine {
             response = route.handler(req, res);
           }
 
-          if (res.streaming || res.done || response === res) {
+          if (res.streaming || response === res) {
             debug('routes lookup was done with HttpResponse');
             return res;
-          }
-          if (!res.streaming && !res.done && response) {
+          } else if (response) {
             debug('routes lookup was done with async json result');
             return res.send(response as string | Record<string, unknown>);
           }
@@ -286,5 +286,6 @@ export default class RouteEngine {
         }
       }
     }
+    return res;
   }
 }

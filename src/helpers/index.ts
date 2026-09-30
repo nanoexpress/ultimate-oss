@@ -4,18 +4,18 @@ import httpMethods from './http-methods';
 import invalid from './invalid';
 import iterateBlocks from './iterate-blocks';
 import { getMime, mimes } from './mime';
-import slashify from './slashify';
 import noop from './noop';
+import slashify from './slashify';
 
 export * from './loggy';
 export {
   _gc,
-  httpMethods,
+  getMime,
   httpCodes,
+  httpMethods,
   invalid,
   iterateBlocks,
   mimes,
-  getMime,
-  slashify,
-  noop
+  noop,
+  slashify
 };

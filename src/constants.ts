@@ -27,6 +27,12 @@ export const resAbortHandler: unique symbol = Symbol(
 export const resAbortHandlerExpose: unique symbol = Symbol(
   'NanoexpressHttpResponseAbortHandlerExpose'
 );
+export const resCorkHandlers: unique symbol = Symbol(
+  'NanoexpressHttpResponseCorkHandlers'
+);
+export const resCorkIsCorked: unique symbol = Symbol(
+  'NanoexpressHttpResponseCorkIsCorked'
+);
 
 export const appInstance: unique symbol = Symbol('NanoexpressAppInstance');
 export const routerInstances: unique symbol = Symbol(

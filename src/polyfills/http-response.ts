@@ -1,30 +1,34 @@
 // eslint-disable-next-line @eslint-community/eslint-comments/disable-enable-pair
 /* eslint-disable max-lines, max-lines-per-function, max-depth */
-import { EventEmitter } from 'events';
-import { createReadStream, ReadStream, statSync } from 'fs';
-import uWS, { RecognizedString } from 'uWebSockets.js';
+
+import type uWS from 'uWebSockets.js';
+import type { RecognizedString } from 'uWebSockets.js';
+import { EventEmitter } from 'node:events';
+import { createReadStream, type ReadStream, statSync } from 'node:fs';
 import {
-  BrotliCompress,
-  BrotliOptions,
+  type BrotliCompress,
+  type BrotliOptions,
   createBrotliCompress,
   createDeflate,
   createGzip,
-  Deflate,
-  Gzip,
-  ZlibOptions
-} from 'zlib';
-import { INanoexpressOptions } from '../../types/nanoexpress';
+  type Deflate,
+  type Gzip,
+  type ZlibOptions
+} from 'node:zlib';
+import type { INanoexpressOptions } from '../../types/nanoexpress';
 import {
-  request as resRequest,
   resAbortHandler,
   resAbortHandlerExpose,
   resConfig,
+  resCorkHandlers,
+  resCorkIsCorked,
   resEvents,
   resHeaders,
+  request as resRequest,
   response as resResponse
 } from '../constants';
 import { debug, getMime, httpCodes, invalid, warn } from '../helpers';
-import HttpRequest from './http-request';
+import type HttpRequest from './http-request';
 
 /**
  * HttpResponse class
@@ -44,7 +48,11 @@ class HttpResponse {
 
   protected [resAbortHandler]: (() => void)[];
 
+  protected [resCorkHandlers]: (() => void)[];
+
   protected [resAbortHandlerExpose]: boolean;
+
+  protected [resCorkIsCorked]: boolean;
 
   protected [resConfig]: INanoexpressOptions;
 
@@ -60,7 +68,7 @@ class HttpResponse {
 
   protected registered: boolean;
 
-  protected mode: 'immediate' | 'queue' | 'cork' = 'queue';
+  protected mode: 'immediate' | 'queue' | 'cork' = 'cork';
 
   public serialize?: (
     data: Record<string, unknown> | string | number | boolean
@@ -82,6 +90,8 @@ class HttpResponse {
     this[resEvents] = null;
     this[resAbortHandler] = [];
     this[resAbortHandlerExpose] = false;
+    this[resCorkHandlers] = [];
+    this[resCorkIsCorked] = false;
 
     this[resRequest] = null;
     this[resResponse] = null;
@@ -99,7 +109,7 @@ class HttpResponse {
       this.exposeAborted();
 
       emitter
-        .on('pipe', (stream) => {
+        .on('pipe', (stream: ReadStream) => {
           debug('stream.pipe(res)');
 
           this.streaming = true;
@@ -265,13 +275,15 @@ class HttpResponse {
     this[resRequest] = req;
     this[resResponse] = res;
     this.done = false;
-    this.aborted = res.aborted || false;
+    this.aborted = (res.aborted as boolean) || false;
     this._headersSet = false;
     this.streaming = false;
     this.registered = false;
     this[resEvents] = null;
     this[resAbortHandlerExpose] = false;
+    this[resCorkIsCorked] = false;
     this[resAbortHandler].length = 0;
+    this[resCorkHandlers].length = 0;
 
     this[resHeaders] = null;
     this.statusCode = 200;
@@ -282,6 +294,48 @@ class HttpResponse {
   }
 
   // Native methods re-implementing
+  /**
+   * Corks this response for writes/SSE
+   * @param callback All the response manipulations within corked response
+   * @returns nanoexpress.HttpResponse
+   * @memberof nanoexpress.HttpResponse
+   * @example
+   * ```js
+   * res.cork(() => {
+   *  res.write('hello');
+   *  res.write('world');
+   *  res.end();
+   * })
+   * ```
+   */
+  cork(callback: () => void): this {
+    const { mode } = this;
+    const res = this[resResponse];
+    const corks = this[resCorkHandlers];
+
+    if (mode !== 'cork') {
+      invalid('Forbidden to use respond to the client without cork');
+    }
+
+    if (!res) {
+      return this;
+    }
+    if (this[resCorkIsCorked]) {
+      invalid('One HttpResponse could be corked once');
+    }
+
+    res.cork(() => {
+      this[resCorkIsCorked] = true;
+
+      for (const cork of corks) {
+        cork();
+      }
+
+      callback();
+    });
+    return this;
+  }
+
   /**
    * Ends this response by copying the contents of body.
    * @param body Body content
@@ -294,13 +348,19 @@ class HttpResponse {
     const { mode } = this;
     const res = this[resResponse];
 
-    if (res && mode === 'cork') {
-      res.cork(() => {
-        this._end(body, closeConnection);
-      });
+    if (mode !== 'cork') {
+      invalid('Forbidden to use respond to the client without cork');
+    }
+
+    if (!res) {
       return this;
     }
-    return this._end(body, closeConnection);
+
+    this.cork(() => {
+      this._end(body, closeConnection);
+    });
+
+    return this;
   }
 
   /**
@@ -313,16 +373,26 @@ class HttpResponse {
   sse(body: ReadStream): this {
     const { mode } = this;
     const res = this[resResponse];
+    const corks = this[resCorkHandlers];
 
     this.exposeAborted();
 
-    if (res && mode === 'cork') {
-      res.cork(() => {
-        this._sse(body);
-      });
+    if (mode !== 'cork') {
+      invalid('Forbidden to use respond to the client without cork');
+    }
+
+    if (!res) {
       return this;
     }
-    return this._sse(body);
+
+    res.cork(() => {
+      for (const cork of corks) {
+        cork();
+      }
+
+      this._sse(body);
+    });
+    return this;
   }
 
   protected _sse(body: ReadStream): this {
@@ -336,7 +406,7 @@ class HttpResponse {
     } = this;
     const res = this[resResponse];
 
-    if (!done && res && !streaming && !done) {
+    if (!done && res && !streaming) {
       debug(
         'res.sse(body) called with status %d and has headers',
         statusCode,
@@ -442,7 +512,7 @@ class HttpResponse {
    * @example res.writeHead(200, {'X-Header': 1234});
    */
   writeHead(
-    code: number | Record<string, RecognizedString>,
+    code: number | Record<string, RecognizedString> | undefined,
     headers?: Record<string, RecognizedString>
   ): this {
     if (typeof code === 'object' && !headers) {
@@ -473,7 +543,7 @@ class HttpResponse {
       path = code;
       code = 301;
     }
-    if (path && path.indexOf('/') === -1) {
+    if (path && !path.includes('/')) {
       path = `/${path}`;
     }
 
@@ -594,8 +664,8 @@ class HttpResponse {
     size?: number,
     compressed = false
   ): this {
-    if (!this.done && this[resResponse] && this[resResponse] !== null) {
-      const res = this[resResponse] as uWS.HttpResponse;
+    if (!this.done && this[resResponse]) {
+      const res = this[resResponse];
       const config = this[resConfig];
       const { mode, statusCode, _headersSet, [resHeaders]: _headers } = this;
 
@@ -657,7 +727,7 @@ class HttpResponse {
               return;
             }
             res.write(
-              buffer.buffer.slice(
+              buffer.subarray(
                 buffer.byteOffset,
                 buffer.byteOffset + buffer.byteLength
               )
@@ -672,13 +742,13 @@ class HttpResponse {
           if (this.done || this.aborted) {
             return;
           }
-          buffer = buffer.buffer.slice(
+          buffer = buffer.subarray(
             buffer.byteOffset,
             buffer.byteOffset + buffer.byteLength
-          ) as Buffer;
+          );
 
           const lastOffset = res.getWriteOffset();
-          const [ok, done] = res.tryEnd(buffer, size as number);
+          const [ok, done] = res.tryEnd(buffer, size);
 
           if (done) {
             this.done = true;
@@ -690,8 +760,8 @@ class HttpResponse {
                 return true;
               }
               const [writeOk, writeDone] = res.tryEnd(
-                buffer.slice(offset - lastOffset),
-                size as number
+                buffer.subarray(offset - lastOffset),
+                size
               );
               if (writeDone) {
                 this.done = true;
@@ -737,16 +807,9 @@ class HttpResponse {
       );
       return null;
     }
-    if (!req.headers) {
-      invalid(
-        'This method requires active `HttpRequest.headers`. Please load required middleware'
-      );
-      return null;
-    }
     const contentEncoding = req.headers['content-encoding'];
-    const encoding = priority.find(
-      (currentEncoding) =>
-        contentEncoding && contentEncoding.indexOf(currentEncoding) !== -1
+    const encoding = priority.find((currentEncoding) =>
+      contentEncoding?.includes(currentEncoding)
     );
 
     let compression = null;
@@ -791,7 +854,7 @@ class HttpResponse {
       const mtimeutc = mtime.toUTCString();
 
       // Return 304 if last-modified
-      if (headers && headers['if-modified-since']) {
+      if (headers?.['if-modified-since']) {
         if (new Date(headers['if-modified-since']) >= mtime) {
           this.statusCode = 304;
           return this.end();
@@ -804,9 +867,9 @@ class HttpResponse {
     let start: number | undefined = 0;
     let end: number | undefined = 0;
 
-    if (headers && headers.range) {
+    if (headers?.range) {
       [start, end] = headers.range
-        .substr(6)
+        .substring(6)
         .split('-')
         .map((byte: string) => (byte ? parseInt(byte, 10) : undefined));
 
@@ -844,6 +907,11 @@ class HttpResponse {
    */
   write(chunk: uWS.RecognizedString | ArrayBuffer): this {
     const res = this[resResponse];
+    const isCorked = this[resCorkIsCorked];
+
+    if (!isCorked) {
+      invalid('Calling `.write` without corking is forbidden');
+    }
     if (!this.done && res && !this.streaming) {
       debug('res.write(%s)', chunk);
       res.write(chunk);
@@ -864,7 +932,9 @@ class HttpResponse {
         this.aborted = true;
         warn('res.onAborted is called');
 
-        this[resAbortHandler].forEach((callback) => callback());
+        this[resAbortHandler].forEach((callback) => {
+          callback();
+        });
       });
       this[resAbortHandlerExpose] = true;
     }
@@ -887,7 +957,7 @@ class HttpResponse {
    */
   getHeader(key: string): RecognizedString | null {
     const headers = this[resHeaders];
-    if (headers && headers[key]) {
+    if (headers?.[key]) {
       debug("res.getHeader('%s')", key);
       return headers[key];
     }
@@ -993,7 +1063,7 @@ class HttpResponse {
     debug("res.removeHeader('%s')", key);
 
     const headers = this[resHeaders];
-    if (headers && headers[key]) {
+    if (headers?.[key]) {
       headers[key] = null;
     }
 

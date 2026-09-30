@@ -1,5 +1,5 @@
-import { pathToRegexp } from 'path-to-regexp';
 import uWS from 'uWebSockets.js';
+import { pathToRegexp } from 'path-to-regexp';
 
 const app = uWS.App();
 
