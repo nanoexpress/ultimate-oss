@@ -15,9 +15,9 @@ app.use(async (req) => {
   }
 });
 
-app.get('/', (_req, res) => res.end('ok'));
+app.get('/', (req, res) => res.end('ok'));
 
-app.post('/', async (req, _res) => {
+app.post('/', async (req, res) => {
   return { status: 'success', body: req.body };
 });
 

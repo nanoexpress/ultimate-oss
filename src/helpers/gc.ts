@@ -4,7 +4,7 @@ export default function _gc(): boolean {
       global.gc();
     }
     return true;
-  } catch (_e) {
+  } catch (e) {
     return false;
   }
 }

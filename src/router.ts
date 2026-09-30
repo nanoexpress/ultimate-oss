@@ -113,7 +113,13 @@ export default class Router {
       } else if (Array.isArray(handler)) {
         this.use(path, ...handler);
       } else {
-        this.on('ANY', '*', handler, path, this._basePath + path);
+        this.on(
+          'ANY',
+          '*',
+          handler,
+          path as string,
+          this._basePath + (path as string)
+        );
       }
     });
 

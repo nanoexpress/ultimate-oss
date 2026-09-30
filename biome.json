@@ -23,6 +23,10 @@
     "rules": {
       "suspicious": {
         "noExplicitAny": "off"
+      },
+      "correctness": {
+        "noUnusedVariables": "warn",
+        "noUnusedFunctionParameters": "warn"
       }
     }
   }

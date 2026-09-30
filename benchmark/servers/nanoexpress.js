@@ -1,7 +1,7 @@
 import { nanoexpress } from '../../esm/nanoexpress.js';
 
 const app = nanoexpress();
-app.setNotFoundHandler((_req, res) => {
+app.setNotFoundHandler((req, res) => {
   res.status(404);
   res.send({ status: 'error' });
 });
@@ -12,7 +12,7 @@ app
   .get('/user/:id', (request, response) => {
     response.end(request.params.id);
   })
-  .post('/user', (_request, response) => {
+  .post('/user', (request, response) => {
     response.end('');
   })
   .get('/test/simple/:id', async (request) => ({

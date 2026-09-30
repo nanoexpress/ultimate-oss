@@ -29,7 +29,7 @@ function _gc() {
       global.gc();
     }
     return true;
-  } catch (_e) {
+  } catch (e) {
     return false;
   }
 }
@@ -1640,5 +1640,5 @@ export {
   useState
 };
 
-//# debugId=EAECA40FC951B7B264756E2164756E21
+//# debugId=BA73EE69B10BEA4764756E2164756E21
 //# sourceMappingURL=nanoexpress.js.map

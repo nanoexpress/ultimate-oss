@@ -3,11 +3,11 @@ import nanoexpress, { useEffect } from '../esm/nanoexpress.js';
 
 const app = nanoexpress();
 
-app.get('/', (_req, res) => {
+app.get('/', (req, res) => {
   return res.send({ health: 'ok' });
 });
 
-app.get('/sse', (_req, res) => {
+app.get('/sse', (req, res) => {
   const sse = new PassThrough();
 
   useEffect(() => {
