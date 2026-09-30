@@ -397,6 +397,8 @@ import {
   createDeflate,
   createGzip
 } from "node:zlib";
+var COMPRESSION_PRIORITY = ["gzip", "br", "deflate"];
+
 class HttpResponse {
   [request];
   [response];
@@ -810,20 +812,20 @@ class HttpResponse {
     }
     return this;
   }
-  compressStream(stream, options, priority = ["gzip", "br", "deflate"]) {
+  compressStream(stream, options, priority = COMPRESSION_PRIORITY) {
     const req = this[request];
     if (!req) {
       invalid("This method requires active `HttpRequest`. Please load required middleware");
       return null;
     }
-    const contentEncoding = req.headers["content-encoding"];
-    const encoding = priority.find((currentEncoding) => contentEncoding?.includes(currentEncoding));
+    const acceptEncoding = req.headers["accept-encoding"];
+    const encoding = priority.find((currentEncoding) => acceptEncoding?.includes(currentEncoding));
     let compression = null;
     if (encoding === "br") {
       compression = createBrotliCompress(options);
     } else if (encoding === "gzip") {
       compression = createGzip(options);
-    } else if (encoding === "deflare") {
+    } else if (encoding === "deflate") {
       compression = createDeflate(options);
     }
     if (compression && encoding) {
@@ -1121,10 +1123,12 @@ class RouteEngine {
       }
       if (route.method === "ANY" || route.method === req.method) {
         let found = false;
+        let matchedExec = null;
         if (route.all) {
           found = route.path && route.path !== "*" ? req.path.includes(route.path) : route.originalUrl === "*" || req.originalUrl.substring(route.originalUrl.length).length > 1;
-        } else if (route.regex && route.path.test(req.path)) {
-          found = true;
+        } else if (route.regex) {
+          matchedExec = route.path.exec(req.path);
+          found = matchedExec !== null;
         } else if (route.path === req.path && route.baseUrl === req.baseUrl) {
           found = true;
         } else if (route.originalUrl === req.originalUrl) {
@@ -1132,7 +1136,7 @@ class RouteEngine {
         }
         if (found) {
           if (route.fetch_params && route.param_keys) {
-            const exec = route.path.exec(req.path);
+            const exec = matchedExec;
             req.params = {};
             for (let p = 0, lenp = route.param_keys.length;exec && p < lenp; p += 1) {
               const key = route.param_keys[p].name;
@@ -1640,5 +1644,5 @@ export {
   useState
 };
 
-//# debugId=BA73EE69B10BEA4764756E2164756E21
+//# debugId=21087203E756B08064756E2164756E21
 //# sourceMappingURL=nanoexpress.js.map
