@@ -9,6 +9,8 @@ export declare const resConfig: unique symbol;
 export declare const resEvents: unique symbol;
 export declare const resAbortHandler: unique symbol;
 export declare const resAbortHandlerExpose: unique symbol;
+export declare const resCorkHandlers: unique symbol;
+export declare const resCorkIsCorked: unique symbol;
 export declare const appInstance: unique symbol;
 export declare const routerInstances: unique symbol;
 export declare const wsInstances: unique symbol;

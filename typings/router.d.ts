@@ -1,9 +1,9 @@
-import { RecognizedString, WebSocketBehavior } from 'uWebSockets.js';
-import { MiddlewareHandler, RequestSchema, RequestSchemaWithBody, RouteHandler, UnpreparedRoute } from '../types/find-route';
-import { HttpMethod, IWebsocketRoute } from '../types/nanoexpress';
-import App from './app';
+import type { RecognizedString, WebSocketBehavior } from 'uWebSockets.js';
+import type { MiddlewareHandler, RequestSchema, RequestSchemaWithBody, RouteHandler, UnpreparedRoute } from '../types/find-route';
+import type { HttpMethod, IWebsocketRoute } from '../types/nanoexpress';
+import type App from './app';
 import { appInstance, routerInstances, wsInstances } from './constants';
-import RouteEngine from './route-engine';
+import type RouteEngine from './route-engine';
 export default class Router {
     protected [appInstance]: App | Router;
     protected _engine?: RouteEngine;

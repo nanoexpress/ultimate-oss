@@ -1,4 +1,4 @@
-import { HttpRequest, HttpResponse, WebSocketBehavior, WebSocket } from 'uWebSockets.js';
+import type { HttpRequest, HttpResponse, WebSocket, WebSocketBehavior } from 'uWebSockets.js';
 interface IWebSocket<UserData> extends WebSocket<UserData> {
     on(eventName: 'connection' | 'error' | 'upgrade' | 'willUpgrade' | 'upgraded' | 'message' | 'drain' | 'close', listener: (...args: any[]) => void): void;
     emit(eventName: 'message', message: ArrayBuffer, isBinary: boolean): void;

@@ -1,19 +1,19 @@
-/// <reference types="node" />
-/// <reference types="node" />
-/// <reference types="node" />
-import { EventEmitter } from 'events';
-import { ReadStream } from 'fs';
-import uWS, { RecognizedString } from 'uWebSockets.js';
-import { BrotliCompress, BrotliOptions, Deflate, Gzip, ZlibOptions } from 'zlib';
-import { INanoexpressOptions } from '../../types/nanoexpress';
-import { request as resRequest, resAbortHandler, resAbortHandlerExpose, resConfig, resEvents, resHeaders, response as resResponse } from '../constants';
-import HttpRequest from './http-request';
+import type uWS from 'uWebSockets.js';
+import type { RecognizedString } from 'uWebSockets.js';
+import { EventEmitter } from 'node:events';
+import { type ReadStream } from 'node:fs';
+import { type BrotliCompress, type BrotliOptions, type Deflate, type Gzip, type ZlibOptions } from 'node:zlib';
+import type { INanoexpressOptions } from '../../types/nanoexpress';
+import { resAbortHandler, resAbortHandlerExpose, resConfig, resCorkHandlers, resCorkIsCorked, resEvents, resHeaders, request as resRequest, response as resResponse } from '../constants';
+import type HttpRequest from './http-request';
 declare class HttpResponse {
     [resRequest]: HttpRequest | null;
     [resResponse]: uWS.HttpResponse | null;
     protected [resHeaders]: Record<string, RecognizedString | null> | null;
     protected [resAbortHandler]: (() => void)[];
+    protected [resCorkHandlers]: (() => void)[];
     protected [resAbortHandlerExpose]: boolean;
+    protected [resCorkIsCorked]: boolean;
     protected [resConfig]: INanoexpressOptions;
     protected [resEvents]: EventEmitter | null;
     done: boolean;
@@ -28,18 +28,19 @@ declare class HttpResponse {
     id: number;
     constructor(config: INanoexpressOptions);
     protected registerEvents(): this;
-    on(eventName: string | symbol, eventArgument: (eventArgument?: unknown) => void): this;
-    once(eventName: string | symbol, eventArgument: (eventArgument?: unknown) => void): this;
-    off(eventName: string | symbol, eventArgument: (eventArgument?: unknown) => void): this;
-    removeListener(eventName: string | symbol, eventArgument: (eventArgument?: unknown) => void): this;
+    on(eventName: string | symbol, eventArgument: (eventArg?: unknown) => void): this;
+    once(eventName: string | symbol, eventArgument: (eventArg?: unknown) => void): this;
+    off(eventName: string | symbol, eventArgument: (eventArg?: unknown) => void): this;
+    removeListener(eventName: string | symbol, eventArgument: (eventArg?: unknown) => void): this;
     emit(eventName: string | symbol, eventArgument?: never): boolean;
     setResponse(res: uWS.HttpResponse, req: HttpRequest): this;
+    cork(callback: () => void): this;
     end(body?: uWS.RecognizedString, closeConnection?: boolean): this;
     sse(body: ReadStream): this;
     protected _sse(body: ReadStream): this;
     protected _end(body?: uWS.RecognizedString, closeConnection?: boolean): this;
     status(code: number): this;
-    writeHead(code: number | Record<string, RecognizedString>, headers?: Record<string, RecognizedString>): this;
+    writeHead(code: number | Record<string, RecognizedString> | undefined, headers?: Record<string, RecognizedString>): this;
     redirect(code: number | string, path?: string): this;
     sendStatus(code: number): this;
     send(data: Record<string, unknown> | string | number | boolean, closeConnection?: boolean): this;
