@@ -1388,7 +1388,7 @@ class App extends Router {
         if (req.method === "POST" || req.method === "PUT") {
           res.exposeAborted();
           rawRes.onData((arrayChunk, isLast) => {
-            req.stream.push(Buffer.from(arrayChunk.slice(0)));
+            req.stream.push(Buffer.from(arrayChunk));
             if (isLast) {
               req.stream.push(null);
             }
@@ -1644,5 +1644,5 @@ export {
   useState
 };
 
-//# debugId=21087203E756B08064756E2164756E21
+//# debugId=C920F82996820AC264756E2164756E21
 //# sourceMappingURL=nanoexpress.js.map
