@@ -222,6 +222,7 @@ export default class RouteEngine {
 
       if (route.method === 'ANY' || route.method === req.method) {
         let found = false;
+        let matchedExec: RegExpExecArray | null = null;
 
         if (route.all) {
           found =
@@ -229,8 +230,9 @@ export default class RouteEngine {
               ? req.path.includes(route.path as string)
               : route.originalUrl === '*' ||
                 req.originalUrl.substring(route.originalUrl.length).length > 1;
-        } else if (route.regex && (route.path as RegExp).test(req.path)) {
-          found = true;
+        } else if (route.regex) {
+          matchedExec = (route.path as RegExp).exec(req.path);
+          found = matchedExec !== null;
         } else if (route.path === req.path && route.baseUrl === req.baseUrl) {
           found = true;
         } else if (route.originalUrl === req.originalUrl) {
@@ -239,7 +241,7 @@ export default class RouteEngine {
 
         if (found) {
           if (route.fetch_params && route.param_keys) {
-            const exec = (route.path as RegExp).exec(req.path);
+            const exec = matchedExec;
 
             req.params = {} as Record<string, string>;
             for (
