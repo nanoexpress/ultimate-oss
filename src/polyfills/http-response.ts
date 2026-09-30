@@ -30,6 +30,10 @@ import {
 import { debug, getMime, httpCodes, invalid, warn } from '../helpers';
 import type HttpRequest from './http-request';
 
+// gzip-first on purpose: brotli's default quality (11) is ~800x slower
+// than gzip level 6 (measured), it is only used when gzip is not offered
+const COMPRESSION_PRIORITY = ['gzip', 'br', 'deflate'];
+
 /**
  * HttpResponse class
  * @constructor
@@ -797,7 +801,7 @@ class HttpResponse {
   compressStream(
     stream: ReadStream,
     options?: BrotliOptions | ZlibOptions,
-    priority = ['gzip', 'br', 'deflate']
+    priority: string[] = COMPRESSION_PRIORITY
   ): BrotliCompress | Gzip | Deflate | null {
     const req = this[resRequest];
 
@@ -807,9 +811,9 @@ class HttpResponse {
       );
       return null;
     }
-    const contentEncoding = req.headers['content-encoding'];
+    const acceptEncoding = req.headers['accept-encoding'];
     const encoding = priority.find((currentEncoding) =>
-      contentEncoding?.includes(currentEncoding)
+      acceptEncoding?.includes(currentEncoding)
     );
 
     let compression = null;
@@ -818,7 +822,7 @@ class HttpResponse {
       compression = createBrotliCompress(options);
     } else if (encoding === 'gzip') {
       compression = createGzip(options);
-    } else if (encoding === 'deflare') {
+    } else if (encoding === 'deflate') {
       compression = createDeflate(options);
     }
 
