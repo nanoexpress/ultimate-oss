@@ -53,5 +53,11 @@ jobs:
 
       - name: Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bunx semantic-release
+          GIT_USERNAME: ${{ vars.GIT_USERNAME }}
+          GIT_EMAIL: ${{ vars.GIT_EMAIL }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GPG_KEY_ID: ${{ vars.GPG_KEY_ID }}
+          GPG_KEY: ${{ secrets.GPG_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: bun run release-me --plugins=npm,npm-post,git,github-release
