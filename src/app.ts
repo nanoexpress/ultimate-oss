@@ -79,7 +79,10 @@ class App extends RouterTemplate {
       res.statusCode = 500;
       return res.send({
         status: 'error',
-        message: err.message
+        message:
+          process.env.NODE_ENV === 'production'
+            ? 'Internal Server Error'
+            : err.message
       });
     };
 
