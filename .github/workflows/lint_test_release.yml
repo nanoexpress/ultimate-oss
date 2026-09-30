@@ -1,5 +1,5 @@
-# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+# This workflow will do a clean install of dependencies, build the source code and run tests
+# For more information see: https://help.github.actions/language-and-framework-guides
 
 name: Linting, Testing and Release
 
@@ -18,31 +18,35 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18]
         os: [ubuntu-22.04]
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - name: Use Bun.sh
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          bun-version: 1.4.2
+
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/bun.lock') }}
 
       - name: Install
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Lint code
-        run: npm run lint
+        run: bun run lint
 
       - name: Build
-        run: npm run build
+        run: bun run build
 
       - name: Test code
-        run: npm run test
+        run: bun run test
 
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm exec semantic-release
+        run: bunx semantic-release
