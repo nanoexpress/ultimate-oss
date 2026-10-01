@@ -190,9 +190,10 @@ class App extends RouterTemplate {
           res.exposeAborted();
 
           rawRes.onData((arrayChunk: ArrayBuffer, isLast: boolean) => {
-            // zero-copy view (uWS hands out regular V8 ArrayBuffers here,
-            // same view pattern the nanoexpress stream uses)
-            req.stream.push(Buffer.from(arrayChunk));
+            // uWS recycles the chunk ArrayBuffer after this callback, so the
+            // bytes must be copied — Buffer.from(ArrayBuffer) would be a
+            // zero-copy view reading garbage once the stream consumer runs
+            req.stream.push(Buffer.from(new Uint8Array(arrayChunk)));
 
             if (isLast) {
               req.stream.push(null);
