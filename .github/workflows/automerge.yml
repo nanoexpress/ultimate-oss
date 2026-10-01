@@ -1,20 +1,34 @@
 name: Auto-merge dependabot updates
 
-on: pull_request_target
+# workflow_run runs on the base branch after the pull_request CI completes
+# successfully: no pull_request_target, never runs on forks, and secrets
+# stay available (pull_request runs for dependabot PRs withhold them), so
+# the PAT comments/approves/merges as dalisoft; dependabot PRs only
+on:
+  workflow_run:
+    workflows: ["Linting, Testing and Release"]
+    types: [completed]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   auto-merge:
     timeout-minutes: 5
 
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]'
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.actor.login == 'dependabot[bot]' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
 
     steps:
-      - uses: ahmadnassri/action-dependabot-auto-merge@45fc124d949b19b6b8bf6645b6c9d55f4f9ac61a # v2.6.6
-        with:
-          target: minor
-          approve: true
-          github-token: ${{ secrets.GH_TOKEN }}
+      - run: |
+          gh pr review ${{ env.PR_NUMBER }} --comment -b "LGTM!"
+          gh pr review ${{ env.PR_NUMBER }} --approve
+          gh pr merge ${{ env.PR_NUMBER }} --auto --squash
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
