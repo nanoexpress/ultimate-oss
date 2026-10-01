@@ -1,6 +1,6 @@
 import swaggerJsDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import swaggerDefinition from './swagger.json';
+import swaggerDefinition from './swagger.json' with { type: 'json' };
 
 const specs = swaggerJsDoc({
   swaggerDefinition,
