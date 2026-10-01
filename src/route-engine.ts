@@ -70,8 +70,9 @@ export default class RouteEngine {
         route.all = true;
       } else if (route.path.includes(':')) {
         route.fetch_params = true;
-        route.param_keys = [];
-        route.path = pathToRegexp(route.path, route.param_keys);
+        const { regexp, keys } = pathToRegexp(route.path);
+        route.param_keys = keys;
+        route.path = regexp;
         route.regex = true;
       } else if (route.path.includes('/*')) {
         route.baseUrl = route.path.substring(0, route.path.indexOf('/*') + 1);
