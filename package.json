@@ -1,7 +1,7 @@
 {
   "name": "@nanoexpress/ultimate",
   "type": "module",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Ultimate solution based on nanoexpress and best-practices",
   "main": "esm/nanoexpress.js",
   "module": "esm/nanoexpress.js",
