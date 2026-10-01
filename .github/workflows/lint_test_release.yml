@@ -22,6 +22,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          # release-me needs full history + tags to find the last release
+          fetch-depth: 0
 
       - name: Use Bun.sh
         uses: oven-sh/setup-bun@v2.2.0
@@ -36,7 +39,7 @@ jobs:
       - name: Cache
         uses: actions/cache@v6.1.0
         with:
-          path: '~/.bun/install/cache'
+          path: "~/.bun/install/cache"
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
 
       - name: Install
@@ -52,6 +55,7 @@ jobs:
         run: bun run test
 
       - name: Release
+        if: github.event_name == 'push'
         env:
           GIT_USERNAME: ${{ vars.GIT_USERNAME }}
           GIT_EMAIL: ${{ vars.GIT_EMAIL }}
