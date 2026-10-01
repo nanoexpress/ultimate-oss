@@ -1,7 +1,7 @@
 {
   "name": "@nanoexpress/ultimate",
   "type": "module",
-  "version": "3.0.0",
+  "version": "3.0.2",
   "description": "Ultimate solution based on nanoexpress and best-practices",
   "main": "esm/nanoexpress.js",
   "module": "esm/nanoexpress.js",
@@ -15,7 +15,8 @@
     "prepare": "lefthook install",
     "prepublishOnly": "bun run lint && bun run test && bun run build",
     "format": "biome check --write . && rumdl fmt .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "release-me": "npm publish && true"
   },
   "engines": {
     "node": ">=22"
