@@ -15,8 +15,7 @@
     "prepare": "lefthook install",
     "prepublishOnly": "bun run lint && bun run test && bun run build",
     "format": "biome check --write . && rumdl fmt .",
-    "typecheck": "tsc --noEmit",
-    "release-me": "npm publish && true"
+    "typecheck": "tsc --noEmit"
   },
   "engines": {
     "node": ">=22"
