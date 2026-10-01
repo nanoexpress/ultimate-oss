@@ -15,8 +15,7 @@
     "prepare": "lefthook install",
     "prepublishOnly": "bun run lint && bun run test && bun run build",
     "format": "biome check --write . && rumdl fmt .",
-    "typecheck": "tsc --noEmit",
-    "release-me": "sh -c 'echo \"//registry.npmjs.org/:_authToken=${NPM_TOKEN}\" > .npmrc && npm publish --access public; RC=$?; rm -f .npmrc; exit $RC' release-me"
+    "typecheck": "tsc --noEmit"
   },
   "engines": {
     "node": ">=22"
