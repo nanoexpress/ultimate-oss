@@ -47,13 +47,13 @@
     "debug": "^4.4.3",
     "fast-decode-uri-component": "^1.0.1",
     "fast-query-parse": "^3.1.0",
-    "path-to-regexp": "^6.3.0",
+    "path-to-regexp": "^8.4.2",
     "supports-color": "^11.0.0",
     "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/refs/tags/v20.70.0.tar.gz"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
-    "@commitlint/cli": "^19.3.0",
+    "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
     "@ls-lint/ls-lint": "^2.3.1",
     "@types/debug": "^4.1.13",

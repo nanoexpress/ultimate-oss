@@ -326,10 +326,10 @@ class HttpRequest {
     req.forEach((key, value) => {
       this.headers[key] = value;
     });
-    if (url.charAt(url.length - 1) !== "/") {
-      this.url += "/";
-      this.path += "/";
-      this.originalUrl += "/";
+    if (options.ignoreTrailingSlash) {
+      this.url = slashify_default(url);
+      this.path = this.url;
+      this.originalUrl = this.url;
     }
     if (options.enableExpressCompatibility && query) {
       this.originalUrl += `?${query}`;
@@ -916,8 +916,9 @@ class HttpResponse {
     debug("res.hasHeader('%s')", key);
     return this.getHeader(key) !== null;
   }
-  setHeader(key, value) {
+  setHeader(key, rawValue) {
     const { mode, [response]: res } = this;
+    const value = typeof rawValue === "number" ? String(rawValue) : rawValue;
     debug("res.setHeader('%s', '%s')", key, value);
     if (res && mode === "immediate") {
       res.writeHeader(key, value);
@@ -1024,15 +1025,18 @@ class RouteEngine {
     if (typeof route.path === "string") {
       if (config.ignoreTrailingSlash) {
         route.path = slashify_default(route.path);
-        route.originalUrl = slashify_default(route.originalUrl);
+        if (route.originalUrl) {
+          route.originalUrl = slashify_default(route.originalUrl);
+        }
       }
       route.path = fastDecodeURI(route.path);
       if (route.baseUrl === "*") {
         route.all = true;
       } else if (route.path.includes(":")) {
         route.fetch_params = true;
-        route.param_keys = [];
-        route.path = pathToRegexp(route.path, route.param_keys);
+        const { regexp, keys } = pathToRegexp(route.path);
+        route.param_keys = keys;
+        route.path = regexp;
         route.regex = true;
       } else if (route.path.includes("/*")) {
         route.baseUrl = route.path.substring(0, route.path.indexOf("/*") + 1);
@@ -1617,11 +1621,14 @@ var useState = (initialValue) => {
 var useRef = (ref, dependencies) => useMemo(() => ({ current: ref ?? null }), dependencies);
 
 // src/nanoexpress.ts
-var nanoexpress = (options = {
+var nanoexpress = (userOptions = {
   ignoreTrailingSlash: true,
-  enableExpressCompatibility: false,
-  responseMode: "cork"
+  enableExpressCompatibility: false
 }) => {
+  const options = {
+    responseMode: "cork",
+    ...userOptions
+  };
   let app;
   if (options.https) {
     app = uWS2.SSLApp(options.https);
@@ -1644,5 +1651,5 @@ export {
   useState
 };
 
-//# debugId=E06C3D363BCDE36E64756E2164756E21
+//# debugId=CB65AFB620B0BCEF64756E2164756E21
 //# sourceMappingURL=nanoexpress.js.map
