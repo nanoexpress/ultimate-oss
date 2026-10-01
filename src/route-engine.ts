@@ -58,7 +58,10 @@ export default class RouteEngine {
     if (typeof route.path === 'string') {
       if (config.ignoreTrailingSlash) {
         route.path = slashify(route.path);
-        route.originalUrl = slashify(route.originalUrl);
+        // Empty `originalUrl` must stay empty, `'/'` would match every `/` request
+        if (route.originalUrl) {
+          route.originalUrl = slashify(route.originalUrl);
+        }
       }
 
       route.path = fastDecodeURI(route.path);
