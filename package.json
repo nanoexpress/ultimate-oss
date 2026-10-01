@@ -18,7 +18,7 @@
     "typecheck": "tsc --noEmit"
   },
   "engines": {
-    "node": ">=18.19.1"
+    "node": ">=22"
   },
   "repository": {
     "type": "git",
