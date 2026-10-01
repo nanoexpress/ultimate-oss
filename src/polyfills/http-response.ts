@@ -988,8 +988,10 @@ class HttpResponse {
    * @memberof nanoexpress.HttpResponse
    * @example res.setHeader('content-type', 'application/json');
    */
-  setHeader(key: string, value: uWS.RecognizedString): this {
+  setHeader(key: string, rawValue: uWS.RecognizedString | number): this {
     const { mode, [resResponse]: res } = this;
+    // Node.js-style numeric values (e.g. `Content-Length`), uWS needs strings
+    const value = typeof rawValue === 'number' ? String(rawValue) : rawValue;
 
     debug("res.setHeader('%s', '%s')", key, value);
 
