@@ -14,7 +14,7 @@ import type {
 } from '../../types/find-route';
 import type { HttpMethod, INanoexpressOptions } from '../../types/nanoexpress';
 import { reqConfig, reqEvents, reqRawResponse, reqRequest } from '../constants';
-import { invalid } from '../helpers/index';
+import { invalid, slashify } from '../helpers/index';
 
 export default class HttpRequest<
   THttpMethod = HttpMethod,
@@ -79,10 +79,11 @@ export default class HttpRequest<
       (this.headers as RequestSchema['headers'])[key] = value;
     });
 
-    if (url.charAt(url.length - 1) !== '/') {
-      this.url += '/';
-      this.path += '/';
-      this.originalUrl += '/';
+    // Same rule as routes, so files (`/app.css`) and disabled option match
+    if (options.ignoreTrailingSlash) {
+      this.url = slashify(url);
+      this.path = this.url;
+      this.originalUrl = this.url;
     }
 
     if (options.enableExpressCompatibility && query) {

@@ -3,7 +3,7 @@ import App from './app';
 import { exposeWebsocket } from './exposes';
 import { useCallback, useEffect, useMemo, useRef, useState } from './hooks';
 import Router from './router';
-declare function nanoexpress(options?: INanoexpressOptions): App;
+declare function nanoexpress(userOptions?: Partial<INanoexpressOptions>): App;
 declare namespace nanoexpress {
     export { Router };
     export { App };

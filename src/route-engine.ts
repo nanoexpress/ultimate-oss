@@ -58,7 +58,10 @@ export default class RouteEngine {
     if (typeof route.path === 'string') {
       if (config.ignoreTrailingSlash) {
         route.path = slashify(route.path);
-        route.originalUrl = slashify(route.originalUrl);
+        // Empty `originalUrl` must stay empty, `'/'` would match every `/` request
+        if (route.originalUrl) {
+          route.originalUrl = slashify(route.originalUrl);
+        }
       }
 
       route.path = fastDecodeURI(route.path);
@@ -67,8 +70,9 @@ export default class RouteEngine {
         route.all = true;
       } else if (route.path.includes(':')) {
         route.fetch_params = true;
-        route.param_keys = [];
-        route.path = pathToRegexp(route.path, route.param_keys);
+        const { regexp, keys } = pathToRegexp(route.path);
+        route.param_keys = keys;
+        route.path = regexp;
         route.regex = true;
       } else if (route.path.includes('/*')) {
         route.baseUrl = route.path.substring(0, route.path.indexOf('/*') + 1);

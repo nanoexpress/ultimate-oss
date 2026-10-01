@@ -34,8 +34,8 @@ app2.get('/', async function root(req, res) {
   res.send({ status: 'ok' });
 });
 
-app2.all((req, res) => {
-  res.send({ status: 404 });
+app2.use((req, res) => {
+  res.status(404).send({ status: 404 });
 });
 
 app2.listen(7000, () => {

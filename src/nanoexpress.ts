@@ -14,12 +14,16 @@ import Router from './router';
  * @returns
  */
 const nanoexpress = (
-  options: INanoexpressOptions = {
+  userOptions: Partial<INanoexpressOptions> = {
     ignoreTrailingSlash: true,
-    enableExpressCompatibility: false,
-    responseMode: 'cork'
+    enableExpressCompatibility: false
   }
 ): App => {
+  // `responseMode` must always be set, otherwise every response throws
+  const options = {
+    responseMode: 'cork',
+    ...userOptions
+  } as INanoexpressOptions;
   let app: App | undefined;
 
   if (options.https) {

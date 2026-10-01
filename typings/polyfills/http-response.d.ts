@@ -54,7 +54,7 @@ declare class HttpResponse {
     onAborted(handler: () => void): this;
     getHeader(key: string): RecognizedString | null;
     hasHeader(key: string): boolean;
-    setHeader(key: string, value: uWS.RecognizedString): this;
+    setHeader(key: string, rawValue: uWS.RecognizedString | number): this;
     set(key: string, value: uWS.RecognizedString): this;
     setHeaders(headers: Record<string, uWS.RecognizedString>): this;
     removeHeader(key: string): this;

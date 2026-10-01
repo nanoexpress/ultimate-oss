@@ -1,6 +1,6 @@
 version: 2
 updates:
-  - package-ecosystem: npm
+  - package-ecosystem: bun
     open-pull-requests-limit: 10
     directory: /
     commit-message:
@@ -9,3 +9,10 @@ updates:
       include: scope
     schedule:
       interval: daily
+  - package-ecosystem: github-actions
+    open-pull-requests-limit: 10
+    directory: /
+    commit-message:
+      prefix: ci
+    schedule:
+      interval: weekly
