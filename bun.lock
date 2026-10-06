@@ -22,7 +22,7 @@
         "@types/node": "^26.6.3",
         "lefthook": "^2.1.15",
         "oxlint": "^1.86.0",
-        "release-me-sh": "^0.11.12",
+        "release-me-sh": "^0.12.3",
         "rumdl": "^0.2.78",
         "typescript": "^7.0.2",
       },
@@ -669,7 +669,7 @@
 
     "registry-auth-token": ["registry-auth-token@5.1.1", "", { "dependencies": { "@pnpm/npm-conf": "^3.0.2" } }, "sha512-P7B4+jq8DeD2nMsAcdfaqHbssgHtZ7Z5+++a5ask90fvmJ8p5je4mOa+wzu+DB4vQ5tdJV/xywY+UnVFeQLV5Q=="],
 
-    "release-me-sh": ["release-me-sh@0.11.12", "", { "bin": { "release-me": "release.sh", "release-me-sh": "release.sh" } }, "sha512-rLfJKZs/qei3GAb3aAZMH77gMfDJxqR9HxqjxCqBkx3F2eC+7CHPYvErJGlIka8Z4unyEkAJ3BKkqd2OHYL2lA=="],
+    "release-me-sh": ["release-me-sh@0.12.3", "", { "bin": { "release-me": "release.sh", "release-me-sh": "release.sh" } }, "sha512-uhOvQgVNGsZC1igi7t4+gGJ3kinKbdUOa9MYPRL5eBiVejvkhQTNxUH+2Zx+yRLZIgRD2Rs0ou1K+6xblaHxUw=="],
 
     "require-directory": ["require-directory@2.1.1", "", {}, "sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q=="],
 
