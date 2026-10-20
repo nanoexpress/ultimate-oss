@@ -91,7 +91,7 @@
 
     "@conventional-changelog/template": ["@conventional-changelog/template@1.4.0", "", {}, "sha512-aalGyl7dbB5PArRebDIX43ZvBlXrYm9uWzGJ26t+4SzJVPsOuvfILGGbw5X4yX7i50YEmJ8zvbiWnqH/AAnZqg=="],
 
-    "@ls-lint/ls-lint": ["@ls-lint/ls-lint@2.3.1", "", { "os": [ "linux", "win32", "darwin", ], "cpu": [ "x64", "arm64", "s390x", ], "bin": { "ls-lint": "bin/cli.js" } }, "sha512-vPe6IDByQnQRTxcAYjTxrmga/tSIui50VBFTB5KIJWY3OOFmxE2VtymjeSEfQfiMbhZV/ZPAqYy2lt8pZFQ0Rw=="],
+    "@ls-lint/ls-lint": ["@ls-lint/ls-lint@2.3.2", "", { "os": [ "linux", "win32", "darwin", ], "cpu": [ "x64", "arm64", "s390x", ], "bin": { "ls-lint": "bin/cli.js" } }, "sha512-8GPo2oRjpEEX/soVzWqb692mwrt9iKs3Z9xK7abSonyizmSVsdLwSQWS4OmqPIwwKdungwhNkzsmPwNFg9gSgg=="],
 
     "@nanoexpress/route-syntax-parser": ["@nanoexpress/route-syntax-parser@https://github.com/nanoexpress/route-syntax-parser/releases/download/v2.4.4/nanoexpress-route-syntax-parser-2.4.4.tgz", { "dependencies": { "semantic-release": "^19.0.2" } }, "sha512-kHZv29me4XdbeFjGtfNAGOPsKCqbzaVZTdueqMWNQeMvEmPZXnNuRfB5119ZOgvhwVJorFaMo1PsQD0l8oDQkw=="],
 
