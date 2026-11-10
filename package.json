@@ -7,7 +7,7 @@
   "module": "esm/nanoexpress.js",
   "typings": "typings/nanoexpress.d.ts",
   "scripts": {
-    "lint": "ls-lint && biome check . && oxlint . && rumdl check .",
+    "lint": "ls-lint && biome check . && rumdl check .",
     "test": "node tests/index.js",
     "cleanup": "rm -rf cjs/*.js cjs/*.js.map esm/*.js esm/*.js.map typings/",
     "build": "bun run cleanup && bun build ./src/nanoexpress.ts --outdir esm --entry-naming \"[name].js\" --format esm --target node --packages=external --sourcemap=linked && tsc --emitDeclarationOnly --noEmit false --noCheck",
@@ -52,14 +52,13 @@
     "uWebSockets.js": "https://github.com/uNetworking/uWebSockets.js/archive/refs/tags/v20.70.0.tar.gz"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.6.4",
+    "@biomejs/biome": "^2.6.6",
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@ls-lint/ls-lint": "^2.3.2",
     "@types/debug": "^4.1.13",
     "@types/node": "^26.6.6",
     "lefthook": "^2.2.2",
-    "oxlint": "^1.90.0",
     "release-me-sh": "^0.12.3",
     "rumdl": "^0.3.2",
     "typescript": "^7.0.2"

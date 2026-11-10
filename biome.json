@@ -5,6 +5,17 @@
     "clientKind": "git",
     "useIgnoreFile": true
   },
+  "files": {
+    "includes": [
+      "**",
+      "!**/cjs",
+      "!**/esm",
+      "!**/typings",
+      "!**/dist",
+      "!**/coverage",
+      "!**/bench.tmp.mjs"
+    ]
+  },
   "formatter": {
     "indentStyle": "space",
     "indentWidth": 2,
@@ -25,6 +36,10 @@
     "linter": {
       "enabled": false
     }
+  },
+  "yaml": {
+    "formatter": { "enabled": false },
+    "linter": { "enabled": false }
   },
   "linter": {
     "enabled": true,
